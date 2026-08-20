@@ -50,6 +50,31 @@
 - ESDF audit wrote
   `outputs/closed_loop_sessions/20260820_142510/cycle_001/capture/planning/target_removal_esdf_input_audit.json`.
 - Isaac, dense MotionPlanner, and full grasp execution were not started.
+
+## 2026-08-20 20:xx +08:00 — target-removal depth gate correction
+
+- User visual check on `20260820_195131/cycle_001` showed yellow
+  `target_grasp_mask` covered the full object while purple
+  `target_removal_mask` covered only a small part.
+- Generated breakdown under
+  `outputs/closed_loop_sessions/20260820_195131/cycle_001/capture/planning/target_removal_debug_breakdown/`.
+  Root cause: HSV neighbourhood lost only `303` SAM pixels (`1.93%`), but the
+  fixed `median_depth +/- 0.03m` gate lost `9487` SAM pixels (`60.51%`).
+- Changed `target_removal_mask` depth consistency from fixed median +/- 3cm to
+  adaptive `[P1, P99] +/- 1cm` computed from `SAM & HSV & valid_depth`, while
+  keeping the final mask constrained to matched SAM and selected HSV
+  neighbourhood.  Default SAM expansion is now `0`, so target removal does not
+  delete pixels outside the matched SAM mask.
+- Replayed `20260820_195131/cycle_001/red_target_000_red_000`: new removal
+  `15369` px, SAM leftover `309` px (`1.971%`).  Breakdown v2 shows depth gate
+  now loses only `6` SAM pixels; the remaining `309` are HSV-neighbourhood edge
+  misses.
+- Replayed `20260820_142510/cycle_001/red_target_000_red_003`: new removal
+  `16543` px, SAM leftover `496` px (`2.911%`), improved from old HSV leftover
+  `6779` px (`39.785%`).
+- Future production/replay writes binary PNG previews for
+  `target_grasp_mask.png` and `target_removal_mask.png`; current session
+  overlays were regenerated for visual inspection.
 - Key output: blue-zone V3 endpoint preflight still FAIL on `20260820_140119/cycle_001` after scanning all 17 unique front-half cases; each PLACE had raw `0`. Residual audit for representative `rank=16 cand=3525`: best position error `0.22438162565231323 m`, P50 `0.3483843207359314 m`; best orientation error `9.0158 deg`; best inner joint margin `-8.6631 deg`; failure type `multiple_fail=108/108`.
 - Conclusion: V3 wiring fixes old red PLACE endpoint generation and proves at least one PLACE V3 endpoint PASS. The old blue session is no longer failing because of precise near-table pose semantics alone; it is a reachability/joint-margin issue for that target/color-zone configuration and must not be masked by threshold loosening.
 

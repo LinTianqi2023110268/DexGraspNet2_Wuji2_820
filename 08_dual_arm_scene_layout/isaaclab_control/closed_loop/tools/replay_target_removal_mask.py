@@ -54,9 +54,12 @@ def main() -> int:
         default=None,
         help="color target id, e.g. red_target_000_red_003. Defaults to selected_target.json.",
     )
-    parser.add_argument("--sam-expand-radius", type=int, default=5)
+    parser.add_argument("--sam-expand-radius", type=int, default=0)
     parser.add_argument("--hsv-expand-radius", type=int, default=12)
     parser.add_argument("--depth-threshold-m", type=float, default=0.03)
+    parser.add_argument("--depth-percentile-low", type=float, default=1.0)
+    parser.add_argument("--depth-percentile-high", type=float, default=99.0)
+    parser.add_argument("--depth-percentile-padding-m", type=float, default=0.01)
     args = parser.parse_args()
 
     cycle_root = args.cycle_root.expanduser().resolve()
@@ -113,6 +116,9 @@ def main() -> int:
         sam_expand_radius=args.sam_expand_radius,
         hsv_expand_radius=args.hsv_expand_radius,
         depth_threshold_m=args.depth_threshold_m,
+        depth_percentile_low=args.depth_percentile_low,
+        depth_percentile_high=args.depth_percentile_high,
+        depth_percentile_padding_m=args.depth_percentile_padding_m,
     )
 
     planning_dir = capture_root / "planning"
@@ -127,6 +133,9 @@ def main() -> int:
         sam_expand_radius=args.sam_expand_radius,
         hsv_expand_radius=args.hsv_expand_radius,
         depth_threshold_m=args.depth_threshold_m,
+        depth_percentile_low=args.depth_percentile_low,
+        depth_percentile_high=args.depth_percentile_high,
+        depth_percentile_padding_m=args.depth_percentile_padding_m,
     )
 
     old_hsv_removal = hsv_mask

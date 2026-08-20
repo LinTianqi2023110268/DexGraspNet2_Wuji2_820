@@ -12,6 +12,95 @@
   3. 场景文件夹
   4. 物品名称或目标颜色
 
+关闭进程
+(base) lin@lin-OMEN-by-HP-Gaming-Laptop-16-xf0xxx:~/Projects/DexGraspNet2_Wuji2$ pkill -f persistent_isaac
+pkill -f orchestrator.py
+pkill -f worker.py
+
+	对于 20260820_195131，你要诊断“哪一关筛掉最多候选 / 电脑一直在反复算什么”，优先看这几个文件。
+
+	  根目录：
+
+	  /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_195131/
+
+	  最重要的 5 类文件：
+
+	  1. 总日志：看终端到底反复打印什么
+
+	  20260820_195131/debug.log
+
+	  用这个看时间线：
+
+	  less /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_195131/debug.log
+
+	  重点搜索：
+
+	  ENDPOINT PREFLIGHT
+	  Route B FRONT HALF PASS
+	  Route B full
+	  FAIL
+	  COVER_TO_LIFT
+	  PREGRASP_TO_COVER
+	  TRANSFER
+	  PLACE
+	  retry front-half
+
+	  2. 每轮总漏斗：看候选在哪一级被筛掉
+
+	  cycle_001/planning_funnel.json
+	  cycle_002/planning_funnel.json
+
+	  这两个是最该先看的。
+
+	  它会告诉你：
+
+	  DGN2候选数量
+	  LEAP reach筛掉多少
+	  Wuji2 retarget筛掉多少
+	  Exact COVER筛掉多少
+	  Route B front-half是否成功
+	  Route B full最终卡在哪
+
+	  查看命令：
+
+	  python -m json.tool \
+	  /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_195131/cycle_001/planning_funnel.json
+
+	  3. LEAP reach 粗可达筛选
+
+	  cycle_001/routeB_front_half/leap_reach/leap_target_reach_report.json
+	  cycle_001/routeB_front_half/leap_reach/leap_target_reach_filter.json
+
+	  这里看：
+
+	  DGN2 target candidates 多少
+	  LEAP reach PASS 多少
+	  direct / near / reject 多少
+
+	  如果这里 reject 很多，说明候选在“粗可达”阶段就被大量降级或过滤。
+
+	  4. Route B front-half：CURRENT → PREGRASP 是否能走
+
+	  cycle_001/routeB_front_half/planning/routeB_front_half_report.json
+	  cycle_002/routeB_front_half/planning/routeB_front_half_report.json
+
+	  这个看：
+
+	  CURRENT_TO_PREGRASP 是否成功
+	  选中了哪个 candidate
+	  轨迹点数
+	  min_clearance
+	  scene_collision
+	  cspace
+
+	  你这个 session 里 front-half 是成功过的，不是主要卡点。
+
+	  5. Route B full：真正卡住的阶段
+
+	  cycle_001/routeB_full/planning/routeB_full_plan_report.json
+
+	  这个最关键。
+
 
 
 

@@ -560,3 +560,21 @@ Run `./run_closed_loop.sh --planning-only` from a GPU-visible terminal using `sc
   Isaac, dense MotionPlanner, and full grasp execution were not run or changed
   beyond the explicit Route B mask-argument interface required to separate ESDF
   removal from perception/grasp mask usage.
+
+## 2026-08-20 — target-removal depth gate root cause and fix
+
+- Visual inspection of `20260820_195131/cycle_001` confirmed
+  `target_grasp_mask` was complete but `target_removal_mask` covered only part
+  of the object.  The DGN2 target mask was therefore fixed; the remaining bug was
+  ESDF target removal.
+- Decomposition proved the loss was not HSV neighbourhood: HSV dilation missed
+  only `303 / 15678` SAM pixels.  The fixed `median_depth +/- 0.03m` rule missed
+  `9487 / 15678` SAM pixels because the selected object has a real depth span.
+- `target_removal_mask` now uses an adaptive depth gate from the matched
+  `SAM & HSV & valid_depth` distribution: `[P1, P99] +/- 1cm`.  The final mask
+  remains constrained to matched SAM and selected HSV neighbourhood, and default
+  SAM expansion is `0` to avoid deleting outside the selected SAM object.
+- Offline replay results: `20260820_195131/cycle_001/red_target_000_red_000`
+  improved to `15369` removal pixels with `309` SAM leftover (`1.971%`);
+  `20260820_142510/cycle_001/red_target_000_red_003` improved to `16543`
+  removal pixels with `496` SAM leftover (`2.911%`).

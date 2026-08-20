@@ -41,9 +41,12 @@ def build_target_removal_mask(
     hsv_mask: np.ndarray,
     depth_m: np.ndarray,
     *,
-    sam_expand_radius: int = 5,
+    sam_expand_radius: int = 0,
     hsv_expand_radius: int = 12,
     depth_threshold_m: float = 0.03,
+    depth_percentile_low: float = 1.0,
+    depth_percentile_high: float = 99.0,
+    depth_percentile_padding_m: float = 0.01,
 ) -> np.ndarray:
     """Build ESDF-only target removal mask for color-sort.
 
@@ -67,8 +70,29 @@ def build_target_removal_mask(
     if not np.any(hsv_valid):
         return np.zeros_like(sam, dtype=bool)
 
-    median_depth = float(np.median(depth[hsv_valid]))
-    depth_consistent = valid & (np.abs(depth - median_depth) < float(depth_threshold_m))
+    seed = sam & hsv & valid
+    if np.count_nonzero(seed) >= 8:
+        seed_depth = depth[seed]
+    else:
+        seed_depth = depth[hsv_valid]
+
+    median_depth = float(np.median(seed_depth))
+    legacy_gate = valid & (np.abs(depth - median_depth) < float(depth_threshold_m))
+
+    lo, hi = np.percentile(
+        seed_depth,
+        [float(depth_percentile_low), float(depth_percentile_high)],
+    )
+    lo = float(lo) - float(depth_percentile_padding_m)
+    hi = float(hi) + float(depth_percentile_padding_m)
+    adaptive_gate = valid & (depth >= lo) & (depth <= hi)
+
+    # Use the adaptive range when the selected SAM/HSV overlap has a real
+    # depth span.  This fixes tilted/deep objects where median +/- 3cm removes
+    # most of the object itself.  The mask is still constrained by matched SAM
+    # and the selected HSV neighbourhood, so it does not become a same-color or
+    # table deletion rule.
+    depth_consistent = adaptive_gate
 
     return (
         _dilate(sam, sam_expand_radius)
@@ -137,9 +161,12 @@ def write_target_removal_artifacts(
     sam_source: Path | str | None = None,
     hsv_source: Path | str | None = None,
     depth_source: Path | str | None = None,
-    sam_expand_radius: int = 5,
+    sam_expand_radius: int = 0,
     hsv_expand_radius: int = 12,
     depth_threshold_m: float = 0.03,
+    depth_percentile_low: float = 1.0,
+    depth_percentile_high: float = 99.0,
+    depth_percentile_padding_m: float = 0.01,
 ) -> dict[str, Any]:
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -152,6 +179,9 @@ def write_target_removal_artifacts(
         sam_expand_radius=sam_expand_radius,
         hsv_expand_radius=hsv_expand_radius,
         depth_threshold_m=depth_threshold_m,
+        depth_percentile_low=depth_percentile_low,
+        depth_percentile_high=depth_percentile_high,
+        depth_percentile_padding_m=depth_percentile_padding_m,
     )
 
     grasp_path = output_dir / "target_grasp_mask.npy"
@@ -159,11 +189,26 @@ def write_target_removal_artifacts(
     audit_path = output_dir / "target_removal_audit.json"
     np.save(grasp_path, target_grasp_mask)
     np.save(removal_path, target_removal_mask)
+    try:
+        from PIL import Image
+
+        Image.fromarray((target_grasp_mask.astype(np.uint8) * 255)).save(
+            output_dir / "target_grasp_mask.png"
+        )
+        Image.fromarray((target_removal_mask.astype(np.uint8) * 255)).save(
+            output_dir / "target_removal_mask.png"
+        )
+    except Exception:
+        pass
 
     parameters = {
         "sam_expand_radius": int(sam_expand_radius),
         "hsv_expand_radius": int(hsv_expand_radius),
         "depth_threshold_m": float(depth_threshold_m),
+        "depth_gate": "adaptive_percentile_from_sam_hsv_overlap",
+        "depth_percentile_low": float(depth_percentile_low),
+        "depth_percentile_high": float(depth_percentile_high),
+        "depth_percentile_padding_m": float(depth_percentile_padding_m),
     }
     sources = {
         "sam_mask": "" if sam_source is None else str(Path(sam_source).resolve()),
@@ -187,4 +232,3 @@ def write_target_removal_artifacts(
     )
     audit["target_removal_audit"] = str(audit_path)
     return audit
-

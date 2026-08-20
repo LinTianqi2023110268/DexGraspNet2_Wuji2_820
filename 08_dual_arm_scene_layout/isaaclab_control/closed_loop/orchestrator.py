@@ -1961,6 +1961,18 @@ def main() -> int:
                     planning_target_removal_audit = capture_root / "planning/target_removal_audit.json"
                     shutil.copy2(target_mask_path, planning_target_grasp_mask)
                     shutil.copy2(target_removal_mask_path, planning_target_removal_mask)
+                    for source_png, dest_png in (
+                        (
+                            Path(metrics["target_grasp_mask_path"]).resolve().with_suffix(".png"),
+                            capture_root / "planning/target_grasp_mask.png",
+                        ),
+                        (
+                            Path(metrics["target_removal_mask_path"]).resolve().with_suffix(".png"),
+                            capture_root / "planning/target_removal_mask.png",
+                        ),
+                    ):
+                        if source_png.is_file():
+                            shutil.copy2(source_png, dest_png)
                     shutil.copy2(
                         Path(metrics["target_removal_audit_path"]).resolve(),
                         planning_target_removal_audit,
