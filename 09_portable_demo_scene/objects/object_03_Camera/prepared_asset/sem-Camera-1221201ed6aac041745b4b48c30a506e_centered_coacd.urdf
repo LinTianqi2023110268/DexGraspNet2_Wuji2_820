@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<robot name="sem-Camera-1221201ed6aac041745b4b48c30a506e">
+  <link name="object_root"/>
+  <link name="convex_piece_000">
+    <visual><geometry><mesh filename="pieces/piece_000.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_000.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_000" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_000"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_001">
+    <visual><geometry><mesh filename="pieces/piece_001.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_001.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_001" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_001"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_002">
+    <visual><geometry><mesh filename="pieces/piece_002.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_002.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_002" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_002"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_003">
+    <visual><geometry><mesh filename="pieces/piece_003.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_003.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_003" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_003"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_004">
+    <visual><geometry><mesh filename="pieces/piece_004.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_004.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_004" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_004"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_005">
+    <visual><geometry><mesh filename="pieces/piece_005.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_005.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_005" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_005"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_006">
+    <visual><geometry><mesh filename="pieces/piece_006.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_006.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_006" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_006"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_007">
+    <visual><geometry><mesh filename="pieces/piece_007.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_007.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_007" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_007"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_008">
+    <visual><geometry><mesh filename="pieces/piece_008.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_008.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_008" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_008"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_009">
+    <visual><geometry><mesh filename="pieces/piece_009.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_009.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_009" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_009"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_010">
+    <visual><geometry><mesh filename="pieces/piece_010.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_010.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_010" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_010"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_011">
+    <visual><geometry><mesh filename="pieces/piece_011.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_011.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_011" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_011"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_012">
+    <visual><geometry><mesh filename="pieces/piece_012.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_012.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_012" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_012"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_013">
+    <visual><geometry><mesh filename="pieces/piece_013.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_013.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_013" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_013"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_014">
+    <visual><geometry><mesh filename="pieces/piece_014.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_014.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_014" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_014"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>

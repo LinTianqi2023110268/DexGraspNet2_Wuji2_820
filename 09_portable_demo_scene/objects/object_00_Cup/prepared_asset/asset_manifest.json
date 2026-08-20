@@ -1,0 +1,30 @@
+{
+  "object_code": "sem-Cup-d8ea3aa39bcb162798910e50f05b8001",
+  "source_obj": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/decomposed.obj",
+  "source_obj_sha256": "dd897f88b4bcdeb59a02e54e48cc7650390eaaaf81646f7a204c53b75cd3da46",
+  "scale": 0.1,
+  "native_aabb_center": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "aabb_min_m": [
+    -0.0456447,
+    -0.0456447,
+    -0.0874857
+  ],
+  "aabb_max_m": [
+    0.0456447,
+    0.0456447,
+    0.0874857
+  ],
+  "extent_m": [
+    0.0912894,
+    0.0912894,
+    0.1749714
+  ],
+  "piece_count": 16,
+  "centered_combined_obj": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/centered_combined.obj",
+  "urdf": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/sem-Cup-d8ea3aa39bcb162798910e50f05b8001_centered_coacd.urdf",
+  "root_frame": "centered source-mesh AABB; source axes retained"
+}

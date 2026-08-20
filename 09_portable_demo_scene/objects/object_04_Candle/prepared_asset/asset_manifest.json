@@ -1,0 +1,30 @@
+{
+  "object_code": "sem-Candle-1be58678b919b12bc5fe7f65b41f3b19",
+  "source_obj": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/decomposed.obj",
+  "source_obj_sha256": "339f3061c350711a6ca9ed930ef9c9d82f25e52f77419f0a5acf446916b40412",
+  "scale": 0.1,
+  "native_aabb_center": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "aabb_min_m": [
+    -0.0408579,
+    -0.0408579,
+    -0.08949820000000001
+  ],
+  "aabb_max_m": [
+    0.0408579,
+    0.0408579,
+    0.08949820000000001
+  ],
+  "extent_m": [
+    0.0817158,
+    0.0817158,
+    0.17899640000000003
+  ],
+  "piece_count": 3,
+  "centered_combined_obj": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/centered_combined.obj",
+  "urdf": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19_centered_coacd.urdf",
+  "root_frame": "centered source-mesh AABB; source axes retained"
+}

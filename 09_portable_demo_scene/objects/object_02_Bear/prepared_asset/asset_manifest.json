@@ -1,0 +1,30 @@
+{
+  "object_code": "sem-Bear-1629215db795111ba649bd1425725662",
+  "source_obj": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/decomposed.obj",
+  "source_obj_sha256": "54909db60055b75038277da5bef4ee6130216347a3d95ca2c5cc8d29476c9f56",
+  "scale": 0.1,
+  "native_aabb_center": [
+    0.0,
+    -2.7499999999958114e-05,
+    0.0
+  ],
+  "aabb_min_m": [
+    -0.0285651,
+    -0.09733035000000001,
+    -0.0444347
+  ],
+  "aabb_max_m": [
+    0.0285651,
+    0.09733035000000001,
+    0.0444347
+  ],
+  "extent_m": [
+    0.0571302,
+    0.19466070000000002,
+    0.0888694
+  ],
+  "piece_count": 14,
+  "centered_combined_obj": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/centered_combined.obj",
+  "urdf": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/sem-Bear-1629215db795111ba649bd1425725662_centered_coacd.urdf",
+  "root_frame": "centered source-mesh AABB; source axes retained"
+}

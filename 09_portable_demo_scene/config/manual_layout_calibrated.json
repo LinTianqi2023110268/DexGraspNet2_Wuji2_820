@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "status": "table_and_dual_arm_layout_calibrated_camera_ready",
+  "created_utc": "2026-08-12T10:26:57.548006+00:00",
+  "coordinate_contract": {
+    "world_up": "+Z",
+    "table_top_nominal_z_m": 0.0,
+    "matrix_convention": "OpenUSD Gf.Matrix4d row-vector convention"
+  },
+  "geometry": {
+    "table_size_m": [
+      1.600000023841858,
+      0.4000000059604645,
+      0.03999999910593033
+    ],
+    "source_zone_size_m": [
+      0.5,
+      0.30000001192092896,
+      0.0010000000474974513
+    ],
+    "placement_zone_size_m": [
+      0.800000011920929,
+      0.30000001192092896,
+      0.0010000000474974513
+    ],
+    "zone_collision": false,
+    "table_collision": true
+  },
+  "transforms": {
+    "table_assembly": {
+      "prim_path": "/World/Layout/TableAssembly",
+      "position_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Gf_local_to_world_row_major": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "matrix_convention": "OpenUSD Gf.Matrix4d row-vector convention"
+    },
+    "table": {
+      "prim_path": "/World/Layout/TableAssembly/Table",
+      "position_world_m": [
+        0.06347617107116313,
+        -0.14842441124362116,
+        0.44
+      ],
+      "Gf_local_to_world_row_major": [
+        [
+          1.600000023841858,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.4000000059604645,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.03999999910593033,
+          0.0
+        ],
+        [
+          0.06347617107116313,
+          -0.14842441124362116,
+          0.44,
+          1.0
+        ]
+      ],
+      "matrix_convention": "OpenUSD Gf.Matrix4d row-vector convention"
+    },
+    "source_zone": {
+      "prim_path": "/World/Layout/TableAssembly/SourceZone",
+      "position_world_m": [
+        -0.4238227717751965,
+        -0.15291664032601016,
+        0.46
+      ],
+      "Gf_local_to_world_row_major": [
+        [
+          0.5,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.30000001192092896,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0010000000474974513,
+          0.0
+        ],
+        [
+          -0.4238227717751965,
+          -0.15291664032601016,
+          0.46,
+          1.0
+        ]
+      ],
+      "matrix_convention": "OpenUSD Gf.Matrix4d row-vector convention"
+    },
+    "placement_zone": {
+      "prim_path": "/World/Layout/TableAssembly/PlacementZone",
+      "position_world_m": [
+        0.27617723418526796,
+        -0.1446419350251421,
+        0.46
+      ],
+      "Gf_local_to_world_row_major": [
+        [
+          0.800000011920929,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.30000001192092896,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0010000000474974513,
+          0.0
+        ],
+        [
+          0.27617723418526796,
+          -0.1446419350251421,
+          0.46,
+          1.0
+        ]
+      ],
+      "matrix_convention": "OpenUSD Gf.Matrix4d row-vector convention"
+    },
+    "dual_arm_mount": {
+      "prim_path": "/World/Layout/DualArmMount",
+      "position_world_m": [
+        0.0,
+        0.16,
+        0.8
+      ],
+      "Gf_local_to_world_row_major": [
+        [
+          2.220446049250313e-16,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          2.220446049250313e-16,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.16,
+          0.8,
+          1.0
+        ]
+      ],
+      "matrix_convention": "OpenUSD Gf.Matrix4d row-vector convention"
+    },
+    "dual_arm": {
+      "prim_path": "/World/Layout/DualArmMount/DualArm",
+      "position_world_m": [
+        0.0,
+        0.16,
+        0.8
+      ],
+      "Gf_local_to_world_row_major": [
+        [
+          2.220446049250313e-16,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          2.220446049250313e-16,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.16,
+          0.8,
+          1.0
+        ]
+      ],
+      "matrix_convention": "OpenUSD Gf.Matrix4d row-vector convention"
+    }
+  },
+  "revolute_joint_positions_deg": {
+    "arm_l_joint_1": 0.0,
+    "arm_l_joint_2": 0.0,
+    "arm_l_joint_3": 0.0,
+    "arm_l_joint_4": 0.0,
+    "arm_l_joint_5": 0.0,
+    "arm_l_joint_6": 0.0,
+    "arm_l_joint_7": 0.0,
+    "arm_l_joint_finger": 0.0,
+    "arm_r_joint_1": 50.0,
+    "arm_r_joint_2": -70.0,
+    "arm_r_joint_3": 0.0,
+    "arm_r_joint_4": 40.0,
+    "arm_r_joint_5": 35.0,
+    "arm_r_joint_6": 0.0,
+    "arm_r_joint_7": 25.0,
+    "r_index_finger_dip": 0.0,
+    "r_index_finger_mcp_abd": 0.0,
+    "r_index_finger_mcp_flex": 0.0,
+    "r_index_finger_pip": 0.0,
+    "r_middle_finger_dip": 0.0,
+    "r_middle_finger_mcp_abd": 0.0,
+    "r_middle_finger_mcp_flex": 0.0,
+    "r_middle_finger_pip": 0.0,
+    "r_pinky_dip": 0.0,
+    "r_pinky_mcp_abd": 0.0,
+    "r_pinky_mcp_flex": 0.0,
+    "r_pinky_pip": 0.0,
+    "r_ring_finger_dip": 0.0,
+    "r_ring_finger_mcp_abd": 0.0,
+    "r_ring_finger_mcp_flex": 0.0,
+    "r_ring_finger_pip": 0.0,
+    "r_thumb_cmc_abd": 0.0,
+    "r_thumb_cmc_flex": 0.0,
+    "r_thumb_ip": 0.0,
+    "r_thumb_mcp": 0.0
+  },
+  "measurements_m": {
+    "robot_to_table_m": 0.8158431221748457,
+    "robot_to_source_m": 0.6270108178238458,
+    "source_to_placement_m": 0.7000489119286356
+  },
+  "camera": {
+    "status": "virtual_depth_camera_calibrated",
+    "camera_prim": "/World/Sensors/TopD435iVirtual/Camera",
+    "anchor_prim": "/World/Layout/DualArmMount/DualArm/arm_base_link_d435i_2",
+    "target_prim": "/World/Layout/TableAssembly/SourceZone",
+    "resolution_wh": [
+      1280,
+      720
+    ],
+    "camera_position_world_m": [
+      3.725290298461914e-09,
+      0.08499996900558474,
+      0.9600000381469727
+    ],
+    "target_position_world_m": [
+      -0.4238227717751965,
+      -0.15291664032601016,
+      0.46
+    ],
+    "horizontal_fov_deg": 81.68809390173672,
+    "vertical_fov_deg": 51.86657737631214,
+    "focal_length_mm": 12.119451995915757,
+    "coverage_pass": true,
+    "opencv_axes": "+x image-right, +y image-down, +z camera-forward"
+  },
+  "next_required_checks": [
+    "visually confirm robot base and table do not penetrate",
+    "confirm both arms can reach the source and placement zones",
+    "freeze the accepted table and DualArmMount transforms",
+    "add the top D435i optical frame and camera in the next stage"
+  ],
+  "updated_utc": "2026-08-18T13:35:15.395232+00:00"
+}

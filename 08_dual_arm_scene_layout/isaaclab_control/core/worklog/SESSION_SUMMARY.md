@@ -487,3 +487,37 @@ Run `./run_closed_loop.sh --planning-only` from a GPU-visible terminal using `sc
   semantic safety 7/7, closed-loop 11/11, core 17/17, Route B 10/10, HSV replay,
   GroundedSAM embedded compile, scene migration audit, and `git diff --check`
   all PASS.
+
+## 2026-08-20 — perception-only planning / verification split v2
+
+- Integrated the corrected v2 refactor package as the current authority.  The
+  planning boundary is now explicit: color/semantic target selection, 40k/DGN2,
+  LEAP/Wuji2, Route A/B planning, attachment proxy, and PLACE planning receive
+  only current perception masks/RGB-D-derived geometry.  Simulator target
+  identity is bound only after a full route has passed and is used only for
+  Persistent Isaac contact/lift/placement verification.
+- `color-sort` now starts Persistent Isaac, captures and displays current RGB,
+  then asks the requested color if `--target-color` was not provided.  The HSV
+  module produces all red/blue instances; production no longer consumes
+  `detection_report["selected"]` or cross-capture `blue_000` blacklists.
+- Added `PerceptionTarget`, `SimulationVerificationBinding`,
+  `build_color_target_pool()`, and `build_perception_target_geometry()`.
+  GroundedSAM legal proposal masks are matched against every requested-color HSV
+  instance with hard gates and lexicographic ranking.  The final DGN2 mask is
+  the full matched HSV instance.
+- Replayed real session `20260820_124401`: cycle 001 healthy blue match remains
+  accepted; cycle 002 old 59 px match is rejected, while a valid same-capture
+  `blue_000` target remains available.  The 40k target sample minimum remains
+  unchanged at 100.
+- Candidate case building no longer resolves the selected simulator object or
+  samples its exact mesh before planning.  It writes a perception proxy derived
+  from `perception_target_geometry.json` for legacy downstream file-shape
+  compatibility.
+- Route B carried-object proxy now comes from selected target mask + depth.  The
+  execution path still requires and receives `target_segmentation_id` after
+  full-route PASS; target-filtered lift/contact/placement verification is
+  preserved.
+- Focused regressions passed: py_compile, semantic safety 7/7, closed-loop
+  logic 6/6, flexible planning 5/5, Route B front/full/right-arm unit tests,
+  wiring audit, target-pool replay, and `git diff --check`.  No new full Isaac
+  grasp was launched.

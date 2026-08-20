@@ -1,0 +1,147 @@
+{
+  "schema_version": 2,
+  "purpose": "Persistent Isaac Lab/Sim closed-loop capture + execution session",
+  "stage": "08_dual_arm_scene_layout/scenes/manual_layout_calibrated_mass_fixed.usda",
+  "robot_prim": "/World/Layout/DualArmMount/DualArm",
+  "flange_body": "arm_r_link_tf",
+  "wuji2_wrist_body": "r_wrist",
+  "right_arm_joints": [
+    "arm_r_joint_1",
+    "arm_r_joint_2",
+    "arm_r_joint_3",
+    "arm_r_joint_4",
+    "arm_r_joint_5",
+    "arm_r_joint_6",
+    "arm_r_joint_7"
+  ],
+  "expected_total_actuated_joints": 35,
+  "home_q_deg": [
+    50.0,
+    -70.0,
+    0.0,
+    40.0,
+    35.0,
+    0.0,
+    25.0
+  ],
+  "initial_home_audit_tolerance_deg": 0.2,
+  "physics_dt_s": 0.008333333333333333,
+  "render_interval": 4,
+  "camera_resolution_wh": [
+    1280,
+    720
+  ],
+  "camera_warmup_frames": 12,
+  "initial_hold_s": 0.0,
+  "post_home_hold_s": 1.0,
+  "telemetry_hz": 10.0,
+  "replay_record_fps": 30.0,
+  "object_lift_pass_mm": 30.0,
+  "placement_center_edge_margin_m": 0.01,
+  "task_object_mass_kg": 0.1,
+  "object_table_penetration_warn_mm": 2.0,
+  "endpoint_refinement_stages": [
+    "cover",
+    "grasp"
+  ],
+  "durations_s": {
+    "form_pregrasp": 0.5,
+    "to_pregrasp": 2.5,
+    "cover": 1.2,
+    "grasp": 0.8,
+    "squeeze": 2.0,
+    "squeeze_hold": 0.4,
+    "lift": 2.5,
+    "lift_hold": 0.4,
+    "transfer": 3.0,
+    "place": 2.5,
+    "place_hold": 0.4,
+    "release": 1.2,
+    "release_hold": 0.4,
+    "retreat": 2.0,
+    "return_home": 3.0
+  },
+  "stage_tolerances": {
+    "contact_position_mm": 5.0,
+    "contact_orientation_deg": 5.0
+  },
+  "endpoint_refinement": {
+    "integral_gain_per_s": 0.8,
+    "max_command_bias_deg": 10.0,
+    "max_duration_s": 2.0,
+    "stable_duration_s": 0.1
+  },
+  "right_arm_force_natural_frequency_groups": [
+    {
+      "name": "right_arm_j1_tuned",
+      "joint_names_expr": [
+        "arm_r_joint_1"
+      ],
+      "natural_frequency_rad_s": 50.0,
+      "damping_ratio": 1.0
+    },
+    {
+      "name": "right_arm_j2_frozen",
+      "joint_names_expr": [
+        "arm_r_joint_2"
+      ],
+      "natural_frequency_rad_s": 40.0,
+      "damping_ratio": 1.0
+    },
+    {
+      "name": "right_arm_j3_tuned",
+      "joint_names_expr": [
+        "arm_r_joint_3"
+      ],
+      "natural_frequency_rad_s": 45.0,
+      "damping_ratio": 1.0
+    },
+    {
+      "name": "right_arm_j4_frozen",
+      "joint_names_expr": [
+        "arm_r_joint_4"
+      ],
+      "natural_frequency_rad_s": 40.0,
+      "damping_ratio": 1.0
+    },
+    {
+      "name": "right_arm_j5_tuned",
+      "joint_names_expr": [
+        "arm_r_joint_5"
+      ],
+      "natural_frequency_rad_s": 55.0,
+      "damping_ratio": 1.0
+    },
+    {
+      "name": "right_arm_j6_tuned",
+      "joint_names_expr": [
+        "arm_r_joint_6"
+      ],
+      "natural_frequency_rad_s": 50.0,
+      "damping_ratio": 1.0
+    },
+    {
+      "name": "right_arm_j7_frozen",
+      "joint_names_expr": [
+        "arm_r_joint_7"
+      ],
+      "natural_frequency_rad_s": 40.0,
+      "damping_ratio": 1.0
+    }
+  ],
+  "viewer_camera": {
+    "enabled": true,
+    "yaw_about_world_z_deg": -90.0,
+    "horizontal_distance_m": 1.45,
+    "height_above_target_m": 0.75,
+    "target_world_m": [
+      0.0,
+      -0.145,
+      0.5
+    ],
+    "hide_prims": [
+      "/World/Sensors/TopD435iVirtual/Frustum",
+      "/World/Markers"
+    ]
+  }
+}

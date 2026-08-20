@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<robot name="sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491">
+  <link name="object_root"/>
+  <link name="convex_piece_000">
+    <visual><geometry><mesh filename="pieces/piece_000.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_000.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_000" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_000"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>

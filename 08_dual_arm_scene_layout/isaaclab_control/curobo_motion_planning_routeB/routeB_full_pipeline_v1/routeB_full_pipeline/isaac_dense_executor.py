@@ -53,8 +53,6 @@ def execute_routeB_manifest(
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     case_root = Path(manifest["case_root"]).resolve()
     candidate_index = int(manifest["candidate_index"])
-    if int(target_segmentation_id) != int(manifest["target_segmentation_id"]):
-        raise RuntimeError("Route B manifest target segmentation id mismatch")
     if int(target_segmentation_id) not in scene.objects_by_seg:
         raise KeyError(
             f"target segmentation id {target_segmentation_id} absent from persistent scene"

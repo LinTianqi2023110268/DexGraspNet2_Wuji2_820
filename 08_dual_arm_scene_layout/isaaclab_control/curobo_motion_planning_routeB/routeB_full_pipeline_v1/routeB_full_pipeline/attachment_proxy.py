@@ -143,77 +143,23 @@ def build_target_proxy_from_capture(
     padding_m: float = 0.005,
     minimum_dim_m: float = 0.02,
 ) -> TargetProxy:
-    """Build a planner proxy from Isaac's exact collision AABB audit.
-
-    The persistent Isaac capture already writes object_physics_audit.json from
-    the actual simulation collision prims.  Reusing it is stronger than trying
-    to infer unseen object extent from a single-view RGB-D mask.
-
-    The world AABB's 8 corners are transformed to arm_base_link and enclosed by
-    a base-frame AABB.  This can be rigidly attached to the flange during carry.
-    """
+    """Build a production planner proxy from current perception only."""
     capture_dir = Path(capture_dir).resolve()
-    audit_path = capture_dir / "object_physics_audit.json"
-    if not audit_path.is_file():
-        raise FileNotFoundError(audit_path)
-    audit = _load_json(audit_path)
-    row = next(
-        (
-            x
-            for x in audit.get("objects", [])
-            if int(x["segmentation_id"]) == int(target_segmentation_id)
-        ),
-        None,
-    )
-    if row is None:
-        raise KeyError(
-            f"target segmentation id {target_segmentation_id} missing from {audit_path}"
-        )
-    lo_w = np.asarray(row["collision_aabb_world_min_m"], dtype=np.float64)
-    hi_w = np.asarray(row["collision_aabb_world_max_m"], dtype=np.float64)
-    if lo_w.shape != (3,) or hi_w.shape != (3,):
-        raise RuntimeError("invalid Isaac collision AABB")
-    if not _is_valid_aabb(lo_w, hi_w):
-        fallback = _target_aabb_from_mask_depth(
-            project_root=project_root,
-            capture_dir=capture_dir,
-            target_mask_path=target_mask_path,
-            padding_m=padding_m,
-            minimum_dim_m=minimum_dim_m,
-        )
-        return TargetProxy(
-            target_segmentation_id=int(target_segmentation_id),
-            center_base_m=fallback.center_base_m,
-            dims_base_m=fallback.dims_base_m,
-            pose_base_wxyz=fallback.pose_base_wxyz,
-            source=(
-                "fallback_mask_depth_due_invalid_isaac_collision_aabb:"
-                f"{fallback.source}"
-            ),
-            source_aabb_world_min_m=fallback.source_aabb_world_min_m,
-            source_aabb_world_max_m=fallback.source_aabb_world_max_m,
-        )
-
-    T_base_world = np.linalg.inv(_world_from_base(Path(project_root)))
-    corners_b = _transform_points(T_base_world, _aabb_corners(lo_w, hi_w))
-    lo_b = corners_b.min(axis=0)
-    hi_b = corners_b.max(axis=0)
-    center_b = 0.5 * (lo_b + hi_b)
-    dims_b = np.maximum(
-        (hi_b - lo_b) + 2.0 * float(padding_m), float(minimum_dim_m)
-    )
-    pose = np.asarray(
-        [center_b[0], center_b[1], center_b[2], 1.0, 0.0, 0.0, 0.0],
-        dtype=np.float64,
+    proxy = _target_aabb_from_mask_depth(
+        project_root=project_root,
+        capture_dir=capture_dir,
+        target_mask_path=target_mask_path,
+        padding_m=padding_m,
+        minimum_dim_m=minimum_dim_m,
     )
     return TargetProxy(
         target_segmentation_id=int(target_segmentation_id),
-        center_base_m=center_b,
-        dims_base_m=dims_b,
-        pose_base_wxyz=pose,
-        source=str(audit_path),
-        source_aabb_world_min_m=lo_w,
-        source_aabb_world_max_m=hi_w,
+        center_base_m=proxy.center_base_m,
+        dims_base_m=proxy.dims_base_m,
+        pose_base_wxyz=proxy.pose_base_wxyz,
+        source="perception_mask_depth:" + proxy.source,
+        source_aabb_world_min_m=proxy.source_aabb_world_min_m,
+        source_aabb_world_max_m=proxy.source_aabb_world_max_m,
     )
 
 

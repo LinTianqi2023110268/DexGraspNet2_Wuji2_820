@@ -1,0 +1,30 @@
+{
+  "object_code": "sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491",
+  "source_obj": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/decomposed.obj",
+  "source_obj_sha256": "ca74526cde4059407ca505222b684d6c7e26b2b88a9bdf07a3fd882f8f65367b",
+  "scale": 0.1,
+  "native_aabb_center": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "aabb_min_m": [
+    -0.012683600000000001,
+    -0.012683600000000001,
+    -0.0972409
+  ],
+  "aabb_max_m": [
+    0.012683600000000001,
+    0.012683600000000001,
+    0.0972409
+  ],
+  "extent_m": [
+    0.025367200000000003,
+    0.025367200000000003,
+    0.1944818
+  ],
+  "piece_count": 1,
+  "centered_combined_obj": "09_portable_demo_scene/objects/object_05_Pencil/prepared_asset/centered_combined.obj",
+  "urdf": "09_portable_demo_scene/objects/object_05_Pencil/prepared_asset/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491_centered_coacd.urdf",
+  "root_frame": "centered source-mesh AABB; source axes retained"
+}

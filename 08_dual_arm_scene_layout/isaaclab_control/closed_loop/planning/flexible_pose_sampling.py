@@ -512,3 +512,134 @@ def sample_retreat(
         },
     )
     return PoseSampleSet(np.stack(poses), meta)
+
+
+def sample_place_from_perception_anchor(
+    *,
+    centres_xy_m: np.ndarray,
+    target_anchor_world_initial: np.ndarray,
+    flange_world_grasp: np.ndarray,
+    samples_per_xy: int,
+    table_top_world_z_m: float,
+    nominal_object_height_m: float,
+    z_extra_range_m: tuple[float, float],
+    object_rotation_half_range_deg_xyz: tuple[float, float, float],
+    start_index: int = 1001,
+) -> PoseSampleSet:
+    """
+    PLACE without simulator object pose.
+
+    The target reference is a translation-only anchor derived from the current
+    visible target point cloud. The grasp flange-to-anchor transform is frozen
+    and translated to each legal placement centre.
+    """
+    centres = np.asarray(centres_xy_m, dtype=np.float64)
+    if centres.ndim != 2 or centres.shape[1] != 2:
+        raise ValueError(
+            f"centres_xy_m must be [N,2], got {centres.shape}"
+        )
+    if samples_per_xy <= 0:
+        raise ValueError("samples_per_xy must be positive")
+
+    anchor_initial = np.asarray(
+        target_anchor_world_initial, dtype=np.float64
+    )
+    grasp_flange = np.asarray(
+        flange_world_grasp, dtype=np.float64
+    )
+    if anchor_initial.shape != (4, 4):
+        raise ValueError(
+            "target_anchor_world_initial must be 4x4"
+        )
+    if grasp_flange.shape != (4, 4):
+        raise ValueError("flange_world_grasp must be 4x4")
+
+    flange_from_anchor = np.linalg.inv(grasp_flange) @ anchor_initial
+
+    poses: list[np.ndarray] = []
+    metadata: list[dict] = []
+
+    rot_half = np.asarray(
+        object_rotation_half_range_deg_xyz,
+        dtype=np.float64,
+    )
+    h = halton(
+        len(centres) * samples_per_xy,
+        4,
+        start_index=start_index,
+    )
+
+    cursor = 0
+    for centre_index, xy in enumerate(centres):
+        for local_index in range(samples_per_xy):
+            unit = h[cursor]
+            cursor += 1
+
+            if local_index == 0:
+                z_extra = 0.0
+                delta_deg = np.zeros(3, dtype=np.float64)
+            else:
+                z_extra = float(
+                    _interval(
+                        np.asarray([unit[0]]),
+                        *z_extra_range_m,
+                    )[0]
+                )
+                delta_deg = (
+                    _symmetric(unit[1:4], 1.0) * rot_half
+                )
+
+            anchor_place = anchor_initial.copy()
+            anchor_place[:3, 3] = np.asarray(
+                [
+                    float(xy[0]),
+                    float(xy[1]),
+                    float(
+                        table_top_world_z_m
+                        + 0.5 * nominal_object_height_m
+                        + z_extra
+                    ),
+                ],
+                dtype=np.float64,
+            )
+            anchor_place[:3, :3] = (
+                anchor_initial[:3, :3]
+                @ local_rpy(delta_deg)
+            )
+
+            flange_place = (
+                anchor_place
+                @ np.linalg.inv(flange_from_anchor)
+            )
+
+            penalty = (
+                0.4
+                * z_extra
+                / max(
+                    1.0e-6,
+                    z_extra_range_m[1] - z_extra_range_m[0],
+                )
+                + 0.15
+                * float(
+                    np.linalg.norm(
+                        delta_deg / np.maximum(rot_half, 1.0)
+                    )
+                )
+            )
+
+            poses.append(flange_place)
+            metadata.append(
+                {
+                    "centre_index": int(centre_index),
+                    "target_anchor_center_world_xy_m": xy.tolist(),
+                    "target_anchor_center_world_z_m":
+                        float(anchor_place[2, 3]),
+                    "target_anchor_rotation_delta_deg_xyz":
+                        delta_deg.tolist(),
+                    "z_extra_m": float(z_extra),
+                    "nominal_penalty": float(penalty),
+                    "geometry_source": "perception_target_anchor",
+                }
+            )
+
+    return PoseSampleSet(np.stack(poses), metadata)

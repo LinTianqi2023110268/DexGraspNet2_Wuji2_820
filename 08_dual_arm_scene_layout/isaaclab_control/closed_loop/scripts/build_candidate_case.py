@@ -32,23 +32,14 @@ OFFICIAL_CONTROL_STEPS = np.asarray([40,20,20,60], dtype=np.int64)
 def transform_pose_left(T_left, poses):
     return np.asarray(T_left)[None] @ np.asarray(poses)
 
-def sample_target_surface(record, output_path: Path) -> None:
-    import trimesh
-    mesh_path = Path(record["asset"]["centered_combined_obj"]).resolve()
-    loaded = trimesh.load(mesh_path, force="scene", process=False)
-    if isinstance(loaded, trimesh.Scene):
-        meshes = [g.copy() for g in loaded.geometry.values()]
-        if not meshes:
-            raise RuntimeError(f"No geometry: {mesh_path}")
-        mesh = trimesh.util.concatenate(meshes)
-    else:
-        mesh = loaded
-    state = np.random.get_state()
-    np.random.seed(0)
-    try:
-        points, _ = trimesh.sample.sample_surface(mesh, 4096)
-    finally:
-        np.random.set_state(state)
+def sample_perception_proxy_surface(geometry: dict, output_path: Path) -> None:
+    lower = np.asarray(geometry["robust_aabb_world_min_m"], dtype=np.float64)
+    upper = np.asarray(geometry["robust_aabb_world_max_m"], dtype=np.float64)
+    center = 0.5 * (lower + upper)
+    dims = np.maximum(upper - lower, 0.01)
+    rng = np.random.default_rng(0)
+    unit = rng.uniform(-0.5, 0.5, size=(4096, 3))
+    points = center[None, :] + unit * dims[None, :]
     np.save(output_path, np.asarray(points, dtype=np.float32))
 
 def main() -> None:
@@ -67,7 +58,8 @@ def main() -> None:
     p.add_argument("--network-input", type=Path, required=True)
     p.add_argument("--capture-root", type=Path, required=True)
     p.add_argument("--settled-manifest", type=Path, required=True)
-    p.add_argument("--sim-target-segmentation-id", type=int, required=True)
+    p.add_argument("--sim-target-segmentation-id", type=int, default=None)
+    p.add_argument("--target-geometry", type=Path, required=True)
     p.add_argument("--replace", action="store_true")
     a = p.parse_args()
 
@@ -140,13 +132,16 @@ def main() -> None:
     ], axis=1).astype(np.float32)
 
     settled = json.loads(a.settled_manifest.read_text(encoding="utf-8"))
-    target_id = int(a.sim_target_segmentation_id)
-    matches = [r for r in settled["objects"] if int(r["segmentation_id"]) == target_id]
-    if len(matches) != 1:
-        raise RuntimeError(f"sim target segmentation {target_id}: {len(matches)} matches")
-    target = matches[0]
-    surface_path = case_root/"01_input"/f"object_{target_id:03d}_surface_points.npy"
-    sample_target_surface(target, surface_path)
+    target_geometry = json.loads(a.target_geometry.read_text(encoding="utf-8"))
+    if bool(target_geometry.get("simulator_identity_used", True)):
+        raise RuntimeError("target geometry used simulator identity")
+    target_id = -1
+    surface_path = case_root/"01_input/perception_target_surface_points.npy"
+    sample_perception_proxy_surface(target_geometry, surface_path)
+    T_world_target_anchor = np.asarray(
+        target_geometry["T_world_target_anchor"], dtype=np.float64
+    )
+    T_source_target_anchor = source_from_world @ T_world_target_anchor
 
     frozen_input = case_root/"01_input/live_top_camera_network_input.npz"
     shutil.copy2(a.network_input, frozen_input)
@@ -178,8 +173,17 @@ def main() -> None:
         rr = dict(r)
         rr["code"] = str(r.get("code", r.get("object_code", "")))
         rr["pose_world_object"] = r["pose_world_object"]
-        rr["surface_points"] = str(surface_path.resolve()) if int(r["segmentation_id"]) == target_id else None
+        rr["surface_points"] = None
         objects.append(rr)
+    objects.append({
+        "segmentation_id": target_id,
+        "object_pool_index": -1,
+        "object_code": "perception_target_proxy",
+        "code": "perception_target_proxy",
+        "pose_world_object": T_source_target_anchor.tolist(),
+        "surface_points": str(surface_path.resolve()),
+        "perception_target_geometry": str(a.target_geometry.resolve()),
+    })
     scene_manifest = {
         "schema_version": 2,
         "experiment": "closed-loop live RGB-D semantic selection",
@@ -198,15 +202,17 @@ def main() -> None:
         "scene_id": "closed_loop",
         "view_id": "live_rgbd",
         "target_segmentation_id": target_id,
-        "target_object_code": str(target.get("object_code", target.get("code",""))),
+        "target_object_code": "perception_target_proxy",
         "source_candidate_index": idx,
         "official_score": float(pred["score"][idx]),
-        "selection_policy": "GroundedSAM target membership -> official DGN2 score order -> cuRobo full gate",
+        "selection_policy": "perception target mask -> official DGN2 score order -> route full gate",
         "source_hand": "LEAP Hand",
         "target_hand": "Wuji Hand 2 Beta1 right",
         "pipeline_status": "official_leap_waypoints_ready_no_legacy_collision_claim",
         "physics_status": "not_tested",
         "live_capture_root": str(a.capture_root.resolve()),
+        "perception_target_geometry": str(a.target_geometry.resolve()),
+        "simulator_target_identity_used_for_planning": False,
         "legacy_mesh_collision_used": False,
     }
     (case_root/"case.json").write_text(json.dumps(case, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")

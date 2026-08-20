@@ -25,7 +25,8 @@ def main() -> None:
     parser.add_argument("--network-input", type=Path, required=True)
     parser.add_argument("--capture-root", type=Path, required=True)
     parser.add_argument("--settled-manifest", type=Path, required=True)
-    parser.add_argument("--sim-target-segmentation-id", type=int, required=True)
+    parser.add_argument("--sim-target-segmentation-id", type=int, default=None)
+    parser.add_argument("--target-geometry", type=Path, required=True)
     parser.add_argument("--items-json", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -46,7 +47,7 @@ def main() -> None:
             "--network-input", str(args.network_input),
             "--capture-root", str(args.capture_root),
             "--settled-manifest", str(args.settled_manifest),
-            "--sim-target-segmentation-id", str(args.sim_target_segmentation_id),
+            "--target-geometry", str(args.target_geometry),
             "--replace",
         ]
         runpy.run_path(str(BUILD), run_name="__main__")

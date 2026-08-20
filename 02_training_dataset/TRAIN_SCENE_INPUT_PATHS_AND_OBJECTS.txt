@@ -1,3 +1,20 @@
+
+
+交互式启动命令：
+
+  cd ~/Projects/DexGraspNet2_Wuji2
+  ./run_closed_loop.sh --sim-execute
+
+  启动后可自行选择：
+
+  1. 指定物品名称抓取 / 红蓝颜色抓取
+  2. Route A / Route B
+  3. 场景文件夹
+  4. 物品名称或目标颜色
+
+
+
+
 DexGraspNet2_Wuji2 scene folder input paths and English target names
 
 Usage: when run_closed_loop.sh asks `Scene folder >`, paste one scene folder path below.

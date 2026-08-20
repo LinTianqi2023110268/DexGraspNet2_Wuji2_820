@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot name="sem-Candle-1be58678b919b12bc5fe7f65b41f3b19">
+  <link name="object_root"/>
+  <link name="convex_piece_000">
+    <visual><geometry><mesh filename="pieces/piece_000.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_000.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_000" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_000"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_001">
+    <visual><geometry><mesh filename="pieces/piece_001.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_001.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_001" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_001"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="convex_piece_002">
+    <visual><geometry><mesh filename="pieces/piece_002.obj"/></geometry></visual>
+    <collision><geometry><mesh filename="pieces/piece_002.obj"/></geometry></collision>
+  </link>
+  <joint name="piece_joint_002" type="fixed">
+    <parent link="object_root"/>
+    <child link="convex_piece_002"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>

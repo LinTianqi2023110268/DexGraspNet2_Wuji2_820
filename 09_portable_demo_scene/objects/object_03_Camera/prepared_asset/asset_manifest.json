@@ -1,0 +1,30 @@
+{
+  "object_code": "sem-Camera-1221201ed6aac041745b4b48c30a506e",
+  "source_obj": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/decomposed.obj",
+  "source_obj_sha256": "2e3b517edc6da700f9fdcee99ab2cb631cdac4be6fe6d2449dc1c8a874bd7423",
+  "scale": 0.1,
+  "native_aabb_center": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "aabb_min_m": [
+    -0.037470500000000004,
+    -0.0499606,
+    -0.0820782
+  ],
+  "aabb_max_m": [
+    0.037470500000000004,
+    0.0499606,
+    0.0820782
+  ],
+  "extent_m": [
+    0.07494100000000001,
+    0.0999212,
+    0.1641564
+  ],
+  "piece_count": 15,
+  "centered_combined_obj": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/centered_combined.obj",
+  "urdf": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/sem-Camera-1221201ed6aac041745b4b48c30a506e_centered_coacd.urdf",
+  "root_frame": "centered source-mesh AABB; source axes retained"
+}

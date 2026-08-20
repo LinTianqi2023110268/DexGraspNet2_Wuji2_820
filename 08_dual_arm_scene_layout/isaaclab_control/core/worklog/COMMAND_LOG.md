@@ -1447,6 +1447,49 @@
   `scene_0065:RED`. The tool invokes the unchanged production entry, streams and
   records terminal output, stops on a real error, and resumes passed cases.
 
+## 2026-08-20 — perception-only color refactor v2 verification boundary
+
+- Read v2 package at
+  `/home/lin/Projects/_wuji2_refactor_packages/wuji2_perception_only_color_refactor_verification_v2_20260820/`.
+- Installed supplied modules:
+  `closed_loop/target_contract.py`,
+  `closed_loop/verification_contract.py`,
+  `closed_loop/color_sort/target_pool.py`,
+  `closed_loop/planning/perception_target_geometry.py`,
+  and `closed_loop/tools/audit_perception_only_planning.py`.
+- Appended `sample_place_from_perception_anchor()` to
+  `closed_loop/planning/flexible_pose_sampling.py`; existing place sampler was
+  preserved.
+- Changed color CLI timing so unspecified `--target-color` is asked after the
+  first fresh RGB capture, not before Persistent Isaac starts.
+- Changed color-sort selection from HSV-selected-single-instance to
+  GroundedSAM legal proposals x HSV component target pool.  The final DGN2 mask
+  is the full matched HSV instance; `SAM & HSV` is saved only for audit.
+- Changed HSV SourceZone membership to use the current capture
+  `settled_scene_manifest.json -> world_from_source_zone` rigid transform, not
+  a layout world-axis AABB.
+- Moved simulator target binding in orchestrator to after Route A/B full route
+  PASS and before `execute()` / `execute_routeB()`.  The execution target id is
+  wrapped by `SimulationVerificationBinding`.
+- Refactored production candidate case construction to accept
+  `--target-geometry` and to build a perception proxy from current mask/RGB-D,
+  instead of resolving exact target segmentation id / object mesh before
+  planning.
+- Changed Route B attachment proxy production path to use current
+  perception mask + depth only; exact Isaac collision AABB is no longer used for
+  planning proxy generation.
+- Updated Route B dense executor so planning manifest proxy id does not need to
+  match the post-plan execution verification id.
+- Replay command summary: rebuilt v2 target pools for
+  `20260820_124401/cycle_001` and `cycle_002`.  Cycle 001 healthy blue match
+  PASS.  Cycle 002 old 59 px pair rejected by overlap/fraction/Dice/depth gates;
+  legal `blue_000` remains in the same capture target pool.
+- Validation commands run: py_compile focused production files PASS; semantic
+  robot safety 7/7 PASS; closed-loop logic 6/6 PASS; flexible planning 5/5
+  PASS; Route B front-half reach/runtime 3/3 PASS; Route B full runtime,
+  attachment proxy, robot config 4/4 PASS; right-arm contract 2/2 PASS;
+  `check_v2_wiring.py` PASS; `git diff --check` PASS.
+
 ## 2026-08-20 — supervised three-scene color campaign and error repairs
 
 - Campaign command: `/home/lin/miniconda3/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/run_color_sort_campaign.py`; canonical timestamp root:

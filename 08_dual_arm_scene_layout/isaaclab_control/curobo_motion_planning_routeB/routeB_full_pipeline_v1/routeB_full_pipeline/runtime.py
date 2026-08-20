@@ -64,7 +64,7 @@ def _failure_summary(output: str) -> str:
     lines = [line.strip() for line in output.splitlines() if line.strip()]
     for line in reversed(lines):
         if line.startswith("RuntimeError:"):
-            text = line.removeprefix("RuntimeError:").strip()
+            text = line[len("RuntimeError:"):].strip()
             break
     else:
         text = lines[-1] if lines else "backend emitted no diagnostic"

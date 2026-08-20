@@ -1,0 +1,30 @@
+{
+  "object_code": "sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd",
+  "source_obj": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/decomposed.obj",
+  "source_obj_sha256": "04b653c8926dd16bf6d693e85e36935b9f8826cd1c73ae9ed22fdafeace82766",
+  "scale": 0.1,
+  "native_aabb_center": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "aabb_min_m": [
+    -0.0934302,
+    -0.0304664,
+    -0.0304664
+  ],
+  "aabb_max_m": [
+    0.0934302,
+    0.0304664,
+    0.0304664
+  ],
+  "extent_m": [
+    0.1868604,
+    0.0609328,
+    0.0609328
+  ],
+  "piece_count": 8,
+  "centered_combined_obj": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/centered_combined.obj",
+  "urdf": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd_centered_coacd.urdf",
+  "root_frame": "centered source-mesh AABB; source axes retained"
+}

@@ -55,6 +55,10 @@ sys.path.insert(0, str(ROUTEB_FULL_ROOT))
 from core.bridge import CuroboWorkerClient  # noqa: E402
 from core.config import WorkerConfig  # noqa: E402
 from persistent_isaac import PersistentIsaacClient  # noqa: E402
+from color_sort.target_pool import build_color_target_pool  # noqa: E402
+from planning.perception_target_geometry import build_perception_target_geometry  # noqa: E402
+from target_contract import PerceptionTarget, write_perception_target  # noqa: E402
+from verification_contract import make_verification_binding  # noqa: E402
 from planning.flexible_route_search import (  # noqa: E402
     screen_exact_cover_batch,
     summarize_exact_cover_subfunnel,
@@ -97,7 +101,8 @@ def build_color_sort_zone_specs(*, root: Path, session_root: Path) -> dict[str, 
         layout["transforms"]["placement_zone"]["position_world_m"], dtype=np.float64
     )
     size = np.asarray(layout["geometry"]["placement_zone_size_m"], dtype=np.float64)
-    gap = float(color_cfg.get("placement_split_gap_m", 0.04))
+    split_cfg = color_cfg.get("placement_split", {})
+    gap = float(split_cfg.get("gap_m", color_cfg.get("placement_split_gap_m", 0.04)))
     axis = 0 if float(size[0]) >= float(size[1]) else 1
     if float(size[axis]) <= gap:
         raise RuntimeError(
@@ -1201,6 +1206,13 @@ def choose_sort_color_interactively(value: str | None, task: str) -> str | None:
         if color is None:
             raise ValueError("--target-color must be red or blue")
         return color
+    return None
+
+
+def prompt_sort_color_after_capture(value: str | None) -> str:
+    color = canonical_sort_color(str(value)) if value is not None else None
+    if color is not None:
+        return color
     if not sys.stdin.isatty():
         raise RuntimeError("color-sort requires --target-color red|blue in non-TTY mode")
     while True:
@@ -1474,7 +1486,10 @@ def main() -> int:
         print("==================================================")
         print(f"HSV perception   : ON（使用RGB->HSV识别红/蓝实例）")
         print(f"Color seed       : {int(args.color_seed)}")
-        print(f"Target color     : {str(args.target_color).upper()}（用户指定）")
+        if args.target_color is None:
+            print("Target color     : ASK AFTER FIRST RGB（先拍照显示，再询问）")
+        else:
+            print(f"Target color     : {str(args.target_color).upper()}（用户指定）")
         print("GroundingDINO/SAM : ON（以颜色文本匹配物体，不使用颜色GT选择）")
         print("==================================================")
     else:
@@ -1806,7 +1821,8 @@ def main() -> int:
                         "placement_zone_override": None,
                     }
                 else:
-                    requested_color = str(args.target_color)
+                    requested_color = prompt_sort_color_after_capture(args.target_color)
+                    args.target_color = requested_color
                     color_root = cycle_root / "color_sort"
                     print(f"[2] HSV 当前RGB颜色审计（目标={requested_color.upper()}；不使用颜色GT选择）...")
                     color_cmd = [
@@ -1819,26 +1835,20 @@ def main() -> int:
                         "--assignment", color_assignment_path,
                         "--preferred-color", requested_color,
                     ]
-                    for instance_id in sorted(failed_targets_current_scene):
-                        color_cmd.extend(["--exclude-instance-id", instance_id])
                     run("HSV color audit", color_cmd, cwd=root, capture_json=False)
                     detection_report = load_json(color_root / "detection_report.json")
                     show_image_path(Path(detection_report["overlay"]), cfg)
-                    selected_color_target = detection_report.get("selected")
                     red_source = int(detection_report["red"]["inside_source_zone"])
                     blue_source = int(detection_report["blue"]["inside_source_zone"])
                     print("\n[COLOR SORT DETECTION]")
                     print(f"    RED  source={red_source} visible={detection_report['red']['visible_components']}")
                     print(f"    BLUE source={blue_source} visible={detection_report['blue']['visible_components']}")
-                    if selected_color_target is None:
+                    requested_source = int(detection_report[requested_color]["inside_source_zone"])
+                    if requested_source <= 0:
                         final_snapshot = session_root / "final_scene_manifest.json"
                         isaac.snapshot(final_snapshot)
                         summary_path = session_root / "color_sort_summary.json"
-                        status = (
-                            "PARTIAL_COMPLETE"
-                            if failed_targets_current_scene
-                            else "COLOR_COMPLETE"
-                        )
+                        status = "COLOR_COMPLETE" if not failed_targets_current_scene else "PARTIAL_COMPLETE"
                         summary_path.write_text(json.dumps({
                             "schema_version": 1,
                             "status": status,
@@ -1852,9 +1862,9 @@ def main() -> int:
                         print(f"✓ {requested_color.upper()} 颜色任务结束：{status} | summary={summary_path}")
                         return 0
 
-                    # GroundingDINO is the color-query matcher.  HSV remains an
-                    # independent current-RGB audit and supplies a stable instance
-                    # id for failure recovery; neither reads sort_color ground truth.
+                    # GroundingDINO/SAM confirms all current-capture HSV instances.
+                    # The final DGN2 target mask is the complete matched HSV
+                    # component, not the SAM/HVS intersection.
                     query_original = requested_color
                     query = f"{requested_color} object"
                     target_slug = safe_slug(f"{requested_color}_object")
@@ -1883,13 +1893,11 @@ def main() -> int:
                     run("GroundingDINO color prompt -> SAM", command, cwd=root)
                     gs_result = load_json(gs_root / "result.json")
                     if gs_result.get("status") == "NO_LEGAL_TARGET":
-                        failed_instance_id = str(selected_color_target["instance_id"])
-                        failed_targets_current_scene.add(failed_instance_id)
                         summary_path = write_color_attempt(
                             color_root=color_root,
                             status="NO_LEGAL_COLOR_TARGET",
                             requested_color=requested_color,
-                            instance_id=failed_instance_id,
+                            instance_id=None,
                             detail=(
                                 f"GroundingDINO/SAM prompt={query!r} produced no legal target; "
                                 f"report={gs_root / 'result.json'}"
@@ -1897,10 +1905,10 @@ def main() -> int:
                         )
                         print(
                             f"⚠ GroundingDINO/SAM没有找到合法{requested_color.upper()}桌面物体；"
-                            f"本scene跳过 HSV 实例 {failed_instance_id}，机械臂保持 HOME，重新拍照尝试其他实例。"
+                            "机械臂保持 HOME，停止本颜色任务。"
                         )
                         print(f"    attempt={summary_path}")
-                        continue
+                        return 2
                     gs_check = run("validate Grounded-SAM color output", [
                         network_py, SCRIPTS / "validate_grounded_sam_output.py",
                         "--rgb", rgb, "--output-root", gs_root, "--query", query,
@@ -1908,68 +1916,41 @@ def main() -> int:
                     overlay = Path(gs_check["overlay"])
                     show_async(cfg.get("show_overlay_command"), overlay=str(overlay))
                     grounded_sam_mask_path = gs_root / "mask.npy"
-                    hsv_instances = [
-                        row for row in detection_report[requested_color]["instances"]
-                        if str(row["instance_id"]) not in failed_targets_current_scene
-                    ]
-                    match_rows = match_grounded_color_proposals(
+                    pool = build_color_target_pool(
+                        capture_root=capture_root,
+                        color_root=color_root,
+                        detection_report=detection_report,
                         grounded_sam_result=gs_result,
-                        selected_mask_path=grounded_sam_mask_path,
-                        hsv_instances=hsv_instances,
+                        selected_sam_mask_path=grounded_sam_mask_path,
+                        requested_color=requested_color,
+                        gate_cfg=load_json(
+                            root / "08_dual_arm_scene_layout/isaaclab_control/closed_loop/config/color_sort.json"
+                        )["matching"],
                     )
-                    color_match = match_rows[0] if match_rows else None
-                    match_path = color_root / "grounding_color_match.json"
-                    match_path.write_text(json.dumps({
-                        "schema_version": 1,
-                        "target_color": requested_color,
-                        "query_groundingdino": query,
-                        "grounded_sam_mask": str(grounded_sam_mask_path),
-                        "legal_proposal_masks": gs_result.get("legal_proposal_masks"),
-                        "matches": [
-                            {
-                                key: value
-                                for key, value in row.items()
-                                if key != "proposal_mask"
-                            }
-                            for row in match_rows
-                        ],
-                    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-                    if color_match is None or int(color_match["overlap_px"]) <= 0:
-                        failed_instance_id = str(selected_color_target["instance_id"])
-                        failed_targets_current_scene.add(failed_instance_id)
+                    target_rows = [
+                        row for row in pool["targets"]
+                        if str(row["target_id"]) not in failed_targets_current_scene
+                    ]
+                    if not target_rows:
                         write_color_attempt(
                             color_root=color_root,
-                            status="NO_HSV_COLOR_MATCH",
+                            status="NO_DINO_SAM_HSV_TARGET_POOL_MATCH",
                             requested_color=requested_color,
-                            instance_id=failed_instance_id,
+                            instance_id=None,
                             detail=(
-                                f"DINO/SAM mask={grounded_sam_mask_path} has no overlap with a current "
-                                f"{requested_color} HSV instance; match={match_path}"
+                                f"No {requested_color} HSV component passed DINO/SAM matching gates; "
+                                f"matrix={pool['match_matrix']}"
                             ),
                         )
                         print(
-                            f"⚠ DINO/SAM目标没有与当前RGB的{requested_color.upper()} HSV实例匹配；"
-                            f"本scene跳过 HSV 实例 {failed_instance_id}，重新拍照尝试其他实例。"
+                            f"⚠ 当前capture没有通过DINO/SAM确认的{requested_color.upper()} HSV实例；"
+                            "机械臂保持 HOME，停止本颜色任务。"
                         )
-                        continue
-                    matched_instance = color_match["instance"]
-                    matched_hsv_mask = np.load(
-                        Path(str(matched_instance["mask_path"]))
-                    ).astype(bool)
-                    sam_mask = np.asarray(color_match["proposal_mask"], dtype=bool)
-                    color_match_metadata = {
-                        key: value
-                        for key, value in color_match.items()
-                        if key != "proposal_mask"
-                    }
-                    # GroundingDINO establishes the user-requested color prompt;
-                    # the same RGB HSV instance makes its SAM region a *single*
-                    # physical target when SAM grouped several same-color objects.
-                    # This uses neither `sort_color` nor the color-assignment JSON.
-                    selected_target_mask = sam_mask & matched_hsv_mask
-                    target_mask_path = gs_root / "color_matched_instance_mask.npy"
-                    np.save(target_mask_path, selected_target_mask)
-                    target_source = "grounded_sam_color_prompt_hsv_instance_intersection"
+                        return 2
+                    selected_target = PerceptionTarget(**target_rows[0]).validate()
+                    target_mask_path = Path(selected_target.mask_path).resolve()
+                    target_source = selected_target.source
+                    metrics = dict(selected_target.metrics)
                     target_selection = {
                         "task_type": "color-sort",
                         "target_source": target_source,
@@ -1977,17 +1958,19 @@ def main() -> int:
                         "query_original": query_original,
                         "query_canonical": query,
                         "color": requested_color,
-                        "instance_id": str(matched_instance["instance_id"]),
-                        "bbox": matched_instance["bbox_xyxy"],
-                        "centroid_uv": matched_instance["centroid_uv"],
-                        "centroid_world": matched_instance["centroid_world_m"],
-                        "placement_zone_override": f"{requested_color}_zone",
+                        "instance_id": selected_target.target_id,
+                        "bbox": None,
+                        "centroid_uv": None,
+                        "centroid_world": None,
+                        "placement_zone_override": selected_target.placement_zone_override,
                         "metadata": {
-                            "grounded_sam_result": str(gs_root / "result.json"),
-                            "grounded_sam_mask": str(grounded_sam_mask_path),
-                            "selected_mask_pixels": int(selected_target_mask.sum()),
-                            "hsv_color_match": color_match_metadata,
+                            "perception_target": str(Path(target_mask_path).parent / "target.json"),
+                            "hsv_instance_id": str(metrics.get("instance_id", "")),
+                            "target_pool": str(color_root / "target_pool.json"),
+                            "match_matrix": str(pool["match_matrix"]),
+                            "final_mask_contract": "complete_hsv_instance_mask",
                             "hsv_audit": str(color_root / "detection_report.json"),
+                            "grounded_sam_result": str(gs_root / "result.json"),
                         },
                     }
                     (color_root / "selected_target.json").write_text(
@@ -1995,12 +1978,44 @@ def main() -> int:
                         encoding="utf-8",
                     )
                     print(
-                        f"    selected={matched_instance['instance_id']} | color={requested_color.upper()} | "
-                        f"DINO proposal={color_match['proposal_index']} "
-                        f"score={color_match['dino_score']} | "
-                        f"HSV overlap={int(color_match['overlap_px'])} px | "
+                        f"    selected={selected_target.target_id} | color={requested_color.upper()} | "
+                        f"DINO proposal={metrics.get('proposal_index')} "
+                        f"score={metrics.get('dino_score')} | "
+                        f"overlap={metrics.get('overlap_px')} px | "
                         f"{time.perf_counter()-started:.1f}s"
                     )
+
+                perception_target_root = Path(target_mask_path).resolve().parent
+                perception_target = PerceptionTarget(
+                    capture_id=capture_root.parent.name,
+                    target_id=target_slug,
+                    task_type=str(args.task),
+                    query_canonical=query,
+                    mask_path=str(Path(target_mask_path).resolve()),
+                    color=target_selection.get("color"),
+                    placement_zone_override=target_selection.get("placement_zone_override"),
+                    source=str(target_source),
+                    metrics={
+                        "query_original": query_original,
+                        "target_selection": target_selection,
+                    },
+                ).validate()
+                write_perception_target(
+                    perception_target_root / "perception_target.json",
+                    perception_target,
+                )
+                target_geometry_path = perception_target_root / "perception_target_geometry.json"
+                build_perception_target_geometry(
+                    capture_root=capture_root,
+                    target_mask_path=Path(target_mask_path),
+                    output_path=target_geometry_path,
+                    depth_path=filtered_depth_path,
+                    minimum_valid_pixels=50,
+                )
+                target_selection["perception_target"] = str(
+                    perception_target_root / "perception_target.json"
+                )
+                target_selection["perception_target_geometry"] = str(target_geometry_path)
 
                 # 3) RGB-D -> official 40k input
                 dgn_root = capture_root / "dgn2" / target_slug
@@ -2172,16 +2187,6 @@ def main() -> int:
                         print("    说明：REJECT只是救援队列，不是永久删除；PASS候选失败后仍可回退尝试。")
                 write_planning_funnel(cycle_root, funnel)
 
-                # simulation-only binding after semantic selection
-                sim_binding = cycle_root / "sim_target.json"
-                bind = run("simulation-only mask -> rigid-body binding", [
-                    network_py, SCRIPTS / "resolve_sim_target.py",
-                    "--capture-root", capture_root,
-                    "--mask", target_mask_path,
-                    "--settled-manifest", settled,
-                    "--output", sim_binding,
-                ], cwd=root, capture_json=True)
-                sim_target_id = int(bind["segmentation_id"])
                 q_current, measured = load_robot_state(robot_state_path)
 
                 try:
@@ -2336,7 +2341,7 @@ def main() -> int:
                             "--network-input", dgn_root / "network_input.npz",
                             "--capture-root", capture_root,
                             "--settled-manifest", settled,
-                            "--sim-target-segmentation-id", str(sim_target_id),
+                            "--target-geometry", target_geometry_path,
                             "--items-json", items_json,
                             "--output", chunk_dir / "batch_build_report.json",
                         ], cwd=root, capture_json=True)
@@ -3028,12 +3033,35 @@ def main() -> int:
                             print("✓ Route B full planning-only 完成；未执行物理抓取。")
                             return 0
 
+                        verification_root = cycle_root / "verification"
+                        sim_binding_report = verification_root / "sim_target.json"
+                        sim_binding_report.parent.mkdir(parents=True, exist_ok=True)
+                        sim_target_result = run(
+                            "verification-only mask -> simulator rigid-body binding",
+                            [
+                                network_py, SCRIPTS / "resolve_sim_target.py",
+                                "--capture-root", capture_root,
+                                "--mask", target_mask_path,
+                                "--settled-manifest", settled,
+                                "--output", sim_binding_report,
+                            ],
+                            cwd=root,
+                            capture_json=True,
+                        )
+                        verification = make_verification_binding(
+                            capture_id=capture_root.parent.name,
+                            perception_target_id=str(perception_target.target_id),
+                            full_route_status="PASS",
+                            sim_target_result=sim_target_result,
+                            binding_report=sim_binding_report,
+                            output_path=verification_root / "verification_binding.json",
+                        )
                         print("[8] Route B 同一 Isaac 场景执行 dense cuRobo arm trajectories")
                         execution_root = cycle_root / "execution_routeB"
                         execution = isaac.execute_routeB(
                             manifest_path=routeb_full_report["execution_manifest"],
                             output_dir=execution_root,
-                            target_segmentation_id=sim_target_id,
+                            target_segmentation_id=verification.target_segmentation_id,
                         )
                         if str(execution.get("status")) != "PASS":
                             failure_stage = str(execution.get("failure_stage") or "UNKNOWN")
@@ -3209,13 +3237,36 @@ def main() -> int:
                     print("✓ Planning-only 完成；未执行物理抓取。")
                     return 0
 
+                verification_root = cycle_root / "verification"
+                sim_binding_report = verification_root / "sim_target.json"
+                sim_binding_report.parent.mkdir(parents=True, exist_ok=True)
+                sim_target_result = run(
+                    "verification-only mask -> simulator rigid-body binding",
+                    [
+                        network_py, SCRIPTS / "resolve_sim_target.py",
+                        "--capture-root", capture_root,
+                        "--mask", target_mask_path,
+                        "--settled-manifest", settled,
+                        "--output", sim_binding_report,
+                    ],
+                    cwd=root,
+                    capture_json=True,
+                )
+                verification = make_verification_binding(
+                    capture_id=capture_root.parent.name,
+                    perception_target_id=str(perception_target.target_id),
+                    full_route_status="PASS",
+                    sim_target_result=sim_target_result,
+                    binding_report=sim_binding_report,
+                    output_path=verification_root / "verification_binding.json",
+                )
                 print("[8] 同一 Isaac 场景直接执行（不重复加载，不二次 IK）")
                 execution_root = cycle_root / "execution"
                 execution = isaac.execute(
                     case_root=selected["case_root"],
                     plan_npz=selected["route"]["output_npz"],
                     output_dir=execution_root,
-                    target_segmentation_id=sim_target_id,
+                    target_segmentation_id=verification.target_segmentation_id,
                 )
                 execution_status = str(execution.get("status", ""))
                 if execution_status == "RECOVERED_FAIL":

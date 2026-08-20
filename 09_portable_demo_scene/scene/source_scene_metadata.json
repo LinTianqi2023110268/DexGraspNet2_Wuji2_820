@@ -1,0 +1,1176 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-08-20T07:20:47.097318+00:00",
+  "git_commit": "ae391047036bbb2bb20a28dd3da752cdfd491666",
+  "source_session": "20260820_124401",
+  "source_session_path": "08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_124401",
+  "source_scene_folder": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0020",
+  "source_scene_manifest": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0020/scene_manifest.json",
+  "portable_scene_manifest": "09_portable_demo_scene/scene/portable_scene_manifest.json",
+  "object_count": 6,
+  "objects": [
+    {
+      "index": 0,
+      "name": "Cup",
+      "segmentation_id": 7,
+      "object_pool_index": 6,
+      "object_code": "sem-Cup-d8ea3aa39bcb162798910e50f05b8001",
+      "sort_color_in_source_session": "blue",
+      "original_simulation_usd": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/usd_cache/object_006/flat/object_006_editable.usd",
+      "portable_simulation_usd": "09_portable_demo_scene/objects/object_00_Cup/simulation/object_006_editable.usd",
+      "original_source_mesh": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/assets/wuji2_factory/03_dexgraspnet_objects/meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/decomposed.obj",
+      "portable_source_mesh": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/decomposed.obj",
+      "original_prepared_asset_dir": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/prepared_assets/object_007",
+      "portable_prepared_asset_dir": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset",
+      "original_pose_T_world_centered_object": [
+        [
+          0.9669601692169799,
+          -0.25492750051017926,
+          2.5129704395303096e-05,
+          0.018097350373864174
+        ],
+        [
+          0.25492750105359935,
+          0.966960169161929,
+          -2.146860191983635e-05,
+          0.06939376890659332
+        ],
+        [
+          -1.8826486186199636e-05,
+          2.716553568896721e-05,
+          0.9999999994537986,
+          0.08748477697372437
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_hashes": {
+        "simulation_usd_sha256_original": "64a1167eeda144e4b9a60e7301439a0276dee3989a1df141f9fbbe1f213f73e5",
+        "source_mesh_sha256_original": "dd897f88b4bcdeb59a02e54e48cc7650390eaaaf81646f7a204c53b75cd3da46"
+      },
+      "portable_hashes": {
+        "simulation_usd_sha256": "b4ba5a86c74b1e988efd2b28eca0d804432bc6fb9ecb514368343b010dc834e9",
+        "source_mesh_sha256": "dd897f88b4bcdeb59a02e54e48cc7650390eaaaf81646f7a204c53b75cd3da46",
+        "centered_combined_obj_sha256": "7b7077c35956ef10d2614ccf7355ab63b517ed68507043c030a2b9a988a25989",
+        "urdf_sha256": "55c3defb6641a7d86f4a865dabde4db9783d1f824e03b06069cc86bca5f39918"
+      },
+      "copied_file_count": 41,
+      "copied_files": [
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/asset_manifest.json",
+          "size_bytes": 962,
+          "sha256": "25d971fd7e6654bbc6f603b531d58dd5f3fc1d4a4cbc48951b0e0813a70c2922"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/centered_combined.obj",
+          "size_bytes": 48633,
+          "sha256": "7b7077c35956ef10d2614ccf7355ab63b517ed68507043c030a2b9a988a25989"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/sem-Cup-d8ea3aa39bcb162798910e50f05b8001_centered_coacd.urdf",
+          "size_bytes": 6164,
+          "sha256": "55c3defb6641a7d86f4a865dabde4db9783d1f824e03b06069cc86bca5f39918"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/simulation/object_006_editable.usd",
+          "size_bytes": 20034,
+          "sha256": "b4ba5a86c74b1e988efd2b28eca0d804432bc6fb9ecb514368343b010dc834e9"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_009.obj",
+          "size_bytes": 2581,
+          "sha256": "c2cf36e2814eab18f104f215909397646f076652a3e079cc44864fac4a9e8ac5"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_004.obj",
+          "size_bytes": 3055,
+          "sha256": "8f8b41715088104dc3e645327e8db9ef683c7fb8224bef2a9a0a8ca9f2cbfaa4"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_000.obj",
+          "size_bytes": 4644,
+          "sha256": "452709e88ff2a8abe216244285c8980a2d892fbe6dc536ee5fa22657c7a02f0a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_006.obj",
+          "size_bytes": 3726,
+          "sha256": "7a89d471391a240a9154272888a3f23c8b45bb4223480dd85abc13f56546ddb2"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_013.obj",
+          "size_bytes": 1078,
+          "sha256": "12447fb1c3d79da43c7b2626c948b3a173d7fa2da2c4e7dcd06d2fe09bf3aa02"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_003.obj",
+          "size_bytes": 2479,
+          "sha256": "21062a973e66fa59f26a1e035cf29d4e4e6eaa2e563af5d9e1c8fe1e630ec77f"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_011.obj",
+          "size_bytes": 3375,
+          "sha256": "b30e29a825617acabb62f76ab9c843a40f26c851ae391a029e4f97f1671e32bc"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_007.obj",
+          "size_bytes": 4302,
+          "sha256": "75a631d9f3e194276477114f1f4734f58f1b370b9566baed847a4b9925c068a9"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_002.obj",
+          "size_bytes": 2849,
+          "sha256": "f70b905610dade287e9d2728e6543c30dbd6e1c1f29b15d29d2b1f3aa132a620"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_014.obj",
+          "size_bytes": 1316,
+          "sha256": "fb85ceafafc10dffdf46eb95ecacd2ed13bcdf99d0feeb9d4717c90917288aad"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_012.obj",
+          "size_bytes": 1235,
+          "sha256": "d735610d23de3082023c441b981bac338f7ad739fd4e71eb3e9c99560d30a9a2"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_008.obj",
+          "size_bytes": 3394,
+          "sha256": "8de70b3cbb157146c326c450b90a9f30223ac579d049bdcd0420d05181960e76"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_001.obj",
+          "size_bytes": 3847,
+          "sha256": "691fe7ea3e92a6c748986534f6f958805a150bcd6e789a3eb41f6eb84eeba0c1"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_005.obj",
+          "size_bytes": 2019,
+          "sha256": "bcedd7a0c65557bf931a1c9f46e54745fb6e0b4ec0b91e33abf4dc5e51f47162"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_010.obj",
+          "size_bytes": 2488,
+          "sha256": "9a280b531dfc95ef83ee0b803442f078ae248cb4f66c8c69b30170c5f8c72272"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/prepared_asset/pieces/piece_015.obj",
+          "size_bytes": 1414,
+          "sha256": "c9f67fe88a9deaa7b8411ecd98032590c25aed34e33b82290dc7c569bc944bb4"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/decomposed.wrl",
+          "size_bytes": 117755,
+          "sha256": "ffe90a2864cfe5fc3606fb53e47e1d944affd74cadcfb9661e39e5a040b32c38"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_8.obj",
+          "size_bytes": 3584,
+          "sha256": "ad3d3903f1e5e8ddedaded5d0a15d49273e446b59e38390c3c6f0076987afd97"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_7.obj",
+          "size_bytes": 4515,
+          "sha256": "3f1a601909aea9fe3cb624c38092f042829bf5f8df3f35944f36fbd5fef29642"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_10.obj",
+          "size_bytes": 2647,
+          "sha256": "6f64d3cef00724140273b18a64ef7030479c9f71135ceda079d2aecac0045578"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_0.obj",
+          "size_bytes": 4886,
+          "sha256": "9e588cce2d24469e6e9d1b1fe68854a493583bae4c919515dbf8b9cb91d90ac6"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_4.obj",
+          "size_bytes": 3248,
+          "sha256": "f63ee6071b1d5db96a1b5b18741d4c8ec228b2bf32cd54a9cff01cc67c4be54d"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_14.obj",
+          "size_bytes": 1402,
+          "sha256": "b5a84937c8d8fa2902889420c1388fec762c3e7451298a7a8105f9d8e54dad44"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_1.obj",
+          "size_bytes": 4049,
+          "sha256": "013c6f46118250470c527d58d2d5fa50de961f238ed4db6bcc05e8a3cad4f7d7"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_9.obj",
+          "size_bytes": 2739,
+          "sha256": "204d3d6ce7f380bad252a6d8020cfdf4fd12e7135d4b8bb3e48d03ece78eb331"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/decomposed_log.txt",
+          "size_bytes": 1242,
+          "sha256": "756f8a712114ea805187d79a43703d46ee89e26b53157ef296ea48e768e435b4"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_13.obj",
+          "size_bytes": 1155,
+          "sha256": "453b0ffc4712235d6f7f23e259c59e9380c600197257968c138b84d970efaeea"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_2.obj",
+          "size_bytes": 3020,
+          "sha256": "ba301adb25de6c7f1df1575d0a16d57cad026b724b8501ea9d39ba8c891f5dcf"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_11.obj",
+          "size_bytes": 3601,
+          "sha256": "97b5c3478da81bb6be2e4a597f8813abf09db921dd4def3cad76e429457cfbab"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_6.obj",
+          "size_bytes": 3927,
+          "sha256": "5fda8fc84da38548154b96f92b4fc7034b161aadc432f0f00ad8d475514fdace"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_3.obj",
+          "size_bytes": 2639,
+          "sha256": "06efd80bcc306546c07777f9acd0f7edfd1bc9e5ce4622d4a10e49c66587d1de"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/model.config",
+          "size_bytes": 198,
+          "sha256": "30c79c0d3c5dbb823402af69c03d8b06eb2c26da0ba5d2c1c739ee5141bd690b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/decomposed.obj",
+          "size_bytes": 46523,
+          "sha256": "dd897f88b4bcdeb59a02e54e48cc7650390eaaaf81646f7a204c53b75cd3da46"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd.urdf",
+          "size_bytes": 14698,
+          "sha256": "a4477df44ad65677ec6092780a867b8d969524fb92bd7871558b6434e5427672"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_5.obj",
+          "size_bytes": 2143,
+          "sha256": "3e748a7336f54f6480ebceb4f184a8d2bfdb7877e8cd3a80dd31ab0ce6230499"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_15.obj",
+          "size_bytes": 1523,
+          "sha256": "dbf4b28d7dd9c80a37223225d803e1a31b09d0dc3b3bf39ae0a56dc008ab1c5f"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_00_Cup/source_meshdata/sem-Cup-d8ea3aa39bcb162798910e50f05b8001/coacd/coacd_convex_piece_12.obj",
+          "size_bytes": 1326,
+          "sha256": "fcff2e11ec4872e68256d448eba357c21507c562be4fce52207d763ba2f66021"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "name": "Flashlight",
+      "segmentation_id": 10,
+      "object_pool_index": 9,
+      "object_code": "sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd",
+      "sort_color_in_source_session": "blue",
+      "original_simulation_usd": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/usd_cache/object_009/flat/object_009_editable.usd",
+      "portable_simulation_usd": "09_portable_demo_scene/objects/object_01_Flashlight/simulation/object_009_editable.usd",
+      "original_source_mesh": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/assets/wuji2_factory/03_dexgraspnet_objects/meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/decomposed.obj",
+      "portable_source_mesh": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/decomposed.obj",
+      "original_prepared_asset_dir": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/prepared_assets/object_010",
+      "portable_prepared_asset_dir": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset",
+      "original_pose_T_world_centered_object": [
+        [
+          -2.320114340137458e-05,
+          0.7899777590520349,
+          -0.6131354986174198,
+          0.10236214101314545
+        ],
+        [
+          4.0786678311866e-05,
+          0.6131354990200053,
+          0.789977758027361,
+          0.097488172352314
+        ],
+        [
+          0.9999999988990769,
+          -6.679373095785923e-06,
+          -4.644601336911691e-05,
+          0.09343148022890091
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_hashes": {
+        "simulation_usd_sha256_original": "babfdf4552e4212648ff9448478621001608048f5801189ba74b42b13b606458",
+        "source_mesh_sha256_original": "04b653c8926dd16bf6d693e85e36935b9f8826cd1c73ae9ed22fdafeace82766"
+      },
+      "portable_hashes": {
+        "simulation_usd_sha256": "9f1df16c2fa2d350b5cfaa3e47bc3de9de8c547a2081631ac98119db4e529a98",
+        "source_mesh_sha256": "04b653c8926dd16bf6d693e85e36935b9f8826cd1c73ae9ed22fdafeace82766",
+        "centered_combined_obj_sha256": "490ba264d52e3c70af3d8d39536e0281cdf3bb261014354a20e9afe24e7fc2b2",
+        "urdf_sha256": "f0f07d4e26858f99d6c9c787d9caf89dcf4471dfa3e67e5b63c931b77a2bc91c"
+      },
+      "copied_file_count": 25,
+      "copied_files": [
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/asset_manifest.json",
+          "size_bytes": 982,
+          "sha256": "55d56014cbbb84432979b51bfe2fa5c9868db110c0e23aa3a2f2f82a8e45cf8b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/centered_combined.obj",
+          "size_bytes": 108736,
+          "sha256": "490ba264d52e3c70af3d8d39536e0281cdf3bb261014354a20e9afe24e7fc2b2"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd_centered_coacd.urdf",
+          "size_bytes": 3147,
+          "sha256": "f0f07d4e26858f99d6c9c787d9caf89dcf4471dfa3e67e5b63c931b77a2bc91c"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/simulation/object_009_editable.usd",
+          "size_bytes": 34429,
+          "sha256": "9f1df16c2fa2d350b5cfaa3e47bc3de9de8c547a2081631ac98119db4e529a98"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_004.obj",
+          "size_bytes": 15703,
+          "sha256": "cda16722f45c86d0ded5bd54a0504d5f5eec78ac30be70cfd3dc313aeb6b1928"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_000.obj",
+          "size_bytes": 21185,
+          "sha256": "b1071c5a8e569d149247f37e6a9c2a1d3383387740982b8c41a51dccf2ca2054"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_006.obj",
+          "size_bytes": 9385,
+          "sha256": "ff16cb5358a1694ba1fd0ee52aeade23fe5a0833d25558f1b525720de9da2e84"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_003.obj",
+          "size_bytes": 14431,
+          "sha256": "6c807a9de0d84990d261751008c148f964d5423aec42e3884ffa107ec625e23d"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_007.obj",
+          "size_bytes": 9162,
+          "sha256": "f038f8d17134ce62694f99e42f2470620a2d3f9ca6e1d6a3025260f88bde6ce8"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_002.obj",
+          "size_bytes": 11531,
+          "sha256": "04a107a6afb4667f0f13304727bc15cfc8deebc6c96a9df20c188836d644ba48"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_001.obj",
+          "size_bytes": 11263,
+          "sha256": "3587b578a6bb68c91d8ec6ed7aaeec117b9cf5c5b43425ce887afb3625b266eb"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/prepared_asset/pieces/piece_005.obj",
+          "size_bytes": 7165,
+          "sha256": "6e808d4bc326ac341aedc3a1b4356dd8f10db5945c5eaa6021d61f684a8c5f00"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/decomposed.wrl",
+          "size_bytes": 237411,
+          "sha256": "e008bf5f4747cb0e6f83993fd23664569cd318cef587cc4fa613ab0db1adb36d"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_7.obj",
+          "size_bytes": 9572,
+          "sha256": "a50cc8dd7168a7bc5b5dcb13b3d4062ca9f92e2eed85bf234ec647dd3afcde4a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_0.obj",
+          "size_bytes": 22147,
+          "sha256": "9d5e13746619988b22f38e09f7a6e7b0acb8f85d67b074c5ce5431f372c260b3"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_4.obj",
+          "size_bytes": 16466,
+          "sha256": "7135add7e82899556e3e295d9774017dd6f02b1a3d0c4feb797321cc4fadc7bd"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_1.obj",
+          "size_bytes": 11833,
+          "sha256": "ff044f7d21822e8a4b5ab89902e4a21f89af2817672633fc58bef92cf3e2055a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/decomposed_log.txt",
+          "size_bytes": 1261,
+          "sha256": "099f7e4381f5464c654bf5f78ecf3710fcb157cc5ba34117f7bab1960441297e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_2.obj",
+          "size_bytes": 12117,
+          "sha256": "93e4d4944735c5f50dae0e14fc9f485b4ff4cca3f238fe8e3de6a1847549138e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_6.obj",
+          "size_bytes": 9829,
+          "sha256": "48cf26d2f6f32155d75861a2bf11a0efb86af8a75040b8ae93fe1801a28aaf71"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_3.obj",
+          "size_bytes": 15170,
+          "sha256": "06d9bde2a411e93acddecc30d17b7db348eb8dd67773d2dd8669fced80e7c01d"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/model.config",
+          "size_bytes": 198,
+          "sha256": "30c79c0d3c5dbb823402af69c03d8b06eb2c26da0ba5d2c1c739ee5141bd690b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/decomposed.obj",
+          "size_bytes": 103728,
+          "sha256": "04b653c8926dd16bf6d693e85e36935b9f8826cd1c73ae9ed22fdafeace82766"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd.urdf",
+          "size_bytes": 7245,
+          "sha256": "c801c3a9134c5290f3d8acb204c368b2464f455b7b190a231e8bf23e2ea1c054"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_01_Flashlight/source_meshdata/sem-Flashlight-5c7bf45b0f847489181be2d6e974dccd/coacd/coacd_convex_piece_5.obj",
+          "size_bytes": 7436,
+          "sha256": "5a71d88fd4bcf3ad83cca19295802211541b4a89c2270cf05702ad8eb16f2948"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "Bear",
+      "segmentation_id": 15,
+      "object_pool_index": 14,
+      "object_code": "sem-Bear-1629215db795111ba649bd1425725662",
+      "sort_color_in_source_session": "red",
+      "original_simulation_usd": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/usd_cache/object_014/flat/object_014_editable.usd",
+      "portable_simulation_usd": "09_portable_demo_scene/objects/object_02_Bear/simulation/object_014_editable.usd",
+      "original_source_mesh": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/assets/wuji2_factory/03_dexgraspnet_objects/meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/decomposed.obj",
+      "portable_source_mesh": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/decomposed.obj",
+      "original_prepared_asset_dir": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/prepared_assets/object_015",
+      "portable_prepared_asset_dir": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset",
+      "original_pose_T_world_centered_object": [
+        [
+          -0.08464941793611169,
+          0.9575317196436126,
+          0.2756219909938679,
+          -0.10817308723926544
+        ],
+        [
+          0.21744616346557227,
+          0.28769990127902345,
+          -0.932708921796154,
+          -0.009410753846168518
+        ],
+        [
+          -0.9723947974136746,
+          -0.01902032282550359,
+          -0.2325652280166417,
+          0.02860327623784542
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_hashes": {
+        "simulation_usd_sha256_original": "0e1e1033e4c616e68a130f43493e91edcd35eafe8e60ec549da15b769d0d0e7f",
+        "source_mesh_sha256_original": "54909db60055b75038277da5bef4ee6130216347a3d95ca2c5cc8d29476c9f56"
+      },
+      "portable_hashes": {
+        "simulation_usd_sha256": "f486c9321e52ee900723970bf9bf4bc5df1b25ab2645e8391eb3a55ac57b34e9",
+        "source_mesh_sha256": "54909db60055b75038277da5bef4ee6130216347a3d95ca2c5cc8d29476c9f56",
+        "centered_combined_obj_sha256": "7bac9105297917d9d45a8dd349c1385cd6ece018a0a08993d50ef5e1c6eaaee4",
+        "urdf_sha256": "7c25b9ee5e921fb177141c820ee8d92cb81397063d029309b818c61f11fd4c94"
+      },
+      "copied_file_count": 37,
+      "copied_files": [
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/asset_manifest.json",
+          "size_bytes": 1015,
+          "sha256": "f206b2220bcc302f6ab9c4a7b763f558adfa5d4633a6ded7f8cbd484fcbbae2a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/centered_combined.obj",
+          "size_bytes": 199167,
+          "sha256": "7bac9105297917d9d45a8dd349c1385cd6ece018a0a08993d50ef5e1c6eaaee4"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/sem-Bear-1629215db795111ba649bd1425725662_centered_coacd.urdf",
+          "size_bytes": 5409,
+          "sha256": "7c25b9ee5e921fb177141c820ee8d92cb81397063d029309b818c61f11fd4c94"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/simulation/object_014_editable.usd",
+          "size_bytes": 59071,
+          "sha256": "f486c9321e52ee900723970bf9bf4bc5df1b25ab2645e8391eb3a55ac57b34e9"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_009.obj",
+          "size_bytes": 9138,
+          "sha256": "55c6d543baf451531c4153813c04e186d48c21fc91c00707746dda8048abfbc2"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_004.obj",
+          "size_bytes": 22965,
+          "sha256": "b526dbf47d24aa2c25b97268c84ec5261d0d60b9f992f07c381e0f7ea29637f8"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_000.obj",
+          "size_bytes": 4413,
+          "sha256": "ea8db3bbe6de13babd1e62cdc6748e1af962fa111b56787e80053bd452137cfb"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_006.obj",
+          "size_bytes": 8219,
+          "sha256": "77f7cedfa48f894ef03971129fbd226530242c3d16769d507bb989075aab5372"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_013.obj",
+          "size_bytes": 11537,
+          "sha256": "e49e2e065bbf0158b7f8742fa91445ea243977412a2aa1906afe28f97ac5ad2a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_003.obj",
+          "size_bytes": 9914,
+          "sha256": "2a2036dddf889dd8c6afd809409c02a2d70fe11105a1cab606827d77ba604ffe"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_011.obj",
+          "size_bytes": 10444,
+          "sha256": "e681f84f3241395ad4a8704ed958a211022fdaedbc267558cff44f3862a55f17"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_007.obj",
+          "size_bytes": 8604,
+          "sha256": "bdef178f42c5a5e43757e75c4d9a84ebf4149c91836f2cb733de50da272a7fc5"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_002.obj",
+          "size_bytes": 12727,
+          "sha256": "ce717d2496ff9a27df5ecb7ffc28490229adaee6118141a35ec122e2f975a3b4"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_012.obj",
+          "size_bytes": 9290,
+          "sha256": "ee4ca345b9d6aeb12a4c3e6cb1a3dd8820ca60455af51d1447e57f8fb6086b29"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_008.obj",
+          "size_bytes": 8675,
+          "sha256": "e6e255c7dc838b6905a7f3c731483ead756c8ef5f04a23b3de286f9ea9435a55"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_001.obj",
+          "size_bytes": 36082,
+          "sha256": "9e8ecd69fa49e73c0c7f4278e747d7bfe5d00ab0ed471bef4983f5b25abf2889"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_005.obj",
+          "size_bytes": 17503,
+          "sha256": "3e5f405b4589afd5deb5bdd644218e293572308343cd709cca3f8fcd906d137a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/prepared_asset/pieces/piece_010.obj",
+          "size_bytes": 8817,
+          "sha256": "cd2970e662600fafac118bc6770f761ef4ee82a423d3954e5c5ec7aafa93cf24"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/decomposed.wrl",
+          "size_bytes": 418223,
+          "sha256": "108a7f2eca71fc7c36582378acb0740a29d3be7307ccfc714f3ccfda4ee1a19d"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_8.obj",
+          "size_bytes": 9014,
+          "sha256": "40ad5fe7b7326deb0d0227c59e83f54d693db21137e9a92c299e277cefd8e3dc"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_7.obj",
+          "size_bytes": 8962,
+          "sha256": "f59995c3f52af8fd1fa8521aa1f60239eaf493f8b39315d920bf2e9b5f25ac51"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_10.obj",
+          "size_bytes": 9151,
+          "sha256": "ec07b6088823eadad999c7033f92397682c156b3e24c9ee9b90403042583b0ef"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_0.obj",
+          "size_bytes": 4472,
+          "sha256": "3e4e8ca5f97754a522e16fa3bbfcbe3f0c90a2ef31fce9c738a339558ecbaecb"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_4.obj",
+          "size_bytes": 23621,
+          "sha256": "dee55f64d50bab515c5237e7704105efa6ed57de7d2e3bad431b4bb32c3a8183"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_1.obj",
+          "size_bytes": 37118,
+          "sha256": "2a79609915876a6eda0231f09a98894f7ffafbb0125a33c9db1d6c880b7b7b9e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_9.obj",
+          "size_bytes": 9508,
+          "sha256": "3d0260399b18cc7538560503844c9220433956b446c38d2d44da1e3b54085f03"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/decomposed_log.txt",
+          "size_bytes": 1245,
+          "sha256": "3d4b6d0b929fdba0c189c286a55241f2f3d1fdeda413228f2f7d80310151378e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_13.obj",
+          "size_bytes": 11977,
+          "sha256": "336032869b620b95a228e1ffe6a5f557befea64fec605fcd505d32f83b88c63a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_2.obj",
+          "size_bytes": 13077,
+          "sha256": "f3de2d90ba8a715237c985a5c96b009add478fd8218b3e0e2776b110a0d471ef"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_11.obj",
+          "size_bytes": 10876,
+          "sha256": "d8e3c1d0579eceb596c2feec22efe651cf2c87447d908a1a2262e0b790a5726f"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_6.obj",
+          "size_bytes": 8544,
+          "sha256": "ff12ca66c4c259afbc3be92e8d8fff19cb0090666301088a8a4133401523741d"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_3.obj",
+          "size_bytes": 10209,
+          "sha256": "036f9175e1f7ba9abcbb4658e50fce438029b541ca582edf74beba1a970fbddc"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/model.config",
+          "size_bytes": 198,
+          "sha256": "30c79c0d3c5dbb823402af69c03d8b06eb2c26da0ba5d2c1c739ee5141bd690b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/decomposed.obj",
+          "size_bytes": 187125,
+          "sha256": "54909db60055b75038277da5bef4ee6130216347a3d95ca2c5cc8d29476c9f56"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd.urdf",
+          "size_bytes": 12835,
+          "sha256": "0ed11e339eaafd292e2ec25604f7c1650b4a070d1404e7d6db6268f262f1301e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_5.obj",
+          "size_bytes": 17829,
+          "sha256": "56a8676d9db1850e768548e57280719187d2d206c6bf7d8604d1883df4f297ac"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_02_Bear/source_meshdata/sem-Bear-1629215db795111ba649bd1425725662/coacd/coacd_convex_piece_12.obj",
+          "size_bytes": 9633,
+          "sha256": "cd2eda664ec65db988daa79740b65b064f80ae3c4defb8a40f1ff8afc8acd28c"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "Camera",
+      "segmentation_id": 22,
+      "object_pool_index": 21,
+      "object_code": "sem-Camera-1221201ed6aac041745b4b48c30a506e",
+      "sort_color_in_source_session": "red",
+      "original_simulation_usd": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/usd_cache/object_021/flat/object_021_editable.usd",
+      "portable_simulation_usd": "09_portable_demo_scene/objects/object_03_Camera/simulation/object_021_editable.usd",
+      "original_source_mesh": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/assets/wuji2_factory/03_dexgraspnet_objects/meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/decomposed.obj",
+      "portable_source_mesh": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/decomposed.obj",
+      "original_prepared_asset_dir": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/prepared_assets/object_022",
+      "portable_prepared_asset_dir": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset",
+      "original_pose_T_world_centered_object": [
+        [
+          -5.982478848709505e-05,
+          0.7999149452381008,
+          0.6001133866243284,
+          0.15675777196884155
+        ],
+        [
+          1.1464216329692967e-05,
+          -0.6001133871101798,
+          0.7999149470285694,
+          -0.01524677686393261
+        ],
+        [
+          0.9999999981447831,
+          5.473457220028788e-05,
+          2.6731258474632646e-05,
+          0.03746959939599037
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_hashes": {
+        "simulation_usd_sha256_original": "33346da3715b121c5c9bf15fe9aa4130ad199a4a393e8dcca91620e440105dd0",
+        "source_mesh_sha256_original": "2e3b517edc6da700f9fdcee99ab2cb631cdac4be6fe6d2449dc1c8a874bd7423"
+      },
+      "portable_hashes": {
+        "simulation_usd_sha256": "41d011fd13d3d60df1901288b2c8aa150ae6eb04c616c7bde87e923124e4bba7",
+        "source_mesh_sha256": "2e3b517edc6da700f9fdcee99ab2cb631cdac4be6fe6d2449dc1c8a874bd7423",
+        "centered_combined_obj_sha256": "222d568439d896d618a46e8bc0586fbea4d1b54f2dfb92d5ecb9a85fa9f76a2a",
+        "urdf_sha256": "5d22c33b7f909bc25c88e7d4a38849ded2398f4d37b242917370670b7a3cf854"
+      },
+      "copied_file_count": 39,
+      "copied_files": [
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/asset_manifest.json",
+          "size_bytes": 1003,
+          "sha256": "2745180913922181e40ca330cdd63620465d9e385c076d50b3704a2be7048ba0"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/centered_combined.obj",
+          "size_bytes": 70373,
+          "sha256": "222d568439d896d618a46e8bc0586fbea4d1b54f2dfb92d5ecb9a85fa9f76a2a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/sem-Camera-1221201ed6aac041745b4b48c30a506e_centered_coacd.urdf",
+          "size_bytes": 5789,
+          "sha256": "5d22c33b7f909bc25c88e7d4a38849ded2398f4d37b242917370670b7a3cf854"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/simulation/object_021_editable.usd",
+          "size_bytes": 25875,
+          "sha256": "41d011fd13d3d60df1901288b2c8aa150ae6eb04c616c7bde87e923124e4bba7"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_009.obj",
+          "size_bytes": 6826,
+          "sha256": "e8dc0ff75303bbf2de1efa391833d1b6c9737ba03b674ba7966b38b7629b416a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_004.obj",
+          "size_bytes": 3431,
+          "sha256": "19ca0e65ce8de713f6bbb1ca2d7811c6b74c00acf545be130bb785f5b34bda93"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_000.obj",
+          "size_bytes": 4826,
+          "sha256": "95bb2d825ce02c526797a22a2d37736d32c97ae67381bc55815c6f67344e5c7c"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_006.obj",
+          "size_bytes": 3882,
+          "sha256": "c711c5cc73d2e5835c2d2c06a616de09918a90014848824d1488704330bba9b2"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_013.obj",
+          "size_bytes": 2718,
+          "sha256": "c1ea514f9315f6162cf929f2ca3b969e9c6982c7029537bdf8c6a13372622784"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_003.obj",
+          "size_bytes": 2867,
+          "sha256": "391061baa51d79bca4e6db6c36e52b4b8b89e0170e3ef6cfe545c9cdaf7de95e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_011.obj",
+          "size_bytes": 3076,
+          "sha256": "2f7bb25e1477ddbe2148f0aec59dc02106919167473f1aa65c67f9c86064aa83"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_007.obj",
+          "size_bytes": 13724,
+          "sha256": "33ac2479a39735b6715902593aaa80400ea18fe70a6dd2daf53164552dd8973e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_002.obj",
+          "size_bytes": 3149,
+          "sha256": "24411bd4414434416e674a3f93338448d93a6bf8aa277e744d5b10409420798f"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_014.obj",
+          "size_bytes": 2571,
+          "sha256": "ed68072b22eff366b76204be09da27b938ec62810eaed4cc1c3e4a89e8bbfd4b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_012.obj",
+          "size_bytes": 2622,
+          "sha256": "ee63605f0767e78946277267c720bd701a8701196b802d5e3f8c8a2139db6411"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_008.obj",
+          "size_bytes": 4083,
+          "sha256": "59a66bf7b931c733dc64f998336b3a0916921cb6e870c7bb3cda6e3c06194ea9"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_001.obj",
+          "size_bytes": 2780,
+          "sha256": "26a836314e37651444798eb41094fd895a464a94f56658ad8957106d96225752"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_005.obj",
+          "size_bytes": 3190,
+          "sha256": "684684831e3875d1181d2ce6e883982ca3ad1d27bfcd94cce4660b27b882b0fb"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/prepared_asset/pieces/piece_010.obj",
+          "size_bytes": 3781,
+          "sha256": "4b850f8da7b638efaaadaee9e9eb4ed0cb4d32588686bc6f533ba8a1a0b4106f"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/decomposed.wrl",
+          "size_bytes": 162999,
+          "sha256": "dc3dc237bdecdb5e438821a65058b134f05ec5efd20cd6bd32e396fef17aa146"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_8.obj",
+          "size_bytes": 4309,
+          "sha256": "088a711dd7251db2f9ebba3db6f3249067abf296335ac4a6f2f24d50decc2a62"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_7.obj",
+          "size_bytes": 14358,
+          "sha256": "bef130bdb675f670c9ec6a4cfe33e1a6f6e4ec9ead58a86d412682bc8c8f6de1"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_10.obj",
+          "size_bytes": 4036,
+          "sha256": "8db9c060341f104981f8aaf7525598efe828e57ed1dbf3a6920d0e5ad846222e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_0.obj",
+          "size_bytes": 5036,
+          "sha256": "63e4ef73503ae17253041eb05f5d90e47c8e1eb9a543bd20cee29b9488957d81"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_4.obj",
+          "size_bytes": 3655,
+          "sha256": "5ed36176ddc8400be4828090a9986e3e3e0617d03071be9835b329ea879798c6"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_14.obj",
+          "size_bytes": 2717,
+          "sha256": "85731d033290347135bf0f918feb93e2fd4503bd9b0f936d28ebd431188d9938"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_1.obj",
+          "size_bytes": 2919,
+          "sha256": "043d7cf48bed971febb405128953582d1b6341f4e986771376a17e4285646a14"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_9.obj",
+          "size_bytes": 7192,
+          "sha256": "4fef7364ab0cfddfcca54f6e715dbc0908e639156445976f0ec0c08ac6d0032f"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/decomposed_log.txt",
+          "size_bytes": 1253,
+          "sha256": "bbe1edaf6cf73c3dbd2af7a452d6af78714466bd4cdc15e77706e956898a892a"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_13.obj",
+          "size_bytes": 2871,
+          "sha256": "be7501f3d5c73122907bbc3f785dc6ab6669691c2c75e3d65a9da829bd3fd19b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_2.obj",
+          "size_bytes": 3339,
+          "sha256": "36c82f51ae78607d662629820c0808c26f055537d83421caffd97c2206947da5"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_11.obj",
+          "size_bytes": 3281,
+          "sha256": "7c578f81dc7cf4e7e81c41f5f1216a76a61a9f55ab5d0f3b96ebd8f829872dba"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_6.obj",
+          "size_bytes": 4115,
+          "sha256": "eb19c8fb4fe834ce4065bf1fd358c7c495a07ad3b797a0602fad9349bb1a9ab8"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_3.obj",
+          "size_bytes": 3038,
+          "sha256": "5a151cc880b5f3c00c4399cb2511adf3c9cb37076d34008f7989a155b3f34f57"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/model.config",
+          "size_bytes": 198,
+          "sha256": "30c79c0d3c5dbb823402af69c03d8b06eb2c26da0ba5d2c1c739ee5141bd690b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/decomposed.obj",
+          "size_bytes": 67131,
+          "sha256": "2e3b517edc6da700f9fdcee99ab2cb631cdac4be6fe6d2449dc1c8a874bd7423"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd.urdf",
+          "size_bytes": 13760,
+          "sha256": "f0ee945fd628618b4c1e4d75971edb03dcb5bc74028eb1b062c4762de6695da7"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_5.obj",
+          "size_bytes": 3408,
+          "sha256": "0bb74b0a6b46fdae10955fcfd780b4dd8f5121a1034451277b3fb1187fd2cadb"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_03_Camera/source_meshdata/sem-Camera-1221201ed6aac041745b4b48c30a506e/coacd/coacd_convex_piece_12.obj",
+          "size_bytes": 2769,
+          "sha256": "7eb59b2f0f4e8c7f419dac508b0115da4a7326bf0386732e91e4ed0bc3a596cd"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "name": "Candle",
+      "segmentation_id": 23,
+      "object_pool_index": 22,
+      "object_code": "sem-Candle-1be58678b919b12bc5fe7f65b41f3b19",
+      "sort_color_in_source_session": "blue",
+      "original_simulation_usd": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/usd_cache/object_022/flat/object_022_editable.usd",
+      "portable_simulation_usd": "09_portable_demo_scene/objects/object_04_Candle/simulation/object_022_editable.usd",
+      "original_source_mesh": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/assets/wuji2_factory/03_dexgraspnet_objects/meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/decomposed.obj",
+      "portable_source_mesh": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/decomposed.obj",
+      "original_prepared_asset_dir": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/prepared_assets/object_023",
+      "portable_prepared_asset_dir": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset",
+      "original_pose_T_world_centered_object": [
+        [
+          0.998893067241577,
+          -0.04700424215838737,
+          -0.0018003987974850556,
+          -0.10308562964200974
+        ],
+        [
+          0.047015974568014034,
+          0.9988685521626621,
+          0.007149380105088276,
+          0.0889434739947319
+        ],
+        [
+          0.0014623105464173691,
+          -0.007226113726122376,
+          0.9999728220948222,
+          0.08922183513641357
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_hashes": {
+        "simulation_usd_sha256_original": "e038da58de07b33abe78631a1d8f9e68a05f6ceec27e3399a1aae4b99962912c",
+        "source_mesh_sha256_original": "339f3061c350711a6ca9ed930ef9c9d82f25e52f77419f0a5acf446916b40412"
+      },
+      "portable_hashes": {
+        "simulation_usd_sha256": "1c779130276107a3ceb5cd90b6118cd1ff5d834f3e48ec614418d55a3231fc43",
+        "source_mesh_sha256": "339f3061c350711a6ca9ed930ef9c9d82f25e52f77419f0a5acf446916b40412",
+        "centered_combined_obj_sha256": "04ef6a2f7a7755260f4eb5f1bff1434e5855ec1135263dc608a527ce96d4f9c7",
+        "urdf_sha256": "4bd86ffd72b0b7494263a2527ebe778c16c7403a2adc9df2e3c4dabd79a91b5b"
+      },
+      "copied_file_count": 15,
+      "copied_files": [
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/asset_manifest.json",
+          "size_bytes": 1000,
+          "sha256": "1a0928f070515ee06d7cb020979d884f549d104445696610aed0d2719f6b7f17"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/centered_combined.obj",
+          "size_bytes": 38473,
+          "sha256": "04ef6a2f7a7755260f4eb5f1bff1434e5855ec1135263dc608a527ce96d4f9c7"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19_centered_coacd.urdf",
+          "size_bytes": 1253,
+          "sha256": "4bd86ffd72b0b7494263a2527ebe778c16c7403a2adc9df2e3c4dabd79a91b5b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/simulation/object_022_editable.usd",
+          "size_bytes": 14438,
+          "sha256": "1c779130276107a3ceb5cd90b6118cd1ff5d834f3e48ec614418d55a3231fc43"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/pieces/piece_000.obj",
+          "size_bytes": 11531,
+          "sha256": "b7fed2b34d1f44be304f5e115355ee41439498ea81ca808b8fcc369ccf5f3fe6"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/pieces/piece_002.obj",
+          "size_bytes": 15219,
+          "sha256": "6e84e059cd270b9962222d92476f8203bcc45846ef6e02b445a07841a35de694"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/prepared_asset/pieces/piece_001.obj",
+          "size_bytes": 10320,
+          "sha256": "b2dfa86a6c4ea2ec1b23a6bca38961ea2d5f73004c586270523f1266cea4a472"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/decomposed.wrl",
+          "size_bytes": 88797,
+          "sha256": "ee26fb121d9d63d0a8174501f10b61481e58e45e1e9058de161b1ae9d2013f8e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/coacd_convex_piece_0.obj",
+          "size_bytes": 12077,
+          "sha256": "6c1bcff05a02a9e28c5919a4cad171c198b7262ee94e041e116a785698d91e5c"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/coacd_convex_piece_1.obj",
+          "size_bytes": 10919,
+          "sha256": "55459d23c0cadb735f21d6fdc795a5dab4c7d1d364a4a213ce0b4cb2b472bdc1"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/decomposed_log.txt",
+          "size_bytes": 1167,
+          "sha256": "28cb18d05f524b16cb8338e73768db692e82eff65914aa3f120521bcf7c8c0fe"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/coacd_convex_piece_2.obj",
+          "size_bytes": 16082,
+          "sha256": "3367080dd84440a199df7433a17ae1ccebc2e4f014c56994f8f6b20afcdc5d14"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/model.config",
+          "size_bytes": 198,
+          "sha256": "30c79c0d3c5dbb823402af69c03d8b06eb2c26da0ba5d2c1c739ee5141bd690b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/decomposed.obj",
+          "size_bytes": 36579,
+          "sha256": "339f3061c350711a6ca9ed930ef9c9d82f25e52f77419f0a5acf446916b40412"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_04_Candle/source_meshdata/sem-Candle-1be58678b919b12bc5fe7f65b41f3b19/coacd/coacd.urdf",
+          "size_bytes": 2610,
+          "sha256": "bab8240403eb358b3086e4582f5f890e9d74de4ef17596bada7902bdada16198"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "name": "Pencil",
+      "segmentation_id": 53,
+      "object_pool_index": 52,
+      "object_code": "sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491",
+      "sort_color_in_source_session": "red",
+      "original_simulation_usd": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/usd_cache/object_052/flat/object_052_editable.usd",
+      "portable_simulation_usd": "09_portable_demo_scene/objects/object_05_Pencil/simulation/object_052_editable.usd",
+      "original_source_mesh": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/assets/wuji2_factory/03_dexgraspnet_objects/meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/decomposed.obj",
+      "portable_source_mesh": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/decomposed.obj",
+      "original_prepared_asset_dir": "/home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/prepared_assets/object_053",
+      "portable_prepared_asset_dir": "09_portable_demo_scene/objects/object_05_Pencil/prepared_asset",
+      "original_pose_T_world_centered_object": [
+        [
+          -0.4721440352120809,
+          0.23720802886752562,
+          0.8490066908184156,
+          0.06713211536407471
+        ],
+        [
+          0.7586867956073173,
+          -0.381059981981418,
+          0.5283820930949705,
+          0.002825823612511158
+        ],
+        [
+          0.44885894909732416,
+          0.8936026192738609,
+          -5.140176328177759e-05,
+          0.013232310302555561
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_hashes": {
+        "simulation_usd_sha256_original": "2f7e278adda71d5d32ef491ee182dc675b86a1b9ae32f42996c3cb58d06cdd14",
+        "source_mesh_sha256_original": "ca74526cde4059407ca505222b684d6c7e26b2b88a9bdf07a3fd882f8f65367b"
+      },
+      "portable_hashes": {
+        "simulation_usd_sha256": "83a51bc6d58f7387f0ed865bec9eb7693714171665666b747bc5c9f21acfbdad",
+        "source_mesh_sha256": "ca74526cde4059407ca505222b684d6c7e26b2b88a9bdf07a3fd882f8f65367b",
+        "centered_combined_obj_sha256": "ccdfd0e97adaceed64bf1e8cc80dd60094b90d479e46acbfdc4bd9e4a06f260e",
+        "urdf_sha256": "ae7e3ad5d072ec49e5e6508bcf88142b67a937db62e5ba3b8d70da3402985be8"
+      },
+      "copied_file_count": 11,
+      "copied_files": [
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/prepared_asset/asset_manifest.json",
+          "size_bytes": 1036,
+          "sha256": "e6086bc9fedda995edb209f25d8597a2fe050b0329802667a72cac1a6c598271"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/prepared_asset/centered_combined.obj",
+          "size_bytes": 18804,
+          "sha256": "ccdfd0e97adaceed64bf1e8cc80dd60094b90d479e46acbfdc4bd9e4a06f260e"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/prepared_asset/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491_centered_coacd.urdf",
+          "size_bytes": 497,
+          "sha256": "ae7e3ad5d072ec49e5e6508bcf88142b67a937db62e5ba3b8d70da3402985be8"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/simulation/object_052_editable.usd",
+          "size_bytes": 8191,
+          "sha256": "83a51bc6d58f7387f0ed865bec9eb7693714171665666b747bc5c9f21acfbdad"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/prepared_asset/pieces/piece_000.obj",
+          "size_bytes": 18796,
+          "sha256": "843ed077c4fbbe2b0be2e0b11c831a69a163bba2cf9ce98d06a52a4ed1d559ff"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/decomposed.wrl",
+          "size_bytes": 44125,
+          "sha256": "ba97d4381743004e99a2e066a3fd8d6c9992be8efadea56ca9d7b57c23e91501"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/coacd_convex_piece_0.obj",
+          "size_bytes": 19709,
+          "sha256": "31023e9c0314e32315ea1190b14603efff90c4712cb999889e2c83d9981e4213"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/decomposed_log.txt",
+          "size_bytes": 1112,
+          "sha256": "79dddb63782a2bd9ecf0736af0835b64d4ddbf6c560cc4939e90f368955d9c3b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/model.config",
+          "size_bytes": 198,
+          "sha256": "30c79c0d3c5dbb823402af69c03d8b06eb2c26da0ba5d2c1c739ee5141bd690b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/decomposed.obj",
+          "size_bytes": 17863,
+          "sha256": "ca74526cde4059407ca505222b684d6c7e26b2b88a9bdf07a3fd882f8f65367b"
+        },
+        {
+          "path": "09_portable_demo_scene/objects/object_05_Pencil/source_meshdata/sem-Pencil-370867e6cf6f4ef8b5f19880cadbe491/coacd/coacd.urdf",
+          "size_bytes": 753,
+          "sha256": "4f1f0bac626db1d604abdda7c8c16157a744b694d1c53dfbe85cd6a7182e25b0"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Portable object paths are repo-relative and contain no dependency on 02_training_dataset/data at runtime.",
+    "Wuji2/dual-arm robot assets are not duplicated; run git submodule update --init --recursive after clone.",
+    "USDC copied files had only local-machine generated-root metadata rewritten by equal-length byte replacement; geometry/collision payload bytes otherwise preserved."
+  ]
+}

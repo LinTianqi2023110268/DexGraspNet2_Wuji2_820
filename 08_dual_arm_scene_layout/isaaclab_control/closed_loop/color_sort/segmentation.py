@@ -144,14 +144,49 @@ def backproject(depth_m: np.ndarray, intrinsic: np.ndarray) -> np.ndarray:
     return np.stack((x, y, depth), axis=-1)
 
 
-def source_zone_bounds(layout: dict[str, Any], z_tolerance_m: float) -> tuple[np.ndarray, np.ndarray]:
-    center = np.asarray(layout["transforms"]["source_zone"]["position_world_m"], dtype=np.float64)
+def source_zone_contract(
+    *,
+    capture_root: Path,
+    layout: dict[str, Any],
+    z_tolerance_m: float,
+) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
+    """Return SourceZone rigid transform and local bounds for this capture."""
+    settled_path = Path(capture_root) / "settled_scene_manifest.json"
+    if not settled_path.is_file():
+        raise FileNotFoundError(
+            f"current capture settled_scene_manifest.json is required: {settled_path}"
+        )
+    settled = load_json(settled_path)
+    contract = settled.get("coordinate_contract", {})
+    if bool(contract.get("scale_used_for_scene_mapping", True)):
+        raise RuntimeError("SOURCEZONE_SCALE_USED_FOR_SCENE_MAPPING")
+
+    world_from_source = np.asarray(
+        settled["world_from_source_zone"], dtype=np.float64
+    )
+    if world_from_source.shape != (4, 4):
+        raise RuntimeError(
+            f"invalid world_from_source_zone shape: {world_from_source.shape}"
+        )
+    source_from_world = np.linalg.inv(world_from_source)
+
     size = np.asarray(layout["geometry"]["source_zone_size_m"], dtype=np.float64)
-    lower = center - 0.5 * size
-    upper = center + 0.5 * size
+    half = 0.5 * size
+    lower = -half.copy()
+    upper = half.copy()
     lower[2] -= float(z_tolerance_m)
     upper[2] += float(z_tolerance_m)
-    return lower, upper
+    meta = {
+        "source": str(settled_path.resolve()),
+        "world_from_source_zone": world_from_source.tolist(),
+        "source_zone_size_m": size.tolist(),
+        "scale_used_for_scene_mapping": False,
+        "bounds_source_m": {
+            "min": lower.tolist(),
+            "max": upper.tolist(),
+        },
+    }
+    return source_from_world, lower, upper, meta
 
 
 def summarize_component(
@@ -159,6 +194,7 @@ def summarize_component(
     component: np.ndarray,
     depth: np.ndarray,
     world_points: np.ndarray,
+    source_from_world: np.ndarray,
     source_lower: np.ndarray,
     source_upper: np.ndarray,
 ) -> dict[str, Any]:
@@ -178,7 +214,13 @@ def summarize_component(
         if len(pts):
             centroid = np.median(pts, axis=0)
             centroid_world = centroid.tolist()
-            inside_source = bool(np.all(centroid >= source_lower) and np.all(centroid <= source_upper))
+            centroid_h = np.ones(4, dtype=np.float64)
+            centroid_h[:3] = centroid
+            centroid_source = source_from_world @ centroid_h
+            inside_source = bool(
+                np.all(centroid_source[:3] >= source_lower)
+                and np.all(centroid_source[:3] <= source_upper)
+            )
     return {
         "area_px": area,
         "bbox_xyxy": bbox,
@@ -240,8 +282,10 @@ def run_color_segmentation(
     with np.errstate(invalid="ignore"):
         flat_world = flat_camera @ world_from_camera[:3, :3].T + world_from_camera[:3, 3]
     world_points = flat_world.reshape((*depth.shape, 3))
-    source_lower, source_upper = source_zone_bounds(
-        layout, cfg["source_zone"]["z_tolerance_m"]
+    source_from_world, source_lower, source_upper, source_meta = source_zone_contract(
+        capture_root=capture_root,
+        layout=layout,
+        z_tolerance_m=cfg["source_zone"]["z_tolerance_m"],
     )
 
     hue, sat, val = rgb_to_hsv01(rgb)
@@ -270,6 +314,7 @@ def run_color_segmentation(
                 component=component,
                 depth=depth,
                 world_points=world_points,
+                source_from_world=source_from_world,
                 source_lower=source_lower,
                 source_upper=source_upper,
             )
@@ -340,10 +385,7 @@ def run_color_segmentation(
         "robot_exclusion": "ON",
         "stale_mask_check": "PASS",
         "excluded_instance_ids": sorted(excluded),
-        "source_zone_bounds_world_m": {
-            "min": source_lower.tolist(),
-            "max": source_upper.tolist(),
-        },
+        "source_zone_contract": source_meta,
         "red": color_reports["red"],
         "blue": color_reports["blue"],
         "selected": selected,
