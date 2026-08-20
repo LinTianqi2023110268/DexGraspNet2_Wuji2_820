@@ -1,0 +1,41 @@
+{
+  "leap_reach_prefilter_routeB": {
+    "enabled": true,
+    "mode": "priority_then_rescue",
+    "fallback_on_error": true,
+    "conda_exe": "/home/lin/miniconda3/bin/conda",
+    "conda_env": "curobo_v2",
+    "script": "08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_front_half_v1/routeB_front_half/leap_reach_backend.py",
+    "bridge_npz": "08_dual_arm_scene_layout/isaaclab_control/closed_loop/rfs_prototype/calibration_production/bridge_calibration_bottle512.npz",
+    "output_subdir": "routeB_front_half/leap_reach",
+    "endpoint_ik_seeds": 24,
+    "endpoint_ik_batch_size": 512,
+    "coarse_joint_margin_deg": 0.0,
+    "extra_position_inflation_m": 0.0,
+    "extra_orientation_inflation_deg": 0.0
+  },
+  "routeB_front_half": {
+    "max_candidate_cases": 32,
+    "goals_per_case": 8,
+    "max_total_goals": 128,
+    "robot_segmenter": {
+      "reuse_existing": true,
+      "conda_exe": "/home/lin/miniconda3/bin/conda",
+      "conda_env": "curobo_v2",
+      "script": "08_dual_arm_scene_layout/isaaclab_control/perception/robot_segmentation/run_robot_segmenter_capture.py"
+    },
+    "dense_backend": {
+      "conda_exe": "/home/lin/miniconda3/bin/conda",
+      "conda_env": "curobo_v2",
+      "dense_backend_script": "08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_front_half_v1/routeB_front_half/routeB_dense_backend.py",
+      "max_attempts": 2,
+      "enable_graph_attempt": 1000000,
+      "num_ik_seeds": 32,
+      "num_trajopt_seeds": 4,
+      "interpolation_dt_s": 0.025,
+      "warmup_iterations": 1,
+      "use_cuda_graph": false,
+      "max_goals_to_try": 128
+    }
+  }
+}

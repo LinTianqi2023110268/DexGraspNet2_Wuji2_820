@@ -1,0 +1,377 @@
+Goal: integrate GPT's Route B front-half v1 into the CURRENT local production
+closed loop, with Route A preserved byte-for-byte in behavior.
+
+Read first:
+- routeB_front_half/README.md
+- routeB_front_half/config_patch_example.json
+
+Do NOT redesign the algorithms in this package.
+
+==================================================
+A. First verify the current GitHub/local state
+==================================================
+
+The current production Route A/legacy path imports:
+
+planning.candidate_rfs_v2_runtime.run_candidate_rfs_v2
+
+and closed_loop.json points it at:
+
+closed_loop/rfs_prototype/04_candidate_centric_rfs_v2.py
+
+That old V2 still contains BOTH:
+- LEAP Target Reach Region
+- HOME->PREGRASP->GRASP rough trajectory space / corridor
+
+Do not delete or alter it. Route A must keep using it.
+
+Route B must NOT call it.
+
+==================================================
+B. Add CLI route switch
+==================================================
+
+In closed_loop/orchestrator.py add:
+
+--motion-route
+choices=["legacy", "curobo"]
+default="legacy"
+
+No argument => identical Route A behavior.
+
+For this integration:
+- legacy: execute current code path unchanged.
+- curobo: use GPT Route B front-half path below.
+- curobo is planning-only for now: after trajectory_right_arm.npz is generated,
+  print PASS and return without calling PersistentIsaac execute.
+
+Do not change run_closed_loop.sh except if absolutely necessary; it already
+forwards arbitrary args to orchestrator.py.
+
+Expected command after integration:
+
+./run_closed_loop.sh --motion-route curobo --planning-only
+
+Do NOT add --no-planner-collision-check to that command.
+
+==================================================
+C. Import GPT hooks only for Route B
+==================================================
+
+Make the package importable, then import:
+
+from routeB_front_half import (
+    run_leap_reach_prefilter_runtime,
+    build_front_half_goal_pool,
+    save_front_half_goal_pool,
+    ensure_robot_segmented_depth,
+    run_routeB_dense_backend,
+)
+
+Use the actual extracted location under:
+
+08_dual_arm_scene_layout/isaaclab_control/
+curobo_motion_planning_routeB/
+routeB_front_half_v1/
+
+If PYTHONPATH needs one path insertion, add only that thin path wiring.
+
+==================================================
+D. Route B pre-retarget filtering
+==================================================
+
+At the current location where production calls:
+
+run_candidate_rfs_v2(...)
+
+branch by motion_route.
+
+legacy:
+    current run_candidate_rfs_v2(...) exactly unchanged.
+
+curobo:
+    call run_leap_reach_prefilter_runtime(
+        project_root=root,
+        cycle_root=cycle_root,
+        query=query,
+        candidates=candidates_plain,
+        settings=cfg["leap_reach_prefilter_routeB"],
+    )
+
+Then use:
+
+reach_result.ordered_indices
+
+to reorder the existing survivor_indices in the SAME identity-safe manner that
+the current RFS order is applied.
+
+Important:
+- Route B does NOT call 04_candidate_centric_rfs_v2.py.
+- no RFS observed ESDF flag.
+- no rough trajectory-space result.
+- no corridor collision.
+- no path graph.
+
+Recommended mode remains:
+priority_then_rescue
+
+==================================================
+E. Keep existing retarget and exact COVER
+==================================================
+
+Do NOT change:
+- DGN2 output
+- candidate case construction
+- LEAP->Wuji2 retarget
+- candidate finalization
+- screen_exact_cover_batch(...)
+- exact COVER tolerances
+- exact COVER candidate ordering
+
+Let the current candidate batch loop reach:
+
+passed_cover
+
+exactly as today.
+
+==================================================
+F. For Route B, replace plan_flexible_route after passed_cover
+==================================================
+
+legacy:
+    keep current plan_flexible_route(...) logic unchanged.
+
+curobo:
+    DO NOT call plan_flexible_route.
+
+While the existing CuroboWorkerClient is still alive, call:
+
+pool = build_front_half_goal_pool(
+    client=curobo,
+    project_root=root,
+    passed_cover_rows=passed_cover,
+    q_current=q_current,
+    config=cfg,
+    max_candidate_cases=cfg["routeB_front_half"]["max_candidate_cases"],
+    goals_per_case=cfg["routeB_front_half"]["goals_per_case"],
+    max_total_goals=cfg["routeB_front_half"]["max_total_goals"],
+)
+
+This stage intentionally does:
+- exact COVER reuse
+- relaxed PREGRASP endpoint IK
+- NO old HOME->PREGRASP check_joint_path
+- NO old PREGRASP->COVER check_joint_path
+
+If pool.goal_count == 0:
+continue to the next candidate/retarget batch.
+
+If pool.goal_count > 0:
+save to:
+
+cycle_root / "routeB_front_half/routeB_front_half_goal_pool.npz"
+
+using save_front_half_goal_pool(...)
+
+Then exit/release the current CuroboWorkerClient cleanly BEFORE launching the
+Route B dense backend. Do not run two heavyweight cuRobo processes in parallel.
+
+This may require storing a pending pool path and breaking out of the current
+batch/worker scope, then continuing after the worker context exits.
+
+Do not close Persistent Isaac; only release the cuRobo worker.
+
+==================================================
+G. RobotSegmenter
+==================================================
+
+After the cuRobo worker has been released and before dense planning:
+
+ensure_robot_segmented_depth(
+    project_root=root,
+    capture_dir=capture_root,
+    settings=cfg["routeB_front_half"]["robot_segmenter"],
+)
+
+This must create/reuse:
+
+capture/planning/filtered_depth.npy
+
+Do not overwrite:
+depth_m.npy
+intrinsics.npy
+T_world_camera.npy
+robot_state.json
+
+==================================================
+H. True Route B dense planner
+==================================================
+
+Then call:
+
+report = run_routeB_dense_backend(
+    project_root=root,
+    capture_dir=capture_root,
+    goal_pool=pending_pool_path,
+    output_dir=cycle_root / "routeB_front_half/planning",
+    settings=cfg["routeB_front_half"]["dense_backend"],
+)
+
+The backend already owns:
+- true 7DOF lock_joints planner
+- environment collision ON
+- self collision OFF
+- VoxelData feature-shape fix
+- q-state numerical sanitization
+- multi-PREGRASP goal attempts
+- scene/cspace postcheck
+- joint-limit/dynamics checks
+- dense trajectory export
+
+Do not reimplement those in orchestrator.
+
+==================================================
+I. Route B front-half success
+==================================================
+
+Only call Route B front-half PASS when all exist:
+
+cycle_root/routeB_front_half/planning/
+    routeB_front_half_report.json
+    routeB_front_half_plan.npz
+    trajectory_right_arm.npz
+
+and report["success"] == true.
+
+Print a compact terminal summary:
+
+========================================
+ Route B FRONT HALF PASS
+========================================
+LEAP reach prior : <pass>/<total>
+candidate        : <selected candidate>
+case             : <selected case>
+PREGRASP goals   : <trial count>
+trajectory       : <N> x 7
+duration         : <seconds>
+min clearance    : <meters>
+scene_collision  : 0
+cspace           : 0
+Isaac execution  : NOT STARTED
+========================================
+
+Then, because v1 is front-half-only, return 0 before the existing Isaac execute
+stage.
+
+==================================================
+J. Config
+==================================================
+
+Merge the two blocks from:
+
+routeB_front_half/config_patch_example.json
+
+into closed_loop/config/closed_loop.json:
+
+leap_reach_prefilter_routeB
+routeB_front_half
+
+Do not delete or modify the old candidate_rfs_v2 block; legacy still needs it.
+
+==================================================
+K. Worklog
+==================================================
+
+Update:
+core/worklog/COMMAND_LOG.md
+core/worklog/SESSION_SUMMARY.md
+
+Record the semantic split:
+
+Route A:
+existing candidate_rfs_v2 + existing interpolated route
+
+Route B:
+LEAP reach-region-only prior
+-> retarget
+-> exact COVER
+-> relaxed PREGRASP endpoint IK
+-> true 7DOF current->PREGRASP MotionPlanner
+
+==================================================
+L. Tests before live run
+==================================================
+
+Run:
+1. py_compile on all new/modified Python files
+2. python -m unittest routeB_front_half.test_reach_contract
+3. python -m unittest routeB_front_half.test_goal_pool_io
+4. existing Route B import unittest
+5. git diff --check
+
+Then do ONE real planning-only live run:
+
+cd ~/Projects/DexGraspNet2_Wuji2
+
+./run_closed_loop.sh --motion-route curobo --planning-only
+
+Use GUI Isaac unless I explicitly requested headless.
+
+Do not use:
+--no-planner-collision-check
+--experimental-bypass-planner-collision
+any diagnostic collision-bypass flags
+
+==================================================
+M. Keep debugging until front-half PASS
+==================================================
+
+If the real run fails because of:
+- import path
+- exact local API name
+- CuroboWorkerClient scope/lifetime
+- path variable names
+- capture_root naming
+- config lookup
+- output path
+- local array dtype/shape
+
+continue fixing those integration issues and rerun.
+
+Do NOT change:
+- LEAP reach-region math
+- bridge inflation values
+- exact COVER tuning
+- PREGRASP sampling/tolerances
+- Route B MotionPlanner parameters
+- Route B collision policy
+- ESDF semantics
+- joint limits
+- URDF/USD
+- VoxelGrid pose
+- Route A logic
+
+If the failure reveals a genuine algorithmic contract bug in GPT core code,
+stop and show the exact traceback + minimal required change instead of silently
+redesigning it.
+
+==================================================
+N. Final answer only after real front-half PASS
+==================================================
+
+Report:
+1. exact command used
+2. LEAP total/direct/near/reject counts
+3. retargeted candidate count tried
+4. exact COVER pass count
+5. PREGRASP IK candidate cases / goal count
+6. selected candidate + case_root
+7. true planner action_dim
+8. trajectory shape / points / dt / duration
+9. minimum clearance
+10. scene_collision max
+11. cspace max
+12. joint-limit/dynamics PASS
+13. trajectory_right_arm.npz path
+14. Route A unchanged
+15. Isaac execution NOT STARTED

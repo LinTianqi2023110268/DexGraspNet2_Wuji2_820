@@ -264,3 +264,226 @@ Run `./run_closed_loop.sh --planning-only` from a GPU-visible terminal using `sc
 - Modified files: `curobo_motion_planning_routeB/routeB_adapter.py`, new `test_current_to_pregrasp_right_arm_only.py`, and worklogs.
 - Test results: right-arm-only core contract unittest PASS; Route B import unittest PASS; py_compile PASS; `git diff --check` PASS; generated `trajectory_right_arm.npz` and `report_right_arm.json`; postcheck PASS with environment collision false, min clearance `0.075289 m`, `scene_collision=0`, `cspace=0`, joint limits PASS, velocity/acceleration/jerk finite PASS.
 - Environment: `curobo_v2`; no Isaac app, DGN2, retarget, full closed-loop, or physical execution was run.
+
+## 2026-08-20 - Route B right-arm trajectory visualization
+
+- Current phase: connect GPT-provided `trajectory_visualizer` to the validated Route B right-arm-only path.
+- Completed: added `build_visualization_right_arm_bundle.py`; reused RobotSegmenter-filtered depth, Route B arm_base_link scene contract, true 7DOF locked planner FK/collision spheres, verified ESDF sphere query, and `trajectory_right_arm.npz`.
+- Current conclusion: visualization bundle generated successfully with 30000 scene points, 233 collision spheres, 95 moving spheres, 138 static spheres, 41 frames, EE frame `arm_r_link_tf`, and global min clearance `0.075289 m`.
+- Current blocker: none for bundle generation. GUI interaction confirmation is manual; viewer loaded the bundle and remained in matplotlib blocking window until the intentional 30s timeout.
+- Modified files: new `curobo_motion_planning_routeB/build_visualization_right_arm_bundle.py`, worklogs.
+- Test results: py_compile PASS; `trajectory_visualizer.test_bundle` PASS; bundle build PASS; viewer launch no traceback before timeout; `git diff --check` PASS.
+- Environment: `curobo_v2`; no Isaac app, DGN2, retarget, full closed-loop, video export, or physical execution was run.
+
+## 2026-08-20 - Route B full pipeline integration
+
+- Current phase: Route B closed-loop integration with shared Route A task endpoints and true 7DOF cuRobo dense arm trajectories.
+- Completed:
+  - Added front-end route selection: explicit `--motion-route legacy|curobo`; if omitted in a TTY, the program prompts before starting heavy processes. Non-TTY defaults to legacy for compatibility.
+  - Route A remains the legacy/flexible q7 + quintic executor path through `PersistentIsaacClient.execute()`.
+  - Route B now uses LEAP reach-region-only prefilter, strict Exact COVER with observed ESDF collision gate OFF, relaxed PREGRASP endpoint collision OFF, and true Route B MotionPlanner with environment collision ON / self collision OFF.
+  - Route B full backend produces all seven arm segments: `CURRENT_TO_PREGRASP`, `PREGRASP_TO_COVER`, `COVER_TO_LIFT`, `LIFT_TO_TRANSFER`, `TRANSFER_TO_PLACE`, `PLACE_TO_RETREAT`, `RETREAT_TO_HOME`.
+  - Route B execution is additive through `execute_routeB`; Route A `execute()` / `execute_segment()` are not replaced.
+- PLACE=0 conclusion:
+  - `candidate=789` has `PLACE raw IK=0/945` in both Route A and Route B for the same case/layout/q_cover/placement registry. The root cause is candidate-specific endpoint infeasibility for the shared PLACE task, not a stale PlacementZone or Route B frame bug.
+  - Other candidates in the same goal pool have complete endpoint chains, e.g. `candidate=676`, so Route B now runs cheap LIFT/TRANSFER/PLACE/RETREAT endpoint-chain preflight before expensive dense MotionPlanner.
+- Latest successful planning:
+  - Session: `20260820_040547/cycle_001`
+  - Query: `pencil`
+  - Selected candidate: `676`
+  - Full planning status: PASS
+  - All seven Route B segments pass with `scene_collision_max=0`, `cspace_max=0`, and active joints exactly `arm_r_joint_1..7`.
+- Latest physical execution:
+  - Same session completed the dense route through `RETREAT_TO_HOME`.
+  - Task outcome: FAIL due to `EMPTY_GRASP`, not due to route interruption.
+  - `verify_lift=0.3519 mm`, max lift `0.7849 mm`, final green zone `false`.
+  - COVER refinement: `4.62 mm / 1.13 deg`; GRASP refinement: `4.12 mm / 1.06 deg`.
+  - Execution report: `08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_040547/cycle_001/execution_routeB/report_routeB.json`.
+- Current blocker:
+  - Route B motion planning and full motion execution wiring are functional.
+  - Simulated physical grasp did not lift the object. Per current decision, EMPTY_GRASP is a physical grasp-quality result and does not block route-completion smoke execution.
+- Validation:
+  - py_compile PASS.
+  - Route B/closed-loop unit tests PASS.
+  - `git diff --check` PASS.
+  - Persistent Isaac background workers were stopped with SIGINT after runs.
+
+## 2026-08-20 - Route B cup run stopped during full planning
+
+- Session inspected: `20260820_063033/cycle_001`; user interrupted during Route B planning for query `cup`.
+- No Isaac/full_motion/orchestrator background process remained after inspection.
+- Front-half selected `candidate=7938` and PASSed true 7DOF `CURRENT_TO_PREGRASP` with trajectory `[61,7]`, environment collision false, `scene_collision=0`, `cspace=0`.
+- Back-half endpoint chain pool existed (`chain_count=32`), so this was not a PLACE endpoint-IK-zero case.
+- Actual blocking gate observed from artifacts: true Route B full MotionPlanner reached `COVER_TO_LIFT` for 16 chains, generated `traj_cover_to_lift.npz`, then failed before producing `traj_lift_to_transfer.npz`; terminal tail identifies `LIFT_TO_TRANSFER` as failed stage.
+- Logging fix: expected no-path full MotionPlanner failures now write `routeB_full_plan_report.json(success=false)` with `trial_summary` and concise stdout; orchestrator excludes that candidate with stage counts instead of printing traceback tails.
+
+## 2026-08-20 - Route B attachment root cause
+
+- For `cup`, session `20260820_063033/cycle_001`, selected candidate `7938`, the full Route B blocker is not endpoint IK and not ordinary right-arm path reachability.
+- Offline control: disabling the carried-object attachment only on `LIFT_TO_TRANSFER` makes all seven Route B dense arm segments PASS with environment collision ON and self collision OFF.
+- Attachment audit at LIFT shows the attached target proxy is already invalid against the current no-target ESDF before motion: 8/48 attached spheres collide; min clearance `-36.8 mm`. Setting attachment padding to `0` still collides: 6/48 spheres; min clearance `-31.9 mm`.
+- Proxy source is mask/depth fallback due invalid Isaac collision AABB; proxy dims are about `[0.157, 0.173, 0.148] m`.
+- Current root cause: `LIFT_TO_TRANSFER` fails because the attached cup proxy/sphere representation overlaps the observed ESDF at the LIFT start state. This is an attachment proxy/scene contract issue, not a q7 endpoint or Route A issue.
+
+## 2026-08-20 - Route B transfer attachment OFF for flow-through
+
+- Decision applied: Route B `LIFT_TO_TRANSFER` no longer attaches the target proxy by default (`routeB_full_pipeline.transfer_attachment=false`).
+- This keeps Route B environment collision ON and self collision OFF; it only disables the carried-object proxy during the transfer segment.
+- Rationale: attachment audit showed the cup proxy already collides with the no-target ESDF at LIFT start, while the same q7 path without attachment produces a complete 7-segment Route B plan.
+- Runtime policy banner now prints the active false/off options in English plus Chinese explanation to avoid confusing this flow-through setting with production carried-object collision safety.
+
+## 2026-08-20 - Route B stdout and execution failure handling
+
+- Raw Route B report JSON is no longer printed to terminal by front-half/full backends; terminal now shows concise summaries and report paths.
+- Route B physical FAIL now reports concrete failure stage and metrics.
+- For completed task-result failures (`EMPTY_GRASP`, `FINAL_GREEN_ZONE`), orchestrator keeps the persistent Isaac session alive, does not commit placement, and continues to the next capture/query cycle.
+- Latest observed physical failure was `EMPTY_GRASP`, not motion-generation failure: verified lift was approximately zero and max lift was only `6.88 mm`; COVER/GRASP refinement errors were small.
+- Separate user observation remains: hand appears to push object before contact. This should be diagnosed next from `trace_routeB.csv` and per-stage object pose/contact telemetry before changing grasp parameters.
+
+## 2026-08-20 - task/route architecture and color-sort foundation
+
+- Current phase: two-axis CLI/task architecture and first color-sort perception/planning plumbing.
+- Completed:
+  - Added task selection dimension: `semantic-grasp` and `color-sort`.
+  - Preserved motion-route dimension: `legacy` and `curobo`.
+  - Added interactive TTY task menu before heavy Isaac/cuRobo/DGN2 processes; non-TTY defaults stay legacy semantic-grasp for compatibility.
+  - Semantic-grasp remains GroundingDINO+SAM based and does not activate color-sort dye/HSV flow.
+  - Color-sort now assigns balanced seeded red/blue colors once per Persistent Isaac session and saves `color_assignment.json`.
+  - Runtime dye is visual-material-only; it does not modify official meshes, URDF/USD, collision, mass, scale, or grasp data.
+  - Added HSV red/blue connected-component instance segmentation, SourceZone 3D filtering, selected-instance target metadata, and failed-instance exclusion for the current scene.
+  - Color-sort destination zones are derived dynamically by splitting the calibrated PlacementZone into `red_zone` and `blue_zone`; Route B endpoint preflight reuses the existing A placement sampler with a layout override for the selected color zone.
+  - RouteB stdout is more compact: large raw JSON report lines are suppressed from terminal but kept in files.
+- Validated:
+  - `py_compile` PASS for modified Python files.
+  - closed-loop logic/flexible planning lightweight tests PASS in `graspnet2.0`.
+  - RouteB goal-pool/attachment/robot-config tests PASS with module PYTHONPATH.
+  - Synthetic HSV smoke PASS: red and blue instances are detected inside SourceZone; excluding `red_000` selects `blue_000`.
+  - `git diff --check` PASS.
+- Not yet run in this phase:
+  - Real Isaac color material smoke.
+  - Real semantic-grasp + cuRobo regression after this task/route refactor.
+  - Real color-sort 2-object repeated execution.
+  - Full multi-object color-sort attempt.
+
+## 2026-08-20 - color-sort first-run path bug fixed
+
+- User run: `--task color-sort --motion-route curobo --color-seed 42 --planning-only`, scene `scene_0065`.
+- COLOR SORT material/perception reached real capture successfully: RED source=2, BLUE source=2, selected HSV instance `red_001`, DGN2 produced `capture/dgn2/red_001/official_leap_1024_target_ranked.npz` with 4187 target candidates.
+- Failure root cause: RouteB LEAP reach runtime received `query=red` and looked for `capture/dgn2/red/official_leap_1024_target_ranked.npz`; color-sort DGN2 uses per-instance slug `red_001`.
+- Fix: RouteB/RFS runtimes now use `target_slug` for file layout, while the semantic/color query remains metadata. RouteB full backend also accepts the explicit selected target mask path, so color-sort does not pretend HSV masks are GroundedSAM masks.
+- No Isaac process remained after the failed attempt.
+
+## 2026-08-20 - Zone semantics and Trimesh/Isaac alignment
+
+- SourceZone and PlacementZone are confirmed visual/planning regions only: `zone_collision=false`. They should not be expected to physically support objects; only the Table collision should support objects.
+- The apparent Trimesh-vs-Isaac mismatch is due to frame mode: scene folders are authored in a local tabletop/source-area frame, while Persistent Isaac places them with `T_world_object = T_world_SourceZone @ T_source_object` in the calibrated layout.
+- Added calibrated Trimesh viewing mode to display the same scene embedded in the Isaac layout, including blue/green region markers.
+- Existing `object_physics_audit.json` from session `20260820_081936` contains invalid AABB sentinel values for objects, so its PASS status was not trustworthy. The audit code now treats those as invalid/WARN instead of PASS.
+
+## 2026-08-20 - scene_0065 migration contract: root cause fixed
+
+- Root cause was pre-physics, not Route B, DGN2, IK, ESDF, or ordinary PhysX settling.
+- Two defects were found in Persistent Isaac spawn:
+  1. when a manifest lacked `simulation_usd`, the worker used the same numeric object index in the unrelated test split; for example, training scene_0065 Clock index 27 could load a test-split asset at index 27;
+  2. `set_reference_transform()` called `Gf.Matrix4d.SetRotate()` followed by `SetTranslate()`.  In Gf, `SetTranslate()` resets the transform to translation-only, so every authored object orientation was discarded before the first physics step.
+- The worker now resolves the validated source dataset lineage by object code + pool index, records source-mesh and editable-USD hashes, and fails closed if identity cannot be proven.  It writes the full 6D pose using `SetTranslateOnly()` so orientation is retained.
+- New zero-step artifact records reference root, rigid root, `T_reference_root_rigid_body`, transform ops/scales, visual/collision AABBs, expected pose error, SourceZone membership, and pairwise-distance preservation.  Physics does not start if this audit fails.
+- `scene_0065` corrected pre-physics result: PASS; SourceZone 0.500 x 0.300 m matches training tabletop; no SourceZone scale enters the mapping; max pairwise distance error 0.011837 mm; all objects retain the manifest 6D pose within 0.013 mm / 0.031 deg.
+- New settle traces at 1 step / 0.05 / 0.10 / 0.25 / 0.50 / 1.00 s show maximum 1 s drift 0.0017 mm for both P1 (training default object-object collision ON) and P2 (persistent task-object filtering OFF).  The previous Clock/Microscope/Pencil/Ipod 18--85 mm movement was caused by the pre-physics pose contract bug.
+- Persistent production keeps its existing collision filtering and the user-requested 0.3 friction; the audit-only `training_default` policy is available only with `--scene-migration-audit` for evidence collection.
+
+## 2026-08-20 - semantic target robot exclusion restored
+
+- The cuRobo RobotSegmenter mask is the sole robot-mask authority.  It now serves its original planning-depth consumer and, separately, semantic final-target rejection; no second robot segmentation method was introduced.
+- The semantic GroundingDINO adapter previously selected the highest-score box before SAM.  It now performs SAM on each proposal and selects only the highest-score legal proposal after mask-level robot exclusion and 3D SourceZone validation.
+- Current `cup` replay from session `20260820_091607`: old selected idx 0 was `99.958%` robot mask and outside SourceZone; it is rejected.  idx 1 (`78.146%` robot) is rejected.  idx 2 is selected as the highest-score legal residual.
+- The adapter asserts RobotSegmenter report `capture_dir == RGB capture_dir`, so cross-cycle masks fail loudly with `STALE_ROBOT_MASK`.
+
+## 2026-08-20 - unified RobotSegmenter RGB/depth perception contract
+
+- `RobotDepthCleaner.remove_robot()` remains the only robot-pixel authority. Its current-cycle output is now consumed by all three paths: semantic RGB (`rgb_no_robot`, DINO/SAM gates), color HSV (`~robot_mask` before morphology), and depth/point-cloud planning (`filtered_depth`).
+- Raw capture assets remain immutable. New derived artifacts are `capture/planning/rgb_no_robot.png` (neutral `[127,127,127]` robot fill) and `robot_mask_overlay.png`, alongside existing mask/depth artifacts.
+- Semantic rejection is two-stage and hard: DINO box overlap first, SAM mask overlap second. The threshold is 0.5 only for a robot-dominant proposal; a smaller SAM overlap is removed and the residual must still have valid depth inside rigid SourceZone. Cross-cycle report-path mismatch raises `STALE_ROBOT_MASK`.
+- `20260820_091931/cycle_001` evidence: previous selected bottle box had 0.6308 robot pixel fraction; it is now pre-SAM `REJECT_ROBOT_OVERLAP`. Seven pure safety regressions and an HSV replay passed. Fresh GPU replay is pending a normal user runtime because this agent sandbox reports no CUDA device.
+
+## 2026-08-20 - pre-experiment preflight PASS
+
+- Fresh headless GPU perception smoke completed without planning or arm motion: scene_0065 migration guard PASS, RGB-D capture, current-cycle RobotSegmenter, `rgb_no_robot`, `filtered_depth`, GroundingDINO/SAM `pencil` selection, then clean Persistent Isaac shutdown.
+- Smoke result: RobotSegmenter mask `225801` pixels; GroundingDINO actual input was `capture/planning/rgb_no_robot.png`; two proposal masks passed robot and SourceZone gates; selected index 0 yielded 5286 valid points; stale-mask check PASS.  No robot proposal became final target.
+- Static preflight confirms: SourceZone migration fix remains (`SetTranslateOnly`, lineage asset resolver, no visual-scale mapping); selected-target removal operates only on `filtered_depth`; Route B history has true action dimension 7, environment collision ON, all IK/TrajOpt/Graph self-collision rollout weights disabled; task/route dispatch all four combinations pass; HSV masks exclude RobotSegmenter pixels before morphology; no stale Isaac process remains.
+
+## 2026-08-20 — mainline cleanup complete
+
+- Frozen mainline behavior was not modified. Added only `MAINLINE.md`, `PRE_EXPERIMENT_BASELINE.md`, and `CLEANUP_20260820.md` to document the production contract and cleanup record.
+- Generated output is reduced to four retained session baselines, two migration audits, and the latest preflight smoke. Superseded captures/plans from known bad migration, stale perception, and intermediate retries were removed.
+- The only source files moved outside the repository were unreferenced historical templates/backups; they are recoverable at `/home/lin/DexGraspNet2_Wuji2_cleanup_archive_20260820/`.
+- Core no-motion regressions all PASS. The repository is ready for a user-initiated formal experiment; cleanup intentionally did not run Isaac, DGN2, Route B planning, or grasp execution.
+
+## 2026-08-20 — scene_0020 migration guard correction
+
+- The first post-cleanup experiment was correctly stopped by the pre-physics guard, but the guard had selected the wrong evidence source. Scene_0020's USD reference/rigid roots exactly match the expected SourceZone-embedded manifest poses; no frame, scale, asset-lineage, or physics contract regression occurred.
+- Pencil's `RigidObject.data.root_pose_w` differed by `0.024183 mm / 0.103546 deg` immediately after `SimulationContext.reset()`. This is retained as a runtime diagnostic, not accepted as a failure of the pre-physics USD migration contract.
+- The guard and formal offline audit now consistently validate `actual_rigid_body_world_pose`. This is a measurement-source correction only; no object transform, SourceZone mapping, physics setting, perception, DGN2, Route B, or grasp contract changed.
+
+## 2026-08-20 — Route B retry continuity repair
+
+- Candidate-level MotionPlanner no-path is now nonfatal. A failed `CURRENT_TO_PREGRASP` backend report follows the same retry policy as a failed full Route B report: exclude that candidate, retain the persistent Isaac scene, and test the next endpoint-feasible candidate.
+- The session only stops after the available Route B goal pool is genuinely exhausted or a real protocol/backend failure occurs; it no longer stops at the first structured front-half no-path report.
+
+## 2026-08-20 — color-query task semantics
+
+- `color-sort` is now explicitly parallel to `semantic-grasp`, not an HSV-only automatic-red task. The user selects one requested color (`red`/`blue`, or Chinese aliases); the persistent session repeatedly captures, identifies, plans for, and places every available object of that requested color.
+- GroundingDINO/SAM is now the required color-text matcher using prompt `"<color> object"` on `rgb_no_robot.png`. Existing RobotSegmenter/SAM/SourceZone gates remain active. HSV never reads `sort_color` or `color_assignment.json` to choose a target; it validates the current rendered color and converts a broad same-color SAM region into a single current-image instance mask.
+- A retained live color capture (`20260820_104319/cycle_001`) replayed `red object` successfully: GroundingDINO/SAM status PASS, best visual match `red_003` (7784 pixels; 49.33% of the broad SAM region; 99.31% of that red component); every blue instance had zero overlap.
+- Route B candidate retry remains first-line alternate-pose recovery. An exhausted planning funnel is non-terminal for color-sort: planning is already frozen at HOME, so the failed instance is skipped and a fresh capture selects another same-color instance. Route B execution exceptions now open the hand and reverse only already-issued cuRobo dense trajectories before accepting continuation; it records `RECOVERED_FAIL` only after HOME tolerance passes.
+
+## 2026-08-20 — repository mainline cleanup
+
+- Production behavior is frozen and unchanged. Five superseded top-level
+  integration/backup packages and one byte-identical Route B visualizer package
+  were archived outside the repository after production-reference searches
+  returned none.
+- Generated closed-loop output was reduced from roughly 381 MiB to roughly
+  96 MiB while retaining the selected candidate for both Route B baselines,
+  perception false-positive fixtures, HSV evidence, preflight smoke, and formal
+  scene-migration audits. Regenerable Trimesh output removed another ~463 MiB.
+- Current documentation now consistently uses TASK (`semantic-grasp`,
+  `color-sort`) and MOTION ROUTE (`legacy`, `curobo`) rather than the obsolete
+  user-facing Route C description. The authoritative environment names and
+  unified RobotSegmenter contract are documented.
+- Cleanup regressions PASS after correcting two test-command mistakes (a shell
+  script was initially passed to `py_compile`; one import smoke initially lacked
+  the control-root `PYTHONPATH`). These were command errors, not code failures.
+- A standardized, resumable three-scene color campaign runner now owns a single
+  auto-timestamp output root. It does not implement perception or planning; it
+  invokes `run_closed_loop.sh` explicitly and stops after a genuine process
+  error so the first failure can be diagnosed before continuing.
+
+## 2026-08-20 — three-scene campaign completed without process aborts
+
+- Canonical result: `outputs/color_sort_campaigns/20260820_111709/` with
+  `campaign_report.md` (human index) and `campaign_summary.json` (machine index).
+  All case logs and sessions are under this one timestamped root; superseded
+  pre-repair attempts were deleted after their root causes were recorded.
+- The campaign is `PARTIAL_COMPLETE`, not a grasp PASS. All three production
+  processes exited 0 and all planning-time failures kept the robot HOME, but no
+  case reached a seven-segment full Route B plan or Isaac arm execution.
+- `scene_0000:RED`: `red_000` passed several complete endpoint funnels; dense
+  planning was dominated by `COVER_TO_LIFT` failure, with additional
+  `CURRENT_TO_PREGRASP` and one `PREGRASP_TO_COVER` no-path.
+- `scene_0020:BLUE`: `blue_000` had reachable LIFT/TRANSFER endpoint nodes, but
+  every attempted blue-zone PLACE endpoint set reported `targets=385 raw=0`.
+  A remaining HSV blue instance had no legal GroundedSAM proposal overlap.
+- `scene_0065:RED`: all four current red instances were independently attempted
+  after the all-proposal wiring repair. `red_000` exhausted
+  CURRENT_TO_PREGRASP; `red_001` reached LIFT/TRANSFER endpoint sets but PLACE
+  was raw IK zero; `red_002` and `red_003` were too small for the official DGN2
+  sampler to produce a seed.
+- Three runtime-continuity defects were fixed with regressions: stale full-plan
+  report reuse, target-local DGN2 no-seed process abort, and single-DINO-proposal
+  color matching. None of these repairs relaxed task, collision, IK, scene,
+  physics, grasp, or Route B contracts.
+- Post-campaign checks: no Isaac/Kit process and no GPU compute process remained;
+  semantic safety 7/7, closed-loop 11/11, core 17/17, Route B 10/10, HSV replay,
+  GroundedSAM embedded compile, scene migration audit, and `git diff --check`
+  all PASS.

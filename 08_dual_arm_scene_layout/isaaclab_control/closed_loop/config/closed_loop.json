@@ -58,6 +58,45 @@
     "bridge_npz": "08_dual_arm_scene_layout/isaaclab_control/closed_loop/rfs_prototype/calibration_production/bridge_calibration_bottle512.npz",
     "output_subdir": "rfs_candidate_centric_v2_runtime"
   },
+  "leap_reach_prefilter_routeB": {
+    "enabled": true,
+    "mode": "priority_then_rescue",
+    "fallback_on_error": true,
+    "conda_exe": "/home/lin/miniconda3/bin/conda",
+    "conda_env": "curobo_v2",
+    "script": "08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_front_half_v1/routeB_front_half/leap_reach_backend.py",
+    "bridge_npz": "08_dual_arm_scene_layout/isaaclab_control/closed_loop/rfs_prototype/calibration_production/bridge_calibration_bottle512.npz",
+    "output_subdir": "routeB_front_half/leap_reach",
+    "endpoint_ik_seeds": 24,
+    "endpoint_ik_batch_size": 512,
+    "coarse_joint_margin_deg": 0.0,
+    "extra_position_inflation_m": 0.0,
+    "extra_orientation_inflation_deg": 0.0
+  },
+  "routeB_front_half": {
+    "max_candidate_cases": 32,
+    "goals_per_case": 8,
+    "max_total_goals": 128,
+    "robot_segmenter": {
+      "reuse_existing": true,
+      "conda_exe": "/home/lin/miniconda3/bin/conda",
+      "conda_env": "curobo_v2",
+      "script": "08_dual_arm_scene_layout/isaaclab_control/perception/robot_segmentation/run_robot_segmenter_capture.py"
+    },
+    "dense_backend": {
+      "conda_exe": "/home/lin/miniconda3/bin/conda",
+      "conda_env": "curobo_v2",
+      "dense_backend_script": "08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_front_half_v1/routeB_front_half/routeB_dense_backend.py",
+      "max_attempts": 2,
+      "enable_graph_attempt": 1000000,
+      "num_ik_seeds": 32,
+      "num_trajopt_seeds": 4,
+      "interpolation_dt_s": 0.025,
+      "warmup_iterations": 1,
+      "use_cuda_graph": false,
+      "max_goals_to_try": 128
+    }
+  },
   "coarse_ik_prefilter": {
     "grasp_enabled": false,
     "pregrasp_enabled": false,
@@ -310,5 +349,18 @@
       "joint_margin_reward": 0.02,
       "home_return_weight": 0.25
     }
+  },
+  "routeB_full_pipeline": {
+    "enabled": true,
+    "conda_exe": "/home/lin/miniconda3/bin/conda",
+    "conda_env": "curobo_v2",
+    "script": "08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/full_motion_backend.py",
+    "backhalf_chain_limit": 32,
+    "attachment_padding_m": 0.005,
+    "attachment_min_dim_m": 0.02,
+    "attachment_sphere_slots": 48,
+    "attachment_sphere_count": 32,
+    "transfer_attachment": false,
+    "max_chain_trials": 16
   }
 }

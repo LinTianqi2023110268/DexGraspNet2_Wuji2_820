@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "palette": {
+    "red": [0.90, 0.08, 0.08],
+    "blue": [0.08, 0.20, 0.95]
+  },
+  "assignment_policy": "balanced_seeded_random",
+  "default_seed": 42,
+  "hsv": {
+    "red": {
+      "hue_ranges_deg": [[0.0, 18.0], [342.0, 360.0]],
+      "s_min": 0.35,
+      "v_min": 0.12
+    },
+    "blue": {
+      "hue_ranges_deg": [[205.0, 255.0]],
+      "s_min": 0.30,
+      "v_min": 0.10
+    }
+  },
+  "morphology": {
+    "open_iterations": 1,
+    "close_iterations": 2
+  },
+  "components": {
+    "min_area_px": 150,
+    "min_valid_depth_fraction": 0.15
+  },
+  "source_zone": {
+    "z_tolerance_m": 0.25
+  },
+  "placement_split": {
+    "gap_m": 0.04
+  }
+}
+

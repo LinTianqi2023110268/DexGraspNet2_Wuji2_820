@@ -1,34 +1,50 @@
-# Project Status
+# Project status
 
-Updated: 2026-08-17.
+Updated: 2026-08-20.
 
-## Active production path
+## Production entry
 
-The current user-facing entry is `./run_closed_loop.sh`.
+`./run_closed_loop.sh` is the only user-facing closed-loop entry.  It dispatches
+two independent task choices (`semantic-grasp`, `color-sort`) and two motion
+implementations (`legacy`, `curobo`).
 
-`08_dual_arm_scene_layout/isaaclab_control/closed_loop/orchestrator.py` integrates the current live-perception and planning stack: Isaac capture, robot state, GroundingDINO/SAM with user text, RGB-D to 40k points, DexGraspNet2 proposal ordering, GPU IK prefilter, LEAP-to-Wuji2 retarget, exact cuRobo IK, placement, full route planning, and Isaac Sim diagnostic execution.
+The current experiment focus is semantic-grasp + Route B, followed by
+color-sort + Route B. Route A remains available and must not be replaced by the
+Route B planner.
 
-## Latest evidence
+## Verified contracts
 
-Compact closed-loop golden evidence:
+- Scene migration regression guard: PASS.  SourceZone visual scale is excluded
+  from object migration; asset fallback uses dataset lineage and object
+  identity; pre-physics pose and pairwise geometry audits are retained.
+- Perception target safety: PASS.  RobotDepthCleaner is the single robot-mask
+  source for RGB, HSV, and planning depth. DINO and SAM robot gates are hard
+  gates; SourceZone and stale-capture checks fail closed.
+- Route B static contract: true right-arm 7DOF, environment collision ON, self
+  collision OFF in IK/TrajOpt/graph.
+- Task/route CLI dispatch and Persistent Isaac lifecycle preflight: PASS.
 
-`08_dual_arm_scene_layout/isaaclab_control/evidence/closed_loop_20260817_candidate5989/`
+## Evidence boundaries
 
-- source session: `20260817_102537`
-- selected official rank: `685`
-- selected candidate: `5989`
-- result: Isaac/PhysX simulated grasp/place PASS
-- planner collision rejection: disabled only for diagnostic simulation
-- static stability gate: diagnostic override enabled
-- Isaac/PhysX collision/contact: enabled
-- real robot output: disabled
+- Formal current perception smoke:
+  `08_dual_arm_scene_layout/isaaclab_control/outputs/pre_experiment_prefight/20260820_100016_semantic_curobo_perception_smoke/`.
+- Corrected scene migration audits:
+  `08_dual_arm_scene_layout/isaaclab_control/outputs/scene_migration_audits/`.
+- Last retained seven-segment Route B planner PASS:
+  `.../outputs/closed_loop_sessions/20260820_073606/cycle_001/`.
+  It is retained as planner regression evidence, not as a capture or trajectory
+  to reuse in a new scene.
+- Historical physical baselines remain indexed under `verified/`; their older
+  A/B/C research-route names are provenance labels, not the current CLI motion
+  route menu.
 
-Diagnostic collision bypass/static override is not a real-robot safety mode.
+## Not yet claimed
 
-## Retained baselines
+- A fresh, post-migration-fix single-target Route B full physical execution has
+  not been promoted to a new frozen baseline in this cleanup.
+- Multi-round color-sort physical completion has not been promoted to a frozen
+  baseline.
+- Diagnostic collision bypass results are not real-robot safety evidence.
 
-- Route A: native Wuji2 network evidence under `07_wuji2_network_3p3r_sim/04_verified_baseline/`.
-- Route B: LEAP-to-Wuji2 evidence under `06_leap_to_wuji2_final_pipeline/04_verified_baseline/`.
-- Route C: current compact closed-loop evidence under `08_dual_arm_scene_layout/isaaclab_control/evidence/`.
-
-Historical reorganization notes are in `docs/history/20260814_reorganization.md`; detailed command and phase logs are in `08_dual_arm_scene_layout/isaaclab_control/core/worklog/`.
+Current commands and behavior are documented in `README.md` and
+`08_dual_arm_scene_layout/isaaclab_control/MAINLINE.md`.

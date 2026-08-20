@@ -9,847 +9,1057 @@ DATASET: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_da
 
 scene_0000
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0000
-Target names: knife, flashlight, clock, detergent, pillow, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0000 --show
+Target names: knife（刀）, flashlight（手电筒）, clock（时钟）, detergent（洗涤剂）, pillow（枕头）, psp（PSP）
 
 scene_0001
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0001
-Target names: canister, coin, dog, eraser, pillow, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0001 --show
+Target names: canister（罐子）, coin（硬币）, dog（狗）, eraser（橡皮）, pillow（枕头）, cassette（磁带）
 
 scene_0002
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0002
-Target names: mouse, bird, bus, detergent, disc case, hammer
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0002 --show
+Target names: mouse（鼠标）, bird（鸟）, bus（巴士）, detergent（洗涤剂）, disc case（光盘盒）, hammer（锤子）
 
 scene_0003
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0003
-Target names: bottle, candle, detergent, dog, eraser, headphones
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0003 --show
+Target names: bottle（瓶子）, candle（蜡烛）, detergent（洗涤剂）, dog（狗）, eraser（橡皮）, headphones（耳机）
 
 scene_0004
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0004
-Target names: bottle, mouse, phonebooth, aaa battery, airplane, clock
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0004 --show
+Target names: bottle（瓶子）, mouse（鼠标）, phonebooth（电话亭）, aaa battery（7号电池）, airplane（飞机）, clock（时钟）
 
 scene_0005
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0005
-Target names: fruit, flashlight, clock, dog, nintendo ds, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0005 --show
+Target names: fruit（水果）, flashlight（手电筒）, clock（时钟）, dog（狗）, nintendo ds（任天堂DS）, cassette（磁带）
 
 scene_0006
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0006
-Target names: fruit, ashtray, camera, detergent, milk carton, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0006 --show
+Target names: fruit（水果）, ashtray（烟灰缸）, camera（相机）, detergent（洗涤剂）, milk carton（牛奶盒）, cassette（磁带）
 
 scene_0007
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0007
-Target names: bottle, airplane, bear, food item, lock, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0007 --show
+Target names: bottle（瓶子）, airplane（飞机）, bear（小熊）, food item（食品）, lock（锁）, pillow（枕头）
 
 scene_0008
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0008
-Target names: remote, flashlight, bus, canister, dog, lock
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0008 --show
+Target names: remote（遥控器）, flashlight（手电筒）, bus（巴士）, canister（罐子）, dog（狗）, lock（锁）
 
 scene_0009
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0009
-Target names: aaa battery, ashtray, eraser, ipad, lock, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0009 --show
+Target names: aaa battery（7号电池）, ashtray（烟灰缸）, eraser（橡皮）, ipad（iPad）, lock（锁）, milk carton（牛奶盒）
 
 scene_0010
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0010
-Target names: bottle, remote, bear, candle, food item, headphones
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0010 --show
+Target names: bottle（瓶子）, remote（遥控器）, bear（小熊）, candle（蜡烛）, food item（食品）, headphones（耳机）
 
 scene_0011
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0011
-Target names: cup, bear, camera, canister, food item, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0011 --show
+Target names: cup（杯子）, bear（小熊）, camera（相机）, canister（罐子）, food item（食品）, battery（电池）
 
 scene_0012
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0012
-Target names: phonebooth, disc case, drinking utensil, food item, key, nintendo ds
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0012 --show
+Target names: phonebooth（电话亭）, disc case（光盘盒）, drinking utensil（饮具）, food item（食品）, key（钥匙）, nintendo ds（任天堂DS）
 
 scene_0013
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0013
-Target names: remote, bowl, canister, milk carton, pen, plate
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0013 --show
+Target names: remote（遥控器）, bowl（碗）, canister（罐子）, milk carton（牛奶盒）, pen（笔）, plate（盘子）
 
 scene_0014
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0014
-Target names: can opener, phonebooth, airplane, canister, media discs, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0014 --show
+Target names: can opener（开罐器）, phonebooth（电话亭）, airplane（飞机）, canister（罐子）, media discs（光盘）, battery（电池）
 
 scene_0015
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0015
-Target names: aaa battery, airplane, bear, key, microscope, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0015 --show
+Target names: aaa battery（7号电池）, airplane（飞机）, bear（小熊）, key（钥匙）, microscope（显微镜）, pillow（枕头）
 
 scene_0016
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0016
-Target names: notepad, candle, canister, controller, jar, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0016 --show
+Target names: notepad（记事本）, candle（蜡烛）, canister（罐子）, controller（手柄）, jar（玻璃罐）, cassette（磁带）
 
 scene_0017
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0017
-Target names: bottle, mouse, mug, chocolate, hammer, lock
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0017 --show
+Target names: bottle（瓶子）, mouse（鼠标）, mug（马克杯）, chocolate（巧克力）, hammer（锤子）, lock（锁）
 
 scene_0018
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0018
-Target names: remote, flashlight, hammer, microscope, milk carton, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0018 --show
+Target names: remote（遥控器）, flashlight（手电筒）, hammer（锤子）, microscope（显微镜）, milk carton（牛奶盒）, power strip（插线板）
 
 scene_0019
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0019
-Target names: bottle, microscope, milk carton, nintendo ds, power strip, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0019 --show
+Target names: bottle（瓶子）, microscope（显微镜）, milk carton（牛奶盒）, nintendo ds（任天堂DS）, power strip（插线板）, battery（电池）
 
 scene_0020
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0020
-Target names: cup, flashlight, bear, camera, candle, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0020 --show
+Target names: cup（杯子）, flashlight（手电筒）, bear（小熊）, camera（相机）, candle（蜡烛）, pencil（铅笔）
 
 scene_0021
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0021
-Target names: bottle, calculator, candle, clock, marker, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0021 --show
+Target names: bottle（瓶子）, calculator（计算器）, candle（蜡烛）, clock（时钟）, marker（马克笔）, power strip（插线板）
 
 scene_0022
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0022
-Target names: flashlight, clock, drinking utensil, lock, pan, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0022 --show
+Target names: flashlight（手电筒）, clock（时钟）, drinking utensil（饮具）, lock（锁）, pan（平底锅）, power strip（插线板）
 
 scene_0023
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0023
-Target names: fruit, calculator, candle, headphones, jar, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0023 --show
+Target names: fruit（水果）, calculator（计算器）, candle（蜡烛）, headphones（耳机）, jar（玻璃罐）, pen（笔）
 
 scene_0024
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0024
-Target names: aaa battery, bus, canister, headphones, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0024 --show
+Target names: aaa battery（7号电池）, bus（巴士）, canister（罐子）, headphones（耳机）, pen（笔）, pencil（铅笔）
 
 scene_0025
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0025
-Target names: knife, canister, clock, detergent, lock, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0025 --show
+Target names: knife（刀）, canister（罐子）, clock（时钟）, detergent（洗涤剂）, lock（锁）, milk carton（牛奶盒）
 
 scene_0026
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0026
-Target names: flashlight, notepad, drinking utensil, marker, milk carton, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0026 --show
+Target names: flashlight（手电筒）, notepad（记事本）, drinking utensil（饮具）, marker（马克笔）, milk carton（牛奶盒）, battery（电池）
 
 scene_0027
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0027
-Target names: bottle, cup, fruit, headphones, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0027 --show
+Target names: bottle（瓶子）, cup（杯子）, fruit（水果）, headphones（耳机）, pen（笔）, pencil（铅笔）
 
 scene_0028
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0028
-Target names: can opener, ashtray, canister, disc case, lock, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0028 --show
+Target names: can opener（开罐器）, ashtray（烟灰缸）, canister（罐子）, disc case（光盘盒）, lock（锁）, cassette（磁带）
 
 scene_0029
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0029
-Target names: remote, phonebooth, blender, food item, power strip, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0029 --show
+Target names: remote（遥控器）, phonebooth（电话亭）, blender（搅拌机）, food item（食品）, power strip（插线板）, cassette（磁带）
 
 scene_0030
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0030
-Target names: knife, flashlight, ashtray, candle, clock, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0030 --show
+Target names: knife（刀）, flashlight（手电筒）, ashtray（烟灰缸）, candle（蜡烛）, clock（时钟）, cassette（磁带）
 
 scene_0031
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0031
-Target names: mouse, fruit, camera, chocolate, dog, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0031 --show
+Target names: mouse（鼠标）, fruit（水果）, camera（相机）, chocolate（巧克力）, dog（狗）, palette（调色板）
 
 scene_0032
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0032
-Target names: bottle, cup, book, bus, food item, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0032 --show
+Target names: bottle（瓶子）, cup（杯子）, book（书）, bus（巴士）, food item（食品）, palette（调色板）
 
 scene_0033
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0033
-Target names: bear, bird, candle, marker, milk carton, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0033 --show
+Target names: bear（小熊）, bird（鸟）, candle（蜡烛）, marker（马克笔）, milk carton（牛奶盒）, pencil（铅笔）
 
 scene_0034
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0034
-Target names: cup, bus, canister, milk carton, nintendo ds, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0034 --show
+Target names: cup（杯子）, bus（巴士）, canister（罐子）, milk carton（牛奶盒）, nintendo ds（任天堂DS）, pen（笔）
 
 scene_0035
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0035
-Target names: mug, blender, calculator, hammer, milk carton, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0035 --show
+Target names: mug（马克杯）, blender（搅拌机）, calculator（计算器）, hammer（锤子）, milk carton（牛奶盒）, pencil（铅笔）
 
 scene_0036
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0036
-Target names: remote, mug, eraser, milk carton, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0036 --show
+Target names: remote（遥控器）, mug（马克杯）, eraser（橡皮）, milk carton（牛奶盒）, pen（笔）, pencil（铅笔）
 
 scene_0037
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0037
-Target names: blender, food item, marker, milk carton, pencil, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0037 --show
+Target names: blender（搅拌机）, food item（食品）, marker（马克笔）, milk carton（牛奶盒）, pencil（铅笔）, pillow（枕头）
 
 scene_0038
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0038
-Target names: can opener, flashlight, ashtray, blender, disc case, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0038 --show
+Target names: can opener（开罐器）, flashlight（手电筒）, ashtray（烟灰缸）, blender（搅拌机）, disc case（光盘盒）, pillow（枕头）
 
 scene_0039
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0039
-Target names: can opener, clock, controller, eraser, pen, plate
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0039 --show
+Target names: can opener（开罐器）, clock（时钟）, controller（手柄）, eraser（橡皮）, pen（笔）, plate（盘子）
 
 scene_0040
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0040
-Target names: fruit, aaa battery, lock, microscope, milk carton, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0040 --show
+Target names: fruit（水果）, aaa battery（7号电池）, lock（锁）, microscope（显微镜）, milk carton（牛奶盒）, cassette（磁带）
 
 scene_0041
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0041
-Target names: bird, calculator, eraser, food item, nintendo ds, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0041 --show
+Target names: bird（鸟）, calculator（计算器）, eraser（橡皮）, food item（食品）, nintendo ds（任天堂DS）, power strip（插线板）
 
 scene_0042
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0042
-Target names: blender, cellphone, eraser, jar, palette, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0042 --show
+Target names: blender（搅拌机）, cellphone（手机）, eraser（橡皮）, jar（玻璃罐）, palette（调色板）, pen（笔）
 
 scene_0043
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0043
-Target names: mouse, remote, chocolate, controller, dog, jar
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0043 --show
+Target names: mouse（鼠标）, remote（遥控器）, chocolate（巧克力）, controller（手柄）, dog（狗）, jar（玻璃罐）
 
 scene_0044
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0044
-Target names: remote, cup, bear, controller, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0044 --show
+Target names: remote（遥控器）, cup（杯子）, bear（小熊）, controller（手柄）, pencil（铅笔）, battery（电池）
 
 scene_0045
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0045
-Target names: mouse, airplane, book, lock, marker, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0045 --show
+Target names: mouse（鼠标）, airplane（飞机）, book（书）, lock（锁）, marker（马克笔）, palette（调色板）
 
 scene_0046
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0046
-Target names: bottle, remote, eraser, key, palette, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0046 --show
+Target names: bottle（瓶子）, remote（遥控器）, eraser（橡皮）, key（钥匙）, palette（调色板）, pen（笔）
 
 scene_0047
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0047
-Target names: mouse, phonebooth, coin, eraser, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0047 --show
+Target names: mouse（鼠标）, phonebooth（电话亭）, coin（硬币）, eraser（橡皮）, pen（笔）, pencil（铅笔）
 
 scene_0048
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0048
-Target names: bear, controller, food item, palette, pen, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0048 --show
+Target names: bear（小熊）, controller（手柄）, food item（食品）, palette（调色板）, pen（笔）, power strip（插线板）
 
 scene_0049
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0049
-Target names: aaa battery, canister, detergent, eraser, hammer, microscope
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0049 --show
+Target names: aaa battery（7号电池）, canister（罐子）, detergent（洗涤剂）, eraser（橡皮）, hammer（锤子）, microscope（显微镜）
 
 scene_0050
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0050
-Target names: knife, bird, clock, detergent, key, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0050 --show
+Target names: knife（刀）, bird（鸟）, clock（时钟）, detergent（洗涤剂）, key（钥匙）, pencil（铅笔）
 
 scene_0051
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0051
-Target names: cup, aaa battery, bear, candle, canister, jar
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0051 --show
+Target names: cup（杯子）, aaa battery（7号电池）, bear（小熊）, candle（蜡烛）, canister（罐子）, jar（玻璃罐）
 
 scene_0052
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0052
-Target names: bottle, remote, canister, dog, pan, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0052 --show
+Target names: bottle（瓶子）, remote（遥控器）, canister（罐子）, dog（狗）, pan（平底锅）, pencil（铅笔）
 
 scene_0053
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0053
-Target names: bottle, mouse, remote, fruit, ashtray, controller
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0053 --show
+Target names: bottle（瓶子）, mouse（鼠标）, remote（遥控器）, fruit（水果）, ashtray（烟灰缸）, controller（手柄）
 
 scene_0054
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0054
-Target names: fruit, food item, marker, pen, pencil, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0054 --show
+Target names: fruit（水果）, food item（食品）, marker（马克笔）, pen（笔）, pencil（铅笔）, power strip（插线板）
 
 scene_0055
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0055
-Target names: bottle, clock, light bulb, pen, psp, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0055 --show
+Target names: bottle（瓶子）, clock（时钟）, light bulb（灯泡）, pen（笔）, psp（PSP）, battery（电池）
 
 scene_0056
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0056
-Target names: bottle, coin, dog, media discs, power strip, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0056 --show
+Target names: bottle（瓶子）, coin（硬币）, dog（狗）, media discs（光盘）, power strip（插线板）, cassette（磁带）
 
 scene_0057
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0057
-Target names: remote, ashtray, coin, controller, dog, marker
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0057 --show
+Target names: remote（遥控器）, ashtray（烟灰缸）, coin（硬币）, controller（手柄）, dog（狗）, marker（马克笔）
 
 scene_0058
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0058
-Target names: cup, aaa battery, cap, dog, power strip, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0058 --show
+Target names: cup（杯子）, aaa battery（7号电池）, cap（瓶盖）, dog（狗）, power strip（插线板）, cassette（磁带）
 
 scene_0059
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0059
-Target names: flashlight, airplane, canister, chocolate, microscope, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0059 --show
+Target names: flashlight（手电筒）, airplane（飞机）, canister（罐子）, chocolate（巧克力）, microscope（显微镜）, pen（笔）
 
 scene_0060
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0060
-Target names: controller, hammer, marker, milk carton, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0060 --show
+Target names: controller（手柄）, hammer（锤子）, marker（马克笔）, milk carton（牛奶盒）, pen（笔）, pencil（铅笔）
 
 scene_0061
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0061
-Target names: bottle, ashtray, camera, detergent, lock, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0061 --show
+Target names: bottle（瓶子）, ashtray（烟灰缸）, camera（相机）, detergent（洗涤剂）, lock（锁）, milk carton（牛奶盒）
 
 scene_0062
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0062
-Target names: can opener, mug, flashlight, bear, chocolate, key
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0062 --show
+Target names: can opener（开罐器）, mug（马克杯）, flashlight（手电筒）, bear（小熊）, chocolate（巧克力）, key（钥匙）
 
 scene_0063
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0063
-Target names: bottle, knife, ashtray, bird, power strip, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0063 --show
+Target names: bottle（瓶子）, knife（刀）, ashtray（烟灰缸）, bird（鸟）, power strip（插线板）, battery（电池）
 
 scene_0064
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0064
-Target names: remote, phonebooth, mug, clock, drinking utensil, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0064 --show
+Target names: remote（遥控器）, phonebooth（电话亭）, mug（马克杯）, clock（时钟）, drinking utensil（饮具）, power strip（插线板）
 
 scene_0065
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0065
-Target names: bottle, aaa battery, clock, ipod, microscope, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0065 --show
+Target names: bottle（瓶子）, aaa battery（7号电池）, clock（时钟）, ipod（iPod）, microscope（显微镜）, pencil（铅笔）
 
 scene_0066
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0066
-Target names: aaa battery, book, calculator, drinking utensil, eraser, key
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0066 --show
+Target names: aaa battery（7号电池）, book（书）, calculator（计算器）, drinking utensil（饮具）, eraser（橡皮）, key（钥匙）
 
 scene_0067
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0067
-Target names: canister, cellphone, food item, key, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0067 --show
+Target names: canister（罐子）, cellphone（手机）, food item（食品）, key（钥匙）, pencil（铅笔）, battery（电池）
 
 scene_0068
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0068
-Target names: knife, bear, candle, headphones, microscope, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0068 --show
+Target names: knife（刀）, bear（小熊）, candle（蜡烛）, headphones（耳机）, microscope（显微镜）, palette（调色板）
 
 scene_0069
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0069
-Target names: mouse, remote, canister, clock, lock, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0069 --show
+Target names: mouse（鼠标）, remote（遥控器）, canister（罐子）, clock（时钟）, lock（锁）, pen（笔）
 
 scene_0070
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0070
-Target names: can opener, canister, chocolate, dog, key, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0070 --show
+Target names: can opener（开罐器）, canister（罐子）, chocolate（巧克力）, dog（狗）, key（钥匙）, battery（电池）
 
 scene_0071
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0071
-Target names: bottle, remote, fruit, flashlight, candle, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0071 --show
+Target names: bottle（瓶子）, remote（遥控器）, fruit（水果）, flashlight（手电筒）, candle（蜡烛）, pencil（铅笔）
 
 scene_0072
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0072
-Target names: remote, airplane, ashtray, bus, candle, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0072 --show
+Target names: remote（遥控器）, airplane（飞机）, ashtray（烟灰缸）, bus（巴士）, candle（蜡烛）, pencil（铅笔）
 
 scene_0073
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0073
-Target names: bottle, fruit, airplane, drinking utensil, eraser, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0073 --show
+Target names: bottle（瓶子）, fruit（水果）, airplane（飞机）, drinking utensil（饮具）, eraser（橡皮）, pencil（铅笔）
 
 scene_0074
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0074
-Target names: can opener, remote, aaa battery, airplane, milk carton, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0074 --show
+Target names: can opener（开罐器）, remote（遥控器）, aaa battery（7号电池）, airplane（飞机）, milk carton（牛奶盒）, pen（笔）
 
 scene_0075
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0075
-Target names: cap, chocolate, food item, marker, microscope, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0075 --show
+Target names: cap（瓶盖）, chocolate（巧克力）, food item（食品）, marker（马克笔）, microscope（显微镜）, battery（电池）
 
 scene_0076
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0076
-Target names: bottle, can opener, canister, controller, pencil, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0076 --show
+Target names: bottle（瓶子）, can opener（开罐器）, canister（罐子）, controller（手柄）, pencil（铅笔）, cassette（磁带）
 
 scene_0077
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0077
-Target names: blender, camera, microscope, pan, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0077 --show
+Target names: blender（搅拌机）, camera（相机）, microscope（显微镜）, pan（平底锅）, pen（笔）, pencil（铅笔）
 
 scene_0078
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0078
-Target names: phonebooth, bird, camera, dog, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0078 --show
+Target names: phonebooth（电话亭）, bird（鸟）, camera（相机）, dog（狗）, pen（笔）, pencil（铅笔）
 
 scene_0079
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0079
-Target names: bottle, can opener, remote, bear, dog, marker
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0079 --show
+Target names: bottle（瓶子）, can opener（开罐器）, remote（遥控器）, bear（小熊）, dog（狗）, marker（马克笔）
 
 scene_0080
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0080
-Target names: knife, remote, bird, camera, drinking utensil, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0080 --show
+Target names: knife（刀）, remote（遥控器）, bird（鸟）, camera（相机）, drinking utensil（饮具）, pencil（铅笔）
 
 scene_0081
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0081
-Target names: bottle, can opener, remote, bus, calculator, food item
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0081 --show
+Target names: bottle（瓶子）, can opener（开罐器）, remote（遥控器）, bus（巴士）, calculator（计算器）, food item（食品）
 
 scene_0082
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0082
-Target names: cup, detergent, dog, lock, palette, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0082 --show
+Target names: cup（杯子）, detergent（洗涤剂）, dog（狗）, lock（锁）, palette（调色板）, psp（PSP）
 
 scene_0083
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0083
-Target names: mouse, phonebooth, flashlight, ipad, pen, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0083 --show
+Target names: mouse（鼠标）, phonebooth（电话亭）, flashlight（手电筒）, ipad（iPad）, pen（笔）, power strip（插线板）
 
 scene_0084
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0084
-Target names: mouse, fruit, flashlight, detergent, dog, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0084 --show
+Target names: mouse（鼠标）, fruit（水果）, flashlight（手电筒）, detergent（洗涤剂）, dog（狗）, pen（笔）
 
 scene_0085
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0085
-Target names: mouse, eraser, hammer, marker, pencil, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0085 --show
+Target names: mouse（鼠标）, eraser（橡皮）, hammer（锤子）, marker（马克笔）, pencil（铅笔）, power strip（插线板）
 
 scene_0086
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0086
-Target names: can opener, remote, marker, microscope, power strip, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0086 --show
+Target names: can opener（开罐器）, remote（遥控器）, marker（马克笔）, microscope（显微镜）, power strip（插线板）, psp（PSP）
 
 scene_0087
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0087
-Target names: bird, clock, hammer, microscope, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0087 --show
+Target names: bird（鸟）, clock（时钟）, hammer（锤子）, microscope（显微镜）, pencil（铅笔）, battery（电池）
 
 scene_0088
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0088
-Target names: bottle, remote, calculator, candle, cap, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0088 --show
+Target names: bottle（瓶子）, remote（遥控器）, calculator（计算器）, candle（蜡烛）, cap（瓶盖）, milk carton（牛奶盒）
 
 scene_0089
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0089
-Target names: fruit, cellphone, coin, eraser, key, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0089 --show
+Target names: fruit（水果）, cellphone（手机）, coin（硬币）, eraser（橡皮）, key（钥匙）, cassette（磁带）
 
 scene_0090
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0090
-Target names: blender, bus, detergent, pen, power strip, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0090 --show
+Target names: blender（搅拌机）, bus（巴士）, detergent（洗涤剂）, pen（笔）, power strip（插线板）, psp（PSP）
 
 scene_0091
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0091
-Target names: bottle, bird, dog, eraser, lock, marker
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0091 --show
+Target names: bottle（瓶子）, bird（鸟）, dog（狗）, eraser（橡皮）, lock（锁）, marker（马克笔）
 
 scene_0092
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0092
-Target names: jar, key, marker, nintendo ds, pen, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0092 --show
+Target names: jar（玻璃罐）, key（钥匙）, marker（马克笔）, nintendo ds（任天堂DS）, pen（笔）, power strip（插线板）
 
 scene_0093
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0093
-Target names: bottle, food item, light bulb, microscope, nintendo ds, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0093 --show
+Target names: bottle（瓶子）, food item（食品）, light bulb（灯泡）, microscope（显微镜）, nintendo ds（任天堂DS）, cassette（磁带）
 
 scene_0094
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0094
-Target names: aaa battery, bird, food item, milk carton, pencil, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0094 --show
+Target names: aaa battery（7号电池）, bird（鸟）, food item（食品）, milk carton（牛奶盒）, pencil（铅笔）, pillow（枕头）
 
 scene_0095
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0095
-Target names: mouse, fruit, bird, dog, food item, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0095 --show
+Target names: mouse（鼠标）, fruit（水果）, bird（鸟）, dog（狗）, food item（食品）, battery（电池）
 
 scene_0096
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0096
-Target names: ashtray, candle, ipad, milk carton, pen, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0096 --show
+Target names: ashtray（烟灰缸）, candle（蜡烛）, ipad（iPad）, milk carton（牛奶盒）, pen（笔）, psp（PSP）
 
 scene_0097
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0097
-Target names: mouse, can opener, knife, remote, eraser, key
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0097 --show
+Target names: mouse（鼠标）, can opener（开罐器）, knife（刀）, remote（遥控器）, eraser（橡皮）, key（钥匙）
 
 scene_0098
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0098
-Target names: remote, bear, camera, controller, nintendo ds, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0098 --show
+Target names: remote（遥控器）, bear（小熊）, camera（相机）, controller（手柄）, nintendo ds（任天堂DS）, power strip（插线板）
 
 scene_0099
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0099
-Target names: remote, airplane, bird, cellphone, detergent, food item
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0099 --show
+Target names: remote（遥控器）, airplane（飞机）, bird（鸟）, cellphone（手机）, detergent（洗涤剂）, food item（食品）
 ====================================================================================================
 DATASET: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes
 ====================================================================================================
 
 scene_0000
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0000
-Target names: knife, flashlight, clock, detergent, pillow, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0000 --show
+Target names: knife（刀）, flashlight（手电筒）, clock（时钟）, detergent（洗涤剂）, pillow（枕头）, psp（PSP）
 
 scene_0001
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0001
-Target names: canister, coin, dog, eraser, pillow, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0001 --show
+Target names: canister（罐子）, coin（硬币）, dog（狗）, eraser（橡皮）, pillow（枕头）, cassette（磁带）
 
 scene_0002
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0002
-Target names: mouse, bird, bus, detergent, disc case, hammer
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0002 --show
+Target names: mouse（鼠标）, bird（鸟）, bus（巴士）, detergent（洗涤剂）, disc case（光盘盒）, hammer（锤子）
 
 scene_0003
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0003
-Target names: bottle, candle, detergent, dog, eraser, headphones
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0003 --show
+Target names: bottle（瓶子）, candle（蜡烛）, detergent（洗涤剂）, dog（狗）, eraser（橡皮）, headphones（耳机）
 
 scene_0004
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0004
-Target names: bottle, mouse, phonebooth, aaa battery, airplane, clock
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0004 --show
+Target names: bottle（瓶子）, mouse（鼠标）, phonebooth（电话亭）, aaa battery（7号电池）, airplane（飞机）, clock（时钟）
 
 scene_0005
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0005
-Target names: fruit, flashlight, clock, dog, nintendo ds, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0005 --show
+Target names: fruit（水果）, flashlight（手电筒）, clock（时钟）, dog（狗）, nintendo ds（任天堂DS）, cassette（磁带）
 
 scene_0006
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0006
-Target names: fruit, ashtray, camera, detergent, milk carton, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0006 --show
+Target names: fruit（水果）, ashtray（烟灰缸）, camera（相机）, detergent（洗涤剂）, milk carton（牛奶盒）, cassette（磁带）
 
 scene_0007
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0007
-Target names: bottle, airplane, bear, food item, lock, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0007 --show
+Target names: bottle（瓶子）, airplane（飞机）, bear（小熊）, food item（食品）, lock（锁）, pillow（枕头）
 
 scene_0008
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0008
-Target names: remote, flashlight, bus, canister, dog, lock
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0008 --show
+Target names: remote（遥控器）, flashlight（手电筒）, bus（巴士）, canister（罐子）, dog（狗）, lock（锁）
 
 scene_0009
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0009
-Target names: aaa battery, ashtray, eraser, ipad, lock, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0009 --show
+Target names: aaa battery（7号电池）, ashtray（烟灰缸）, eraser（橡皮）, ipad（iPad）, lock（锁）, milk carton（牛奶盒）
 
 scene_0010
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0010
-Target names: bottle, remote, bear, candle, food item, headphones
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0010 --show
+Target names: bottle（瓶子）, remote（遥控器）, bear（小熊）, candle（蜡烛）, food item（食品）, headphones（耳机）
 
 scene_0011
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0011
-Target names: cup, bear, camera, canister, food item, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0011 --show
+Target names: cup（杯子）, bear（小熊）, camera（相机）, canister（罐子）, food item（食品）, battery（电池）
 
 scene_0012
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0012
-Target names: phonebooth, disc case, drinking utensil, food item, key, nintendo ds
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0012 --show
+Target names: phonebooth（电话亭）, disc case（光盘盒）, drinking utensil（饮具）, food item（食品）, key（钥匙）, nintendo ds（任天堂DS）
 
 scene_0013
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0013
-Target names: remote, bowl, canister, milk carton, pen, plate
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0013 --show
+Target names: remote（遥控器）, bowl（碗）, canister（罐子）, milk carton（牛奶盒）, pen（笔）, plate（盘子）
 
 scene_0014
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0014
-Target names: can opener, phonebooth, airplane, canister, media discs, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0014 --show
+Target names: can opener（开罐器）, phonebooth（电话亭）, airplane（飞机）, canister（罐子）, media discs（光盘）, battery（电池）
 
 scene_0015
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0015
-Target names: aaa battery, airplane, bear, key, microscope, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0015 --show
+Target names: aaa battery（7号电池）, airplane（飞机）, bear（小熊）, key（钥匙）, microscope（显微镜）, pillow（枕头）
 
 scene_0016
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0016
-Target names: notepad, candle, canister, controller, jar, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0016 --show
+Target names: notepad（记事本）, candle（蜡烛）, canister（罐子）, controller（手柄）, jar（玻璃罐）, cassette（磁带）
 
 scene_0017
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0017
-Target names: bottle, mouse, mug, chocolate, hammer, lock
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0017 --show
+Target names: bottle（瓶子）, mouse（鼠标）, mug（马克杯）, chocolate（巧克力）, hammer（锤子）, lock（锁）
 
 scene_0018
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0018
-Target names: remote, flashlight, hammer, microscope, milk carton, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0018 --show
+Target names: remote（遥控器）, flashlight（手电筒）, hammer（锤子）, microscope（显微镜）, milk carton（牛奶盒）, power strip（插线板）
 
 scene_0019
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0019
-Target names: bottle, microscope, milk carton, nintendo ds, power strip, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0019 --show
+Target names: bottle（瓶子）, microscope（显微镜）, milk carton（牛奶盒）, nintendo ds（任天堂DS）, power strip（插线板）, battery（电池）
 
 scene_0020
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0020
-Target names: cup, flashlight, bear, camera, candle, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0020 --show
+Target names: cup（杯子）, flashlight（手电筒）, bear（小熊）, camera（相机）, candle（蜡烛）, pencil（铅笔）
 
 scene_0021
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0021
-Target names: bottle, calculator, candle, clock, marker, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0021 --show
+Target names: bottle（瓶子）, calculator（计算器）, candle（蜡烛）, clock（时钟）, marker（马克笔）, power strip（插线板）
 
 scene_0022
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0022
-Target names: flashlight, clock, drinking utensil, lock, pan, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0022 --show
+Target names: flashlight（手电筒）, clock（时钟）, drinking utensil（饮具）, lock（锁）, pan（平底锅）, power strip（插线板）
 
 scene_0023
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0023
-Target names: fruit, calculator, candle, headphones, jar, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0023 --show
+Target names: fruit（水果）, calculator（计算器）, candle（蜡烛）, headphones（耳机）, jar（玻璃罐）, pen（笔）
 
 scene_0024
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0024
-Target names: aaa battery, bus, canister, headphones, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0024 --show
+Target names: aaa battery（7号电池）, bus（巴士）, canister（罐子）, headphones（耳机）, pen（笔）, pencil（铅笔）
 
 scene_0025
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0025
-Target names: knife, canister, clock, detergent, lock, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0025 --show
+Target names: knife（刀）, canister（罐子）, clock（时钟）, detergent（洗涤剂）, lock（锁）, milk carton（牛奶盒）
 
 scene_0026
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0026
-Target names: flashlight, notepad, drinking utensil, marker, milk carton, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0026 --show
+Target names: flashlight（手电筒）, notepad（记事本）, drinking utensil（饮具）, marker（马克笔）, milk carton（牛奶盒）, battery（电池）
 
 scene_0027
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0027
-Target names: bottle, cup, fruit, headphones, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0027 --show
+Target names: bottle（瓶子）, cup（杯子）, fruit（水果）, headphones（耳机）, pen（笔）, pencil（铅笔）
 
 scene_0028
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0028
-Target names: can opener, ashtray, canister, disc case, lock, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0028 --show
+Target names: can opener（开罐器）, ashtray（烟灰缸）, canister（罐子）, disc case（光盘盒）, lock（锁）, cassette（磁带）
 
 scene_0029
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0029
-Target names: remote, phonebooth, blender, food item, power strip, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0029 --show
+Target names: remote（遥控器）, phonebooth（电话亭）, blender（搅拌机）, food item（食品）, power strip（插线板）, cassette（磁带）
 
 scene_0030
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0030
-Target names: knife, flashlight, ashtray, candle, clock, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0030 --show
+Target names: knife（刀）, flashlight（手电筒）, ashtray（烟灰缸）, candle（蜡烛）, clock（时钟）, cassette（磁带）
 
 scene_0031
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0031
-Target names: mouse, fruit, camera, chocolate, dog, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0031 --show
+Target names: mouse（鼠标）, fruit（水果）, camera（相机）, chocolate（巧克力）, dog（狗）, palette（调色板）
 
 scene_0032
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0032
-Target names: bottle, cup, book, bus, food item, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0032 --show
+Target names: bottle（瓶子）, cup（杯子）, book（书）, bus（巴士）, food item（食品）, palette（调色板）
 
 scene_0033
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0033
-Target names: bear, bird, candle, marker, milk carton, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0033 --show
+Target names: bear（小熊）, bird（鸟）, candle（蜡烛）, marker（马克笔）, milk carton（牛奶盒）, pencil（铅笔）
 
 scene_0034
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0034
-Target names: cup, bus, canister, milk carton, nintendo ds, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0034 --show
+Target names: cup（杯子）, bus（巴士）, canister（罐子）, milk carton（牛奶盒）, nintendo ds（任天堂DS）, pen（笔）
 
 scene_0035
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0035
-Target names: mug, blender, calculator, hammer, milk carton, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0035 --show
+Target names: mug（马克杯）, blender（搅拌机）, calculator（计算器）, hammer（锤子）, milk carton（牛奶盒）, pencil（铅笔）
 
 scene_0036
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0036
-Target names: remote, mug, eraser, milk carton, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0036 --show
+Target names: remote（遥控器）, mug（马克杯）, eraser（橡皮）, milk carton（牛奶盒）, pen（笔）, pencil（铅笔）
 
 scene_0037
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0037
-Target names: blender, food item, marker, milk carton, pencil, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0037 --show
+Target names: blender（搅拌机）, food item（食品）, marker（马克笔）, milk carton（牛奶盒）, pencil（铅笔）, pillow（枕头）
 
 scene_0038
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0038
-Target names: can opener, flashlight, ashtray, blender, disc case, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0038 --show
+Target names: can opener（开罐器）, flashlight（手电筒）, ashtray（烟灰缸）, blender（搅拌机）, disc case（光盘盒）, pillow（枕头）
 
 scene_0039
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0039
-Target names: can opener, clock, controller, eraser, pen, plate
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0039 --show
+Target names: can opener（开罐器）, clock（时钟）, controller（手柄）, eraser（橡皮）, pen（笔）, plate（盘子）
 
 scene_0040
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0040
-Target names: fruit, aaa battery, lock, microscope, milk carton, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0040 --show
+Target names: fruit（水果）, aaa battery（7号电池）, lock（锁）, microscope（显微镜）, milk carton（牛奶盒）, cassette（磁带）
 
 scene_0041
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0041
-Target names: bird, calculator, eraser, food item, nintendo ds, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0041 --show
+Target names: bird（鸟）, calculator（计算器）, eraser（橡皮）, food item（食品）, nintendo ds（任天堂DS）, power strip（插线板）
 
 scene_0042
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0042
-Target names: blender, cellphone, eraser, jar, palette, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0042 --show
+Target names: blender（搅拌机）, cellphone（手机）, eraser（橡皮）, jar（玻璃罐）, palette（调色板）, pen（笔）
 
 scene_0043
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0043
-Target names: mouse, remote, chocolate, controller, dog, jar
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0043 --show
+Target names: mouse（鼠标）, remote（遥控器）, chocolate（巧克力）, controller（手柄）, dog（狗）, jar（玻璃罐）
 
 scene_0044
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0044
-Target names: remote, cup, bear, controller, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0044 --show
+Target names: remote（遥控器）, cup（杯子）, bear（小熊）, controller（手柄）, pencil（铅笔）, battery（电池）
 
 scene_0045
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0045
-Target names: mouse, airplane, book, lock, marker, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0045 --show
+Target names: mouse（鼠标）, airplane（飞机）, book（书）, lock（锁）, marker（马克笔）, palette（调色板）
 
 scene_0046
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0046
-Target names: bottle, remote, eraser, key, palette, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0046 --show
+Target names: bottle（瓶子）, remote（遥控器）, eraser（橡皮）, key（钥匙）, palette（调色板）, pen（笔）
 
 scene_0047
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0047
-Target names: mouse, phonebooth, coin, eraser, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0047 --show
+Target names: mouse（鼠标）, phonebooth（电话亭）, coin（硬币）, eraser（橡皮）, pen（笔）, pencil（铅笔）
 
 scene_0048
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0048
-Target names: bear, controller, food item, palette, pen, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0048 --show
+Target names: bear（小熊）, controller（手柄）, food item（食品）, palette（调色板）, pen（笔）, power strip（插线板）
 
 scene_0049
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0049
-Target names: aaa battery, canister, detergent, eraser, hammer, microscope
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0049 --show
+Target names: aaa battery（7号电池）, canister（罐子）, detergent（洗涤剂）, eraser（橡皮）, hammer（锤子）, microscope（显微镜）
 
 scene_0050
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0050
-Target names: knife, bird, clock, detergent, key, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0050 --show
+Target names: knife（刀）, bird（鸟）, clock（时钟）, detergent（洗涤剂）, key（钥匙）, pencil（铅笔）
 
 scene_0051
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0051
-Target names: cup, aaa battery, bear, candle, canister, jar
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0051 --show
+Target names: cup（杯子）, aaa battery（7号电池）, bear（小熊）, candle（蜡烛）, canister（罐子）, jar（玻璃罐）
 
 scene_0052
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0052
-Target names: bottle, remote, canister, dog, pan, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0052 --show
+Target names: bottle（瓶子）, remote（遥控器）, canister（罐子）, dog（狗）, pan（平底锅）, pencil（铅笔）
 
 scene_0053
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0053
-Target names: bottle, mouse, remote, fruit, ashtray, controller
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0053 --show
+Target names: bottle（瓶子）, mouse（鼠标）, remote（遥控器）, fruit（水果）, ashtray（烟灰缸）, controller（手柄）
 
 scene_0054
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0054
-Target names: fruit, food item, marker, pen, pencil, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0054 --show
+Target names: fruit（水果）, food item（食品）, marker（马克笔）, pen（笔）, pencil（铅笔）, power strip（插线板）
 
 scene_0055
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0055
-Target names: bottle, clock, light bulb, pen, psp, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0055 --show
+Target names: bottle（瓶子）, clock（时钟）, light bulb（灯泡）, pen（笔）, psp（PSP）, battery（电池）
 
 scene_0056
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0056
-Target names: bottle, coin, dog, media discs, power strip, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0056 --show
+Target names: bottle（瓶子）, coin（硬币）, dog（狗）, media discs（光盘）, power strip（插线板）, cassette（磁带）
 
 scene_0057
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0057
-Target names: remote, ashtray, coin, controller, dog, marker
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0057 --show
+Target names: remote（遥控器）, ashtray（烟灰缸）, coin（硬币）, controller（手柄）, dog（狗）, marker（马克笔）
 
 scene_0058
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0058
-Target names: cup, aaa battery, cap, dog, power strip, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0058 --show
+Target names: cup（杯子）, aaa battery（7号电池）, cap（瓶盖）, dog（狗）, power strip（插线板）, cassette（磁带）
 
 scene_0059
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0059
-Target names: flashlight, airplane, canister, chocolate, microscope, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0059 --show
+Target names: flashlight（手电筒）, airplane（飞机）, canister（罐子）, chocolate（巧克力）, microscope（显微镜）, pen（笔）
 
 scene_0060
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0060
-Target names: controller, hammer, marker, milk carton, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0060 --show
+Target names: controller（手柄）, hammer（锤子）, marker（马克笔）, milk carton（牛奶盒）, pen（笔）, pencil（铅笔）
 
 scene_0061
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0061
-Target names: bottle, ashtray, camera, detergent, lock, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0061 --show
+Target names: bottle（瓶子）, ashtray（烟灰缸）, camera（相机）, detergent（洗涤剂）, lock（锁）, milk carton（牛奶盒）
 
 scene_0062
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0062
-Target names: can opener, mug, flashlight, bear, chocolate, key
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0062 --show
+Target names: can opener（开罐器）, mug（马克杯）, flashlight（手电筒）, bear（小熊）, chocolate（巧克力）, key（钥匙）
 
 scene_0063
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0063
-Target names: bottle, knife, ashtray, bird, power strip, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0063 --show
+Target names: bottle（瓶子）, knife（刀）, ashtray（烟灰缸）, bird（鸟）, power strip（插线板）, battery（电池）
 
 scene_0064
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0064
-Target names: remote, phonebooth, mug, clock, drinking utensil, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0064 --show
+Target names: remote（遥控器）, phonebooth（电话亭）, mug（马克杯）, clock（时钟）, drinking utensil（饮具）, power strip（插线板）
 
 scene_0065
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0065
-Target names: bottle, aaa battery, clock, ipod, microscope, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0065 --show
+Target names: bottle（瓶子）, aaa battery（7号电池）, clock（时钟）, ipod（iPod）, microscope（显微镜）, pencil（铅笔）
 
 scene_0066
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0066
-Target names: aaa battery, book, calculator, drinking utensil, eraser, key
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0066 --show
+Target names: aaa battery（7号电池）, book（书）, calculator（计算器）, drinking utensil（饮具）, eraser（橡皮）, key（钥匙）
 
 scene_0067
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0067
-Target names: canister, cellphone, food item, key, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0067 --show
+Target names: canister（罐子）, cellphone（手机）, food item（食品）, key（钥匙）, pencil（铅笔）, battery（电池）
 
 scene_0068
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0068
-Target names: knife, bear, candle, headphones, microscope, palette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0068 --show
+Target names: knife（刀）, bear（小熊）, candle（蜡烛）, headphones（耳机）, microscope（显微镜）, palette（调色板）
 
 scene_0069
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0069
-Target names: mouse, remote, canister, clock, lock, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0069 --show
+Target names: mouse（鼠标）, remote（遥控器）, canister（罐子）, clock（时钟）, lock（锁）, pen（笔）
 
 scene_0070
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0070
-Target names: can opener, canister, chocolate, dog, key, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0070 --show
+Target names: can opener（开罐器）, canister（罐子）, chocolate（巧克力）, dog（狗）, key（钥匙）, battery（电池）
 
 scene_0071
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0071
-Target names: bottle, remote, fruit, flashlight, candle, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0071 --show
+Target names: bottle（瓶子）, remote（遥控器）, fruit（水果）, flashlight（手电筒）, candle（蜡烛）, pencil（铅笔）
 
 scene_0072
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0072
-Target names: remote, airplane, ashtray, bus, candle, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0072 --show
+Target names: remote（遥控器）, airplane（飞机）, ashtray（烟灰缸）, bus（巴士）, candle（蜡烛）, pencil（铅笔）
 
 scene_0073
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0073
-Target names: bottle, fruit, airplane, drinking utensil, eraser, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0073 --show
+Target names: bottle（瓶子）, fruit（水果）, airplane（飞机）, drinking utensil（饮具）, eraser（橡皮）, pencil（铅笔）
 
 scene_0074
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0074
-Target names: can opener, remote, aaa battery, airplane, milk carton, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0074 --show
+Target names: can opener（开罐器）, remote（遥控器）, aaa battery（7号电池）, airplane（飞机）, milk carton（牛奶盒）, pen（笔）
 
 scene_0075
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0075
-Target names: cap, chocolate, food item, marker, microscope, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0075 --show
+Target names: cap（瓶盖）, chocolate（巧克力）, food item（食品）, marker（马克笔）, microscope（显微镜）, battery（电池）
 
 scene_0076
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0076
-Target names: bottle, can opener, canister, controller, pencil, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0076 --show
+Target names: bottle（瓶子）, can opener（开罐器）, canister（罐子）, controller（手柄）, pencil（铅笔）, cassette（磁带）
 
 scene_0077
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0077
-Target names: blender, camera, microscope, pan, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0077 --show
+Target names: blender（搅拌机）, camera（相机）, microscope（显微镜）, pan（平底锅）, pen（笔）, pencil（铅笔）
 
 scene_0078
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0078
-Target names: phonebooth, bird, camera, dog, pen, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0078 --show
+Target names: phonebooth（电话亭）, bird（鸟）, camera（相机）, dog（狗）, pen（笔）, pencil（铅笔）
 
 scene_0079
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0079
-Target names: bottle, can opener, remote, bear, dog, marker
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0079 --show
+Target names: bottle（瓶子）, can opener（开罐器）, remote（遥控器）, bear（小熊）, dog（狗）, marker（马克笔）
 
 scene_0080
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0080
-Target names: knife, remote, bird, camera, drinking utensil, pencil
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0080 --show
+Target names: knife（刀）, remote（遥控器）, bird（鸟）, camera（相机）, drinking utensil（饮具）, pencil（铅笔）
 
 scene_0081
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0081
-Target names: bottle, can opener, remote, bus, calculator, food item
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0081 --show
+Target names: bottle（瓶子）, can opener（开罐器）, remote（遥控器）, bus（巴士）, calculator（计算器）, food item（食品）
 
 scene_0082
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0082
-Target names: cup, detergent, dog, lock, palette, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0082 --show
+Target names: cup（杯子）, detergent（洗涤剂）, dog（狗）, lock（锁）, palette（调色板）, psp（PSP）
 
 scene_0083
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0083
-Target names: mouse, phonebooth, flashlight, ipad, pen, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0083 --show
+Target names: mouse（鼠标）, phonebooth（电话亭）, flashlight（手电筒）, ipad（iPad）, pen（笔）, power strip（插线板）
 
 scene_0084
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0084
-Target names: mouse, fruit, flashlight, detergent, dog, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0084 --show
+Target names: mouse（鼠标）, fruit（水果）, flashlight（手电筒）, detergent（洗涤剂）, dog（狗）, pen（笔）
 
 scene_0085
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0085
-Target names: mouse, eraser, hammer, marker, pencil, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0085 --show
+Target names: mouse（鼠标）, eraser（橡皮）, hammer（锤子）, marker（马克笔）, pencil（铅笔）, power strip（插线板）
 
 scene_0086
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0086
-Target names: can opener, remote, marker, microscope, power strip, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0086 --show
+Target names: can opener（开罐器）, remote（遥控器）, marker（马克笔）, microscope（显微镜）, power strip（插线板）, psp（PSP）
 
 scene_0087
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0087
-Target names: bird, clock, hammer, microscope, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0087 --show
+Target names: bird（鸟）, clock（时钟）, hammer（锤子）, microscope（显微镜）, pencil（铅笔）, battery（电池）
 
 scene_0088
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0088
-Target names: bottle, remote, calculator, candle, cap, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0088 --show
+Target names: bottle（瓶子）, remote（遥控器）, calculator（计算器）, candle（蜡烛）, cap（瓶盖）, milk carton（牛奶盒）
 
 scene_0089
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0089
-Target names: fruit, cellphone, coin, eraser, key, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0089 --show
+Target names: fruit（水果）, cellphone（手机）, coin（硬币）, eraser（橡皮）, key（钥匙）, cassette（磁带）
 
 scene_0090
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0090
-Target names: blender, bus, detergent, pen, power strip, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0090 --show
+Target names: blender（搅拌机）, bus（巴士）, detergent（洗涤剂）, pen（笔）, power strip（插线板）, psp（PSP）
 
 scene_0091
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0091
-Target names: bottle, bird, dog, eraser, lock, marker
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0091 --show
+Target names: bottle（瓶子）, bird（鸟）, dog（狗）, eraser（橡皮）, lock（锁）, marker（马克笔）
 
 scene_0092
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0092
-Target names: jar, key, marker, nintendo ds, pen, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0092 --show
+Target names: jar（玻璃罐）, key（钥匙）, marker（马克笔）, nintendo ds（任天堂DS）, pen（笔）, power strip（插线板）
 
 scene_0093
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0093
-Target names: bottle, food item, light bulb, microscope, nintendo ds, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0093 --show
+Target names: bottle（瓶子）, food item（食品）, light bulb（灯泡）, microscope（显微镜）, nintendo ds（任天堂DS）, cassette（磁带）
 
 scene_0094
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0094
-Target names: aaa battery, bird, food item, milk carton, pencil, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0094 --show
+Target names: aaa battery（7号电池）, bird（鸟）, food item（食品）, milk carton（牛奶盒）, pencil（铅笔）, pillow（枕头）
 
 scene_0095
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0095
-Target names: mouse, fruit, bird, dog, food item, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0095 --show
+Target names: mouse（鼠标）, fruit（水果）, bird（鸟）, dog（狗）, food item（食品）, battery（电池）
 
 scene_0096
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0096
-Target names: ashtray, candle, ipad, milk carton, pen, psp
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0096 --show
+Target names: ashtray（烟灰缸）, candle（蜡烛）, ipad（iPad）, milk carton（牛奶盒）, pen（笔）, psp（PSP）
 
 scene_0097
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0097
-Target names: mouse, can opener, knife, remote, eraser, key
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0097 --show
+Target names: mouse（鼠标）, can opener（开罐器）, knife（刀）, remote（遥控器）, eraser（橡皮）, key（钥匙）
 
 scene_0098
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0098
-Target names: remote, bear, camera, controller, nintendo ds, power strip
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0098 --show
+Target names: remote（遥控器）, bear（小熊）, camera（相机）, controller（手柄）, nintendo ds（任天堂DS）, power strip（插线板）
 
 scene_0099
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0099
-Target names: remote, airplane, bird, cellphone, detergent, food item
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0099 --show
+Target names: remote（遥控器）, airplane（飞机）, bird（鸟）, cellphone（手机）, detergent（洗涤剂）, food item（食品）
 ====================================================================================================
 DATASET: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes
 ====================================================================================================
 
 scene_0000
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0000
-Target names: can opener, notepad, ashtray, dog, hammer, pen
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0000 --show
+Target names: can opener（开罐器）, notepad（记事本）, ashtray（烟灰缸）, dog（狗）, hammer（锤子）, pen（笔）
 
 scene_0001
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0001
-Target names: knife, blender, clock, microscope, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0001 --show
+Target names: knife（刀）, blender（搅拌机）, clock（时钟）, microscope（显微镜）, pencil（铅笔）, battery（电池）
 
 scene_0002
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0002
-Target names: bottle, airplane, ashtray, bear, food item, jar
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0002 --show
+Target names: bottle（瓶子）, airplane（飞机）, ashtray（烟灰缸）, bear（小熊）, food item（食品）, jar（玻璃罐）
 
 scene_0003
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0003
-Target names: mug, flashlight, candle, canister, detergent, pillow
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0003 --show
+Target names: mug（马克杯）, flashlight（手电筒）, candle（蜡烛）, canister（罐子）, detergent（洗涤剂）, pillow（枕头）
 
 scene_0004
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0004
-Target names: bottle, cup, chocolate, palette, pencil, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0004 --show
+Target names: bottle（瓶子）, cup（杯子）, chocolate（巧克力）, palette（调色板）, pencil（铅笔）, battery（电池）
 
 scene_0005
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0005
-Target names: candle, detergent, microscope, pen, pencil, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0005 --show
+Target names: candle（蜡烛）, detergent（洗涤剂）, microscope（显微镜）, pen（笔）, pencil（铅笔）, cassette（磁带）
 
 scene_0006
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0006
-Target names: can opener, bus, detergent, food item, nintendo ds, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0006 --show
+Target names: can opener（开罐器）, bus（巴士）, detergent（洗涤剂）, food item（食品）, nintendo ds（任天堂DS）, battery（电池）
 
 scene_0007
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0007
-Target names: bottle, camera, milk carton, palette, cassette, battery
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0007 --show
+Target names: bottle（瓶子）, camera（相机）, milk carton（牛奶盒）, palette（调色板）, cassette（磁带）, battery（电池）
 
 scene_0008
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0008
-Target names: flashlight, candle, detergent, headphones, lock, milk carton
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0008 --show
+Target names: flashlight（手电筒）, candle（蜡烛）, detergent（洗涤剂）, headphones（耳机）, lock（锁）, milk carton（牛奶盒）
 
 scene_0009
 Scene folder input: /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0009
-Target names: can opener, bear, canister, coin, food item, cassette
+View command: cd /home/lin/Projects/DexGraspNet2_Wuji2 && conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1/scenes/scene_0009 --show
+Target names: can opener（开罐器）, bear（小熊）, canister（罐子）, coin（硬币）, food item（食品）, cassette（磁带）
 

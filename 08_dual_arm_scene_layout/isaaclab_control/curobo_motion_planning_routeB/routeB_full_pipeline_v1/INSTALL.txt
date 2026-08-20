@@ -1,0 +1,11 @@
+Extract under:
+
+08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/
+
+Expected:
+
+routeB_full_pipeline_v1/
+  routeB_full_pipeline/
+    ...
+
+Then give routeB_full_pipeline/CODEX_INTEGRATION_PROMPT.txt to Codex.

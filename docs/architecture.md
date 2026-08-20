@@ -1,53 +1,148 @@
-# Architecture
+# Current architecture
 
-## 总体数据流
+This document describes the current closed-loop architecture.  The historical
+research routes indexed in `verified/` use older A/B/C labels; those labels must
+not be confused with the current CLI motion routes.
 
-```text
-RGB-D + camera calibration
-  -> full single-view scene cloud (40,000 points)
-  -> text target mask (GroundingDINO + SAM)
-  -> DexGraspNet 2.0 proposals (1,024)
-  -> target membership + score + collision/path filters
-  -> Route A native Wuji2 q20 OR Route B LEAP q16 -> Wuji2 q20/root
-  -> right-arm flange targets and path audit
-  -> Isaac Lab pick, transfer, place, release, return
-```
-
-## Route A：原生 Wuji2
-
-`02_training_dataset` 产生场景、单视角点云和标签；`04_training` 训练 20 关节模型；`05_inference` 预测与过滤；`07_wuji2_network_3p3r_sim` 生成原生动作和独立手物理验证。
-
-正式动作合同由 `07` 管理，不消费 LEAP SQUEEZE。
-
-## Route B：官方 LEAP → Wuji2
-
-`03_prediction_network/official_core` 输出 LEAP；`06_leap_to_wuji2_final_pipeline` 用官方 wuji-retargeting 求 q20，再用四指尖 Kabsch 求 Wuji2 手根 6D，并迁移 LEAP SQUEEZE。
-
-`06/04_verified_baseline` 是不可修改的成功基线区；`06/01_cases/active` 最多一个可再生成工作案例，其余进入 `99_archive`。Route-C dog 来源由兼容链接保持旧读取合同。
-
-## Route C：双臂完整系统
-
-`08_dual_arm_scene_layout` 保存标定桌面、蓝/绿区域、顶部 RGB-D、dual-arm + official Wuji2 组合资产接口和 Isaac Lab 控制。控制目录根部只有正式抓放和正式回放两个入口；实现、诊断、历史、拒绝路线分别位于 `runtime/`、`diagnostics/`、`history/`、`rejected/`。
-
-右手与右法兰固连。抓取给出 `T_world_wuji_wrist` 后，机械臂目标为：
+## Independent choice axes
 
 ```text
-T_world_flange = T_world_wuji_wrist @ inverse(T_flange_wuji_wrist)
+TASK                         MOTION ROUTE
+semantic-grasp               legacy (Route A)
+color-sort                   curobo (Route B)
 ```
 
-独立手验证使用 3P+3R 虚拟根；装到机械臂后由右臂 7 关节 IK 实现手腕 6D，不再瞬移手根。
+The task decides how the current target is selected and where it is placed.
+The motion route decides only how the right-arm q7 path between shared task
+endpoints is generated and executed.
 
-## 权威边界
+## Capture and perception
 
-- upstream/vendor：官方 Wuji2、dual-arm、wuji-retargeting、官方 DexGraspNet2，禁止无差别修改。
-- core：`src/wuji2_dgn2` 与配置合同。
-- datasets：`02_training_dataset/data` 原位保护。
-- models：`03` 官方 LEAP checkpoint 与 `04` Wuji2 checkpoint。
-- cases：可生成工作材料；status 必须读 JSON。
-- verified：只指向三条路线各一个正式业务案例。
-- experiments：诊断和失败历史，不和运行入口并列。
-- archive：迁移快照与待处理清单；未经确认不删除。
+Every cycle starts with one coherent Persistent Isaac capture:
 
-## 环境边界
+```text
+rgb.png + depth_m.npy + intrinsics + T_world_camera + robot_state
+  -> RobotDepthCleaner.remove_robot()
+       -> robot_mask.npy
+       -> rgb_no_robot.png
+       -> filtered_depth.npy
+```
 
-网络使用 `graspnet2.0`；Isaac Sim/Lab 使用 `wuji2_factory`；retarget 使用项目内 Python 3.11 环境。Isaac Lab `AppLauncher` 必须拥有唯一 Kit 进程。
+`robot_mask.npy` is the only robot-pixel definition for the cycle. Semantic
+recognition, color recognition, and planning depth all consume it. The report
+capture path must match the current capture or the pipeline raises
+`STALE_ROBOT_MASK`.
+
+### Semantic target selection
+
+```text
+rgb_no_robot
+  -> GroundingDINO proposals
+  -> robot box overlap hard gate
+  -> SAM
+  -> robot mask overlap hard gate / residual
+  -> valid raw depth
+  -> world projection
+  -> rigid SourceZone membership
+  -> legal TargetSelection
+```
+
+GroundingDINO may still propose robot-shaped false positives; a proposal is not
+a legal target.  The selected mask must survive every hard gate.
+
+### Color target selection
+
+```text
+requested red/blue
+  -> GroundingDINO + SAM on rgb_no_robot
+  -> the same semantic safety gates
+  -> RGB-to-HSV color masks
+  -> mask & ~robot_mask before morphology
+  -> connected SourceZone instances
+  -> intersect legal DINO/SAM mask with one current instance
+  -> legal TargetSelection
+```
+
+Simulation color assignment is audit ground truth only; target selection never
+reads `sort_color` from object records.
+
+## Shared grasp downstream
+
+Both target sources feed the same downstream pipeline:
+
+```text
+TargetSelection
+  -> current-cycle target mask + RobotSegmenter-filtered depth
+  -> 40k DGN2 input
+  -> DexGraspNet2 proposals
+  -> LEAP reach ordering
+  -> LEAP-to-Wuji2 retarget + exact COVER
+  -> PREGRASP/LIFT/TRANSFER/PLACE/RETREAT endpoint funnel
+  -> selected motion route
+```
+
+The target mask is removed only for intentional target contact. Other objects,
+including other objects of the same color, remain environmental obstacles.
+
+## Motion Route A — legacy
+
+Route A retains the established endpoint/keypoint implementation and quintic
+arm executor:
+
+```text
+shared task semantics
+  -> flexible/keypoint q7 waypoints
+  -> legacy quintic arm interpolation
+  -> PersistentIsaacClient.execute()
+  -> PersistentScene.execute()/execute_segment()
+```
+
+## Motion Route B — cuRobo
+
+Route B changes only the arm path implementation:
+
+```text
+shared task endpoints
+  -> true 7DOF cuRobo MotionPlanner
+  -> dense time-parameterized q7 trajectory
+  -> PersistentIsaacClient.execute_routeB()
+  -> PersistentScene.execute_routeB()
+```
+
+The seven required arm segments are CURRENT→PREGRASP, PREGRASP→COVER,
+COVER→LIFT, LIFT→TRANSFER, TRANSFER→PLACE, PLACE→RETREAT, and RETREAT→HOME.
+Only adjacent dense samples may be linearly resampled at the Isaac physics
+step; Route B arm motion is not replanned or replaced by a quintic path.
+
+Route B contract:
+
+- joints exactly `arm_r_joint_1` through `arm_r_joint_7`;
+- environment/ESDF collision ON;
+- self collision OFF in endpoint IK, TrajOpt, and graph rollouts;
+- no 35DOF solve-and-slice and no hard-coded PLACE q7.
+
+## Scene migration
+
+Training scene coordinates are mapped into the calibrated SourceZone with a
+rigid transform only:
+
+```text
+T_world_object = T_world_source_zone_rigid @ T_scene_centered_object
+```
+
+SourceZone cube display scale never enters this matrix.  The persistent worker
+resolves the simulation USD from the scene dataset lineage and object identity,
+uses `SetTranslateOnly()` so orientation is preserved, and writes pre-physics
+pose/pairwise assertions before settling. SourceZone is a visual/coordinate
+region; the table collision is the physical support.
+
+## Process boundary
+
+- orchestrator and Persistent Isaac worker: `isaaclab22_sim50`;
+- GroundingDINO/SAM: `groundedsam`;
+- DGN2 network: `graspnet2.0`;
+- cuRobo IK/RobotSegmenter/MotionPlanner: `curobo_v2`;
+- hand retarget: project-local `wuji_retargeting`.
+
+There is one Persistent Isaac worker per session. GPU planning workers are
+launched in their own environment and released when their stage finishes.

@@ -11,7 +11,10 @@ for required in "$CONDA_SETUP" "$ISAAC_SIM_ENV" "$LAB_ROOT/isaaclab.sh" "$SCRIPT
   [[ -f "$required" ]] || { echo "[ERROR] missing: $required" >&2; exit 2; }
 done
 
-if pgrep -f "persistent_isaac/worker.py" >/dev/null; then
+# Match the actual Isaac Lab launch contract, not an arbitrary parent shell
+# whose command text happens to mention worker.py (for example a Python client
+# or an audit harness).  The old broad pattern falsely refused clean starts.
+if pgrep -f "[i]saaclab.sh -p $SCRIPT" >/dev/null; then
   echo "[REFUSED] persistent Isaac worker is already running" >&2
   exit 3
 fi

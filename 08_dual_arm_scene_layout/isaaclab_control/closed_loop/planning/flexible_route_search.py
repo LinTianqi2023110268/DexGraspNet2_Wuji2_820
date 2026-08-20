@@ -198,6 +198,7 @@ def _exact_cover_candidate_subfunnel(
     collision_enabled: bool,
     block_unknown: bool,
     diagnostic_disable_cover_esdf: bool,
+    cover_collision_bypass_reason: str | None,
     final_solution_count: int,
 ) -> dict:
     raw_counts = report.get("raw_success_per_target") or []
@@ -221,7 +222,8 @@ def _exact_cover_candidate_subfunnel(
         "raw_success_target_pass": bool(raw_count > 0),
         "strict_ik_accepted_solution_count": int(len(strict_rows)),
         "strict_ik_target_pass": bool(len(strict_rows) > 0),
-        "cover_esdf_bypassed": bool(diagnostic_disable_cover_esdf),
+        "cover_esdf_bypassed": bool(diagnostic_disable_cover_esdf or cover_collision_bypass_reason),
+        "cover_collision_bypass_reason": cover_collision_bypass_reason,
         "collision_audited_solution_count": int(len(audited_rows)),
         "scene_collision_rejected_solution_count": int(scene_reject),
         "target_collision_rejected_solution_count": int(target_reject),
@@ -250,9 +252,17 @@ def summarize_exact_cover_subfunnel(rows: list[dict]) -> dict:
     unknown_exposure = sum(int(row.get("unknown_exposure_solution_count", 0)) for row in sub)
     feasible_solutions = sum(int(row.get("feasible_solution_count", 0)) for row in sub)
     cover_esdf_bypassed = any(bool(row.get("cover_esdf_bypassed", False)) for row in sub)
+    bypass_reasons = sorted({
+        str(row.get("cover_collision_bypass_reason"))
+        for row in sub
+        if row.get("cover_collision_bypass_reason")
+    })
     return {
         "input_candidates": total,
         "cover_esdf_bypassed": bool(cover_esdf_bypassed),
+        "cover_collision_bypass_reason": bypass_reasons[0] if len(bypass_reasons) == 1 else (
+            bypass_reasons if bypass_reasons else None
+        ),
         "raw_curobo_reachable_targets": int(raw_targets),
         "strict_ik_targets": int(strict_targets),
         "post_collision_targets": int(feasible_targets),
@@ -459,6 +469,7 @@ def screen_exact_cover_batch(
     block_unknown: bool,
     solutions_per_candidate: int,
     diagnostic_disable_cover_esdf: bool = False,
+    cover_collision_bypass_reason: str | None = None,
 ) -> list[dict]:
     """One batched hard gate: exact Wuji2 COVER pose only."""
     geometries = [_candidate_geometry(Path(root)) for root in case_roots]
@@ -496,6 +507,7 @@ def screen_exact_cover_batch(
             collision_enabled=collision_context is not None,
             block_unknown=block_unknown,
             diagnostic_disable_cover_esdf=bool(diagnostic_disable_cover_esdf),
+            cover_collision_bypass_reason=cover_collision_bypass_reason,
             final_solution_count=len(records),
         )
         rows.append({
@@ -505,6 +517,7 @@ def screen_exact_cover_batch(
             "pass": bool(records),
             "solution_count": len(records),
             "diagnostic_cover_esdf_bypassed": bool(diagnostic_disable_cover_esdf),
+            "cover_collision_bypass_reason": cover_collision_bypass_reason,
             "exact_cover_subfunnel": subfunnel,
             "cover_solutions": records,
         })

@@ -62,6 +62,24 @@ def depth_preview(depth: np.ndarray, *, mask: np.ndarray | None = None) -> Image
     return Image.fromarray(rgb)
 
 
+def rgb_without_robot_preview(rgb: np.ndarray, robot_mask: np.ndarray) -> tuple[Image.Image, Image.Image]:
+    """Create derived RGB artifacts without altering the raw capture.
+
+    A neutral fill deliberately avoids inventing texture with inpainting.  The
+    overlay is an audit image only; neither image changes the authoritative
+    depth/robot mask contract.
+    """
+    image = np.asarray(rgb, dtype=np.uint8)
+    mask = np.asarray(robot_mask, dtype=bool)
+    if image.ndim != 3 or image.shape[2] != 3 or image.shape[:2] != mask.shape:
+        raise ValueError(f"RGB/robot mask shape mismatch: {image.shape} vs {mask.shape}")
+    no_robot = image.copy()
+    no_robot[mask] = np.asarray([127, 127, 127], dtype=np.uint8)
+    overlay = image.astype(np.float32)
+    overlay[mask] = 0.45 * overlay[mask] + 0.55 * np.asarray([255, 40, 40], dtype=np.float32)
+    return Image.fromarray(no_robot), Image.fromarray(np.clip(overlay, 0, 255).astype(np.uint8))
+
+
 def pose_from_matrix(matrix: np.ndarray, *, device: torch.device) -> Pose:
     tensor = torch.as_tensor(matrix, dtype=torch.float32, device=device)
     return Pose.from_matrix(tensor.reshape(1, 4, 4))
@@ -183,6 +201,7 @@ def run_capture_robot_segmentation(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     required = {
+        "rgb": capture_dir / "rgb.png",
         "depth_m": capture_dir / "depth_m.npy",
         "intrinsics": capture_dir / "intrinsics.npy",
         "T_world_camera": capture_dir / "T_world_camera.npy",
@@ -215,9 +234,13 @@ def run_capture_robot_segmentation(
 
     robot_mask = result["robot_mask"]
     filtered_depth = result["filtered_depth"]
+    rgb = np.asarray(Image.open(required["rgb"]).convert("RGB"), dtype=np.uint8)
+    rgb_no_robot, robot_overlay = rgb_without_robot_preview(rgb, robot_mask)
     np.save(output_dir / "robot_mask.npy", robot_mask)
     np.save(output_dir / "filtered_depth.npy", filtered_depth)
     Image.fromarray((255 * robot_mask.astype(np.uint8))).save(output_dir / "robot_mask.png")
+    rgb_no_robot.save(output_dir / "rgb_no_robot.png")
+    robot_overlay.save(output_dir / "robot_mask_overlay.png")
     depth_preview(filtered_depth, mask=robot_mask).save(output_dir / "filtered_depth_preview.png")
 
     valid_input = np.isfinite(depth_m) & (depth_m > 0.0)
@@ -239,6 +262,7 @@ def run_capture_robot_segmentation(
         "active_joint_names": cleaner.active_joint_names,
         "robot_state_joint_count": int(robot_state.get("joint_count", len(robot_state.get("joint_positions_by_name", {})))),
         "depth_shape_hw": [int(depth_m.shape[0]), int(depth_m.shape[1])],
+        "rgb_shape_hwc": [int(value) for value in rgb.shape],
         "intrinsics_shape": list(intrinsics.shape),
         "T_world_camera_shape": list(T_world_camera.shape),
         "T_base_camera": (np.linalg.inv(T_world_base) @ T_world_camera).tolist(),
@@ -251,6 +275,8 @@ def run_capture_robot_segmentation(
         "outputs": {
             "robot_mask_npy": str(output_dir / "robot_mask.npy"),
             "robot_mask_png": str(output_dir / "robot_mask.png"),
+            "rgb_no_robot_png": str(output_dir / "rgb_no_robot.png"),
+            "robot_mask_overlay_png": str(output_dir / "robot_mask_overlay.png"),
             "filtered_depth_npy": str(output_dir / "filtered_depth.npy"),
             "filtered_depth_preview_png": str(output_dir / "filtered_depth_preview.png"),
             "report": str(output_dir / "robot_segmentation_report.json"),
@@ -260,6 +286,7 @@ def run_capture_robot_segmentation(
             "T_world_base": "manual_layout_calibrated.transforms.dual_arm_mount",
             "segmenter_pose": "T_base_camera = inv(T_world_base) @ T_world_camera",
             "depth": "meters, shape [H,W]; adapter adds batch dimension [1,H,W]",
+            "rgb": "raw capture/rgb.png is immutable; rgb_no_robot.png fills RobotSegmenter pixels with neutral [127,127,127]",
         },
     }
     (output_dir / "robot_segmentation_report.json").write_text(

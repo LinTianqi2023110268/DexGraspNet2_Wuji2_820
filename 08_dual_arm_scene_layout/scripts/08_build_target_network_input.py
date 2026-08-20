@@ -111,10 +111,19 @@ def main() -> None:
         default=None,
         help="Optional explicit Grounded-SAM mask; defaults to grounded_sam/<target>/mask.npy.",
     )
+    parser.add_argument(
+        "--depth-path",
+        type=Path,
+        default=None,
+        help=(
+            "Optional aligned depth image. Route B supplies RobotSegmenter-filtered "
+            "depth here so robot pixels never enter the DGN2 scene point cloud."
+        ),
+    )
     args = parser.parse_args()
 
     capture_root = args.capture_root.resolve()
-    depth_path = capture_root / "depth_m.npy"
+    depth_path = (args.depth_path or (capture_root / "depth_m.npy")).resolve()
     intrinsic_path = capture_root / "intrinsics.npy"
     extrinsic_path = capture_root / "T_world_camera.npy"
     mask_path = (
@@ -215,6 +224,7 @@ def main() -> None:
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "target_query": args.target,
         "capture_root": str(capture_root),
+        "depth_input": str(depth_path),
         "target_mask": str(mask_path),
         "target_segmentation_id": args.target_segmentation_id,
         "point_count": POINT_COUNT,

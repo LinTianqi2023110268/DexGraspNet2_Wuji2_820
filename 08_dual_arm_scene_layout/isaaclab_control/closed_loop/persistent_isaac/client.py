@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import queue
+import signal
 import subprocess
 import threading
 import time
@@ -48,6 +49,11 @@ class PersistentIsaacClient:
         headless: bool = False,
         verbose: bool = False,
         log_callback=None,
+        task: str = "semantic-grasp",
+        color_seed: int = 42,
+        color_assignment: Path | str | None = None,
+        scene_migration_audit: bool = False,
+        task_object_collision_policy: str = "persistent_filtered",
     ) -> None:
         self.project_root = Path(project_root).expanduser().resolve()
         self.scene_manifest = Path(scene_manifest).expanduser().resolve()
@@ -67,8 +73,17 @@ class PersistentIsaacClient:
             "--project-root", str(self.project_root),
             "--scene-manifest", str(self.scene_manifest),
             "--config", str(self.runtime_config),
+            "--task", str(task),
+            "--color-seed", str(int(color_seed)),
             "--stdio",
         ]
+        if color_assignment is not None:
+            cmd.extend(["--color-assignment", str(Path(color_assignment).expanduser().resolve())])
+        if scene_migration_audit:
+            cmd.append("--scene-migration-audit")
+            cmd.extend(["--task-object-collision-policy", str(task_object_collision_policy)])
+        elif task_object_collision_policy != "persistent_filtered":
+            raise ValueError("task_object_collision_policy requires scene_migration_audit=True")
         if headless:
             cmd.append("--headless")
         env = dict(os.environ)
@@ -158,6 +173,20 @@ class PersistentIsaacClient:
             "target_segmentation_id": int(target_segmentation_id),
         }, timeout=max(self.request_timeout_s, 300.0))
 
+    def execute_routeB(
+        self,
+        *,
+        manifest_path: Path | str,
+        output_dir: Path | str,
+        target_segmentation_id: int,
+    ) -> dict:
+        return self.request({
+            "op": "execute_routeB",
+            "manifest_path": str(Path(manifest_path).expanduser().resolve()),
+            "output_dir": str(Path(output_dir).expanduser().resolve()),
+            "target_segmentation_id": int(target_segmentation_id),
+        }, timeout=max(self.request_timeout_s, 600.0))
+
     def snapshot(self, output_path: Path | str) -> dict:
         return self.request({"op": "snapshot", "output": str(Path(output_path).expanduser().resolve())})
 
@@ -171,14 +200,21 @@ class PersistentIsaacClient:
             except Exception:
                 pass
             try:
-                proc.terminate()
+                # The launcher owns an Isaac/Kit child in the same dedicated
+                # session.  A protocol-level shutdown can return before Kit has
+                # released CUDA, so wait first and then signal the *group*, not
+                # merely the launcher parent.
                 proc.wait(timeout=10.0)
             except Exception:
                 try:
-                    proc.kill()
+                    os.killpg(os.getpgid(proc.pid), signal.SIGINT)
                     proc.wait(timeout=5.0)
                 except Exception:
-                    pass
+                    try:
+                        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                        proc.wait(timeout=5.0)
+                    except Exception:
+                        pass
         self.proc = None
 
     def __enter__(self):

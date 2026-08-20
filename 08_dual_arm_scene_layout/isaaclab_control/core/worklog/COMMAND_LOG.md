@@ -1158,6 +1158,49 @@
 - Key output: `trajectory_right_arm.npz` and `report_right_arm.json` generated under `capture/curobo_test_result/`. `MotionPlanner success=True`, `planner.action_dim=7`, active joints exactly `arm_r_joint_1..7`, locked joint count `28`, `raw_result.solution.shape=[1,1,16,7]`, trajectory shape `[41,7]`, dt `0.02500000037 s`, duration `1.0000000149 s`.
 - Conclusion: true 7DOF Route B `current -> PREGRASP` planning is working. Postcheck reports environment collision false, min clearance `0.075289 m`, `scene_collision=0`, `cspace=0`, joint-limit PASS, velocity/acceleration/jerk finite PASS. Route A was not modified.
 
+## 2026-08-20 02:45 +08:00 -- Route B right-arm trajectory visualization bundle
+
+- Purpose: wire GPT-provided `trajectory_visualizer` to the validated Route B right-arm-only trajectory without modifying viewer/bundle core or planning logic.
+- Conda environment: `curobo_v2`.
+- Working directory: `/home/lin/Projects/DexGraspNet2_Wuji2`
+- Commands:
+
+  ```bash
+  conda run -n curobo_v2 python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/build_visualization_right_arm_bundle.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/trajectory_visualizer/*.py
+  PYTHONPATH=08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB conda run -n curobo_v2 python -m unittest -v trajectory_visualizer.test_bundle
+  conda run -n curobo_v2 python 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/build_visualization_right_arm_bundle.py --capture-dir 08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260819_174407/cycle_001/capture
+  timeout 30s bash -lc 'PYTHONPATH=08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB conda run -n curobo_v2 python -m trajectory_visualizer.viewer 08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260819_174407/cycle_001/capture/curobo_test_result/visualization_right_arm_bundle.npz'
+  git diff --check
+  ```
+
+- Exit code: py_compile/bundle unittest/bundle build/diff-check `0`; viewer command exited `124` due to intentional 30s timeout after entering matplotlib blocking window with no traceback.
+- Key output: generated `visualization_right_arm_bundle.npz` and `visualization_right_arm_summary.json`. Bundle has `scene_points=30000`, `sphere_count=233`, `moving=95`, `static=138`, `ee_frame=arm_r_link_tf`, `frames=41`, global min clearance `0.075289 m` at frame `24`, sphere `114`, link `arm_r_link_6`.
+- Conclusion: visualization bundle validates and viewer loads it without error. Manual GUI interactions such as slider/play-pause require user-side confirmation in the opened matplotlib window.
+
+## 2026-08-20 04:15 +08:00 -- Route B full planning/execution integration and PLACE=0 audit
+
+- Purpose: diagnose `candidate=789` `PLACE raw IK=0/945`, separate Route A/Route B command-line paths, and run Route B full planning plus one complete Isaac execution attempt.
+- Conda environments: `isaaclab22_sim50` for persistent Isaac/orchestrator; `curobo_v2` for Route B MotionPlanner backend subprocesses.
+- Working directory: `/home/lin/Projects/DexGraspNet2_Wuji2`
+- Key commands:
+
+  ```bash
+  python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/closed_loop/orchestrator.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/client.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/worker.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/planning/flexible_route_search.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/*.py
+  PYTHONPATH=08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1:08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_front_half_v1:08_dual_arm_scene_layout/isaaclab_control/closed_loop conda run --no-capture-output -n curobo_v2 python -m unittest -v routeB_full_pipeline.test_attachment_proxy routeB_full_pipeline.test_robot_config routeB_front_half.test_reach_contract routeB_front_half.test_goal_pool_io 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tests/test_flexible_planning.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tests/test_closed_loop_logic.py
+  ./run_closed_loop.sh --motion-route curobo --planning-only --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0072
+  ./run_closed_loop.sh --motion-route curobo --sim-execute --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0072
+  git diff --check
+  ```
+
+- Key output:
+  - `candidate=789` PLACE failure is not a Route B-specific bug: Route B and Route A use the same PLACE target contract and both get `PLACE raw IK=0/945` for that candidate. Other candidates in the same goal pool do have PLACE/RETREAT endpoint chains, so the shared placement-zone contract is not globally broken.
+  - Config/production PlacementZone is synchronized: center `[0.27617723418526796, -0.1446419350251421, 0.46]`, size `[0.800000011920929, 0.30000001192092896, 0.0010000000474974513]`.
+  - Route B now endpoint-preflights LIFT/TRANSFER/PLACE/RETREAT before spending true MotionPlanner time, skips candidates without a complete endpoint chain, and reuses the preflight chain pool for the selected candidate.
+  - Route B full planning PASS on session `20260820_040547/cycle_001`, selected `candidate=676`, chain `0`; all seven dense 7DOF segments PASS with environment collision ON and self collision OFF.
+  - Route B full Isaac execution completed the full route through `RETREAT_TO_HOME`. Task status is `FAIL` because the simulated grasp was empty: `verify_lift=0.3519 mm`, max lift `0.7849 mm`, final green zone `false`. This no longer aborts the motion route; it is recorded as `EMPTY_GRASP`.
+- Exit code: final static checks/unit tests `0`; Route B planning-only `0`; Route B sim-execute returned `3` because task outcome was FAIL after full route completion.
+- Cleanup: stale persistent Isaac workers were checked and stopped with SIGINT after planning/execution runs to release GPU memory.
+
 
 ## 2026-08-17 16:18:00 +0800 - final worktree cleanup
 - Purpose: clean generated outputs/history in `/home/lin/Projects/DexGraspNet2_Wuji2`, preserve vendor submodule gitlinks, retain compact candidate5989 evidence.
@@ -1167,3 +1210,283 @@
 - Exit code: 0
 - Key output: copied compact evidence, removed generated outputs/captures/archive/scratch, moved layout calibration to config, pruned intermediate checkpoints, updated docs and .gitignore.
 - Conclusion: cleanup edits prepared for user review; no git add/commit/push performed.
+
+## 2026-08-20 Route B full-planning stdout cleanup
+- Checked no active Isaac/full_motion/orchestrator process after user stopped the run.
+- Latest session inspected: `outputs/closed_loop_sessions/20260820_063033/cycle_001`.
+- Finding: front-half candidate 7938 PASS; back-half endpoint pool exists; 16 tried chains generated `COVER_TO_LIFT` trajectory then failed at `LIFT_TO_TRANSFER` before any `traj_lift_to_transfer.npz`.
+- Code-only logging/control-flow fix: Route B full backend now writes `routeB_full_plan_report.json(success=false)` for expected no-path cases and prints compact failure summary; orchestrator excludes the candidate using report stage counts instead of printing traceback tails.
+- Validation: `python -m py_compile` on orchestrator/full backend/runtime PASS; `git diff --check` PASS.
+
+## 2026-08-20 Route B attachment audit
+- Confirmed and terminated stale Isaac worker PID 61449 via SIGINT; GPU compute apps were empty afterwards.
+- Ran offline Route B full backend for session `20260820_063033/cycle_001`, candidate `7938`: attachment=True fails `LIFT_TO_TRANSFER` for 16/16 chains.
+- Added diagnostic-only `--diagnostic-disable-transfer-attachment`; with attachment disabled only for `LIFT_TO_TRANSFER`, all seven Route B dense arm segments PASS offline without Isaac.
+- Added and ran `test_attachment_audit.py`; at LIFT endpoint with attachment=True, the attached object spheres already collide with the no-target ESDF: 8/48 spheres colliding, min clearance `-0.036814 m`; with padding=0 still 6/48 colliding, min clearance `-0.031881 m`.
+- Outputs: `routeB_full/attachment_audit/attachment_audit_chain00.json`, `.npz`, `.png`; padding0 outputs in `routeB_full/attachment_audit_padding0/`.
+- Validation: py_compile PASS; git diff --check PASS.
+
+## 2026-08-20 Route B transfer attachment default OFF
+- Set `closed_loop/config/closed_loop.json` `routeB_full_pipeline.transfer_attachment=false`.
+- Runtime now passes `--disable-transfer-attachment` to Route B full backend when this config is false.
+- Startup Route B policy print now lists active OFF/FALSE items with Chinese explanations, including `RouteB transfer attachment: OFF（LIFT到TRANSFER不挂载目标proxy）`.
+- Offline verification on session `20260820_063033/cycle_001`, candidate `7938`: full Route B backend PASSed 7/7 segments with `transfer_attachment=false`, environment collision ON, self collision OFF, and no Isaac launched.
+- Validation: JSON parse PASS; py_compile PASS; git diff --check PASS.
+
+## 2026-08-20 Route B concise stdout and recoverable execution failure
+- Removed long raw JSON stdout from Route B front-half dense backend and full motion backend; reports remain written to JSON files.
+- Route B execution FAIL in orchestrator now prints concrete stage/reason/lift/green-zone/report.
+- EMPTY_GRASP and FINAL_GREEN_ZONE are treated as completed physical attempts: no placement commit, continue to next capture/query instead of returning process error.
+- Latest execution report inspected: session `20260820_073606/cycle_001` failed `EMPTY_GRASP`, `verify_lift_mm≈0.00006`, `max_object_lift_mm≈6.88`, threshold `30.0`; COVER/GRASP refinement errors were not the blocker.
+- Validation: py_compile PASS; git diff --check PASS.
+
+## 2026-08-20 07:54 +0800 - Runtime task-object friction set to 0.3
+- Purpose: user requested lowering runtime table/object contact material friction from 1.0 to 0.3 for subsequent Isaac attempts.
+- Scope: changed only `closed_loop/persistent_isaac/worker.py` runtime `RigidBodyMaterialCfg`; did not modify URDF/USD, robot dynamics, joint limits, IK, Route A/B planning, or hand q.
+- Commands:
+
+  ```bash
+  python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/worker.py
+  git diff --check
+  ```
+
+- Exit code: 0.
+- Key output: static and dynamic friction now both `0.3`; restitution remains `0.0`.
+
+## 2026-08-20 08:00 +0800 - Scene-folder Trimesh view commands added
+- Purpose: add a direct offline Trimesh scene-folder viewer and put a copy-paste view command after each scene path in `TRAIN_SCENE_INPUT_PATHS_AND_OBJECTS.txt`.
+- Scope: added `trimesh/view_scene_folder.py`; updated the scene address document only. No Isaac, DGN2, cuRobo, retarget, or physical simulation was run.
+- Commands:
+
+  ```bash
+  python -m py_compile trimesh/view_scene_folder.py
+  git diff --check
+  conda run -n graspnet2.0 python trimesh/view_scene_folder.py --scene-folder /home/lin/Projects/DexGraspNet2_Wuji2/02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_v1/scenes/scene_0000 --export /tmp/scene_0000_view_test.glb
+  ```
+
+- Exit code: 0.
+- Key output: `scene_0000` exported successfully to `/tmp/scene_0000_view_test.glb`; each scene entry now has a `View command:` line using `trimesh/view_scene_folder.py --scene-folder ... --show`.
+
+## 2026-08-20 - task/route CLI foundation + color-sort HSV plumbing
+- Purpose: begin two-axis architecture: task=`semantic-grasp|color-sort`, motion_route=`legacy|curobo`; keep Route A intact and reuse current Route B planner.
+- Commands:
+
+  ```bash
+  git status --short
+  git diff --check
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python - <<'PY'
+  for m in ['numpy','cv2','PIL']:
+      __import__(m)
+      print(m, 'OK')
+  PY
+  python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/closed_loop/orchestrator.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/client.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/worker.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/color_sort/segmentation.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/backhalf_pool.py
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/color_sort/segmentation.py --help
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tests/test_closed_loop_logic.py
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tests/test_flexible_planning.py
+  PYTHONPATH=08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_front_half_v1 /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_front_half_v1/routeB_front_half/test_goal_pool_io.py
+  PYTHONPATH=08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1 /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/test_attachment_proxy.py
+  PYTHONPATH=08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1 /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/test_robot_config.py
+  ./run_closed_loop.sh --help
+  git diff --check
+  ```
+
+- Exit code: all listed static checks and lightweight tests passed.
+- Key output:
+  - Added `--task semantic-grasp|color-sort`, `--query`, and `--color-seed` CLI plumbing.
+  - TTY startup now asks task first, then motion route; non-TTY remains semantic-grasp + legacy unless explicitly set.
+  - Semantic-grasp maps common Chinese aliases (铅笔/瓶子/杯子/狗 etc.) to English prompts before GroundingDINO.
+  - Added runtime color assignment for color-sort in Persistent Isaac worker; it binds red/blue PreviewSurface materials to runtime visual prims only, without changing mesh/collision/mass/friction/URDF/USD.
+  - Added `closed_loop/color_sort/segmentation.py` and `closed_loop/config/color_sort.json`; HSV segmentation runs in `graspnet2.0` via `network_python`, produces per-instance masks, overlay, `detection_report.json`, and `selected_target.json`.
+  - Added dynamic red_zone/blue_zone split from the current calibrated PlacementZone and Route B endpoint preflight uses the selected color zone by passing a layout override into the existing A placement helper.
+  - Added current-scene failed HSV instance exclusion to avoid selecting the same failed component repeatedly.
+  - RouteB front/full subprocess runtime no longer prints huge raw JSON lines to stdout; artifacts remain written to JSON.
+- No Isaac app was launched in this phase.
+
+## 2026-08-20 - color-sort RouteB DGN2 slug/mask path fix
+- Purpose: fix first real color-sort planning-only run where selected HSV instance `red_001` produced DGN2 under `capture/dgn2/red_001`, but RouteB LEAP reach backend looked under `capture/dgn2/red` because it received color name as query.
+- Commands:
+
+  ```bash
+  pgrep -af '[p]ersistent_isaac/worker.py|[i]saaclab.sh|[S]imulationApp|[i]saac-sim|[k]it/kit' || true
+  python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/closed_loop/orchestrator.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/full_motion_backend.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/runtime.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/attachment_proxy.py
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tests/test_closed_loop_logic.py
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tests/test_flexible_planning.py
+  git diff --check
+  ```
+
+- Exit code: 0.
+- Key output:
+  - No persistent Isaac/Kit process was running after the failed user planning-only attempt.
+  - Orchestrator now passes `target_slug` (e.g. `red_001`) to RFS/RouteB LEAP reach runtime so it locates the correct DGN2 prediction folder.
+  - RouteB full backend now accepts `--target-mask-path` and uses the selected HSV instance mask for target ESDF removal and attachment-proxy fallback. Semantic GroundedSAM path remains backward compatible.
+  - LEAP reach fallback stdout is compacted to avoid dumping traceback tails into the terminal.
+
+## 2026-08-20 - Source/Placement zone and scene alignment audit
+- Purpose: respond to observed Isaac object/table penetration and Trimesh-vs-Isaac scene mismatch.
+- Commands:
+
+  ```bash
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python - <<'PY'
+  import json, numpy as np
+  from pathlib import Path
+  layout=json.loads(Path('08_dual_arm_scene_layout/config/manual_layout_calibrated.json').read_text())
+  print(layout['geometry'].get('zone_collision'))
+  print(layout['transforms']['table']['position_world_m'], layout['geometry']['table_size_m'])
+  print(layout['transforms']['source_zone']['position_world_m'], layout['geometry']['source_zone_size_m'])
+  print(layout['transforms']['placement_zone']['position_world_m'], layout['geometry']['placement_zone_size_m'])
+  PY
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python trimesh/view_scene_folder.py --scene-folder 02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0065 --calibrated-layout --export /tmp/scene_0065_calibrated.glb
+  python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/worker.py trimesh/view_scene_folder.py
+  git diff --check
+  ```
+
+- Exit code: 0.
+- Key output:
+  - `manual_layout_calibrated.json` has `zone_collision=false`; SourceZone/PlacementZone are visual/planning regions, not physical support surfaces.
+  - Isaac worker embeds scene_manifest object poses via `world_from_source @ T_world_centered_object`; the old Trimesh viewer displayed only the local training tabletop frame, so it did not match calibrated Isaac world layout.
+  - Added `trimesh/view_scene_folder.py --calibrated-layout` to show the scene embedded into calibrated SourceZone and draw blue SourceZone / green PlacementZone markers.
+  - Fixed object physics audit so invalid USD/PhysX AABB sentinel values no longer produce PASS; they now report WARN when CollisionAPI prims exist but no valid AABB can be computed.
+
+## 2026-08-20 — scene_0065 migration-contract audit
+
+- Purpose: prove the training-scene -> SourceZone -> Persistent USD bridge before any physics step, then compare the training default object-object policy against the persistent filtered policy.
+- Commands:
+
+  ```bash
+  python -m py_compile \
+    08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/worker.py \
+    08_dual_arm_scene_layout/isaaclab_control/closed_loop/persistent_isaac/client.py \
+    08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/audit_scene_migration_contract.py
+  /home/lin/miniconda3/envs/graspnet2.0/bin/python \
+    08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/audit_scene_migration_contract.py \
+    --scene-manifest 02_training_dataset/data/scene_datasets/wuji2_train60_100seminal_256view_force_adjusted_legacy_v1/scenes/scene_0065/scene_manifest.json \
+    --capture-dir 08_dual_arm_scene_layout/isaaclab_control/outputs/scene_migration_audits/20260820_scene0065_pose_fix_headless/capture
+  git diff --check
+  ```
+
+- Exit code: 0 for the corrected headless migration captures and static checks.
+- Key result: old worker loaded a wrong test-split editable USD fallback and, independently, `set_reference_transform()` lost the manifest rotation because `Gf.Matrix4d.SetTranslate()` resets the matrix.  The corrected worker resolves the explicit training lineage asset and uses `SetTranslateOnly()` after setting rotation.
+- Corrected zero-step result: max expected-vs-rigid position error `0.0126 mm`; max rotation error `0.0303 deg`; max pairwise geometry error `0.0118 mm`; all collision AABBs valid and within `1.1 mm` of table contact.
+- Settle P1 (training object-object collision ON) and P2 (persistent object-object filtering OFF): both had maximum 1.0 s root drift `0.0017 mm` for scene_0065.  Therefore the previous 18--85 mm errors were migration-frame failures, not normal settling or collision-policy behavior.
+- Artifacts: `outputs/scene_migration_audits/20260820_scene0065_pose_fix_headless/capture/` and `outputs/scene_migration_audits/20260820_scene0065_training_collision_on/capture/`.
+
+## 2026-08-20 — unified RobotSegmenter mask consumers
+
+- Scope was perception-consumer wiring only; scene migration, asset lineage, DGN2/LEAP/Wuji2, IK, and Route B collision/planner contracts were not changed.
+- One current-capture RobotSegmenter run now writes immutable-input derivatives under `capture/planning/`: `robot_mask.npy/png`, `rgb_no_robot.png`, `robot_mask_overlay.png`, and `filtered_depth.npy`. Raw `capture/rgb.png` and `capture/depth_m.npy` remain untouched.
+- Semantic flow now uses `rgb_no_robot` for GroundingDINO, a RobotSegmenter box hard gate before SAM, a second SAM-mask hard gate, then valid-depth + rigid SourceZone acceptance. `NO_LEGAL_TARGET` is structured and never selects the robot.
+- HSV flow now intersects red/blue masks with `~robot_mask` before morphology/components and records `robot_mask_capture_dir` plus `stale_mask_check`.
+- Commands: `PYTHONPATH=08_dual_arm_scene_layout/isaaclab_control/closed_loop/scripts /home/lin/miniconda3/envs/graspnet2.0/bin/python -m unittest 08_dual_arm_scene_layout/isaaclab_control/closed_loop/scripts/test_semantic_target_rejects_robot.py -v`; current-capture HSV replay; `git diff --check`.
+- Results: seven safety regressions PASS. HSV replay on `20260820_091931/cycle_001` PASS (`red source=0`, `blue source=2`, selected `blue_001`) with current-capture robot-mask validation. Its old selected bottle DINO box had 0.6308 robot-box overlap and is now rejected pre-SAM. The sandbox cannot expose CUDA for a new RobotSegmenter/GroundedSAM replay; no Isaac was launched and no raw capture was modified.
+
+## 2026-08-20 — pre-experiment pipeline preflight
+
+- No planner, grasp, physics, scene-migration, or threshold parameters changed in this review.
+- Static checks: `py_compile` for the perception/orchestrator/persistent-Isaac/Route-B-runtime files; seven semantic safety regressions PASS; stale capture mismatch raises `STALE_ROBOT_MASK`; HSV replay on `20260820_091931/cycle_001` has zero robot pixels in both final red/blue masks; all four task/route dispatch pairs preserve their explicit values; `git diff --check` PASS.
+- Historical replay evidence: old bottle DINO boxes 0, 1, and 3 have RobotSegmenter overlap 0.5645, 0.6308, and 0.8489 respectively and now evaluate to `REJECT_ROBOT_OVERLAP`.
+- Real GPU smoke (headless, no arm motion): started one Persistent Isaac worker with scene_0065, migration pre-physics guard PASS (`pairwise=0.0118 mm`, visual scale unused), captured, then cleanly shut down.  cuRobo RobotSegmenter produced 225801 robot pixels and all five expected artifacts. GroundingDINO/SAM ran on `capture/planning/rgb_no_robot.png` for query `pencil`: two legal SourceZone proposals, selected index 0, 5286 valid target points, `stale_mask_check=PASS`. No IK, MotionPlanner, GRASP, or execution ran.
+- Smoke artifacts: `outputs/pre_experiment_prefight/20260820_100016_semantic_curobo_perception_smoke/capture/`. Final host check: no Persistent Isaac/Kit process; GPU 16 MiB used / 7791 MiB free.
+
+## 2026-08-20 — semantic target robot-exclusion regression repair
+
+- Facts-first audit found exactly one robot-mask source: `perception/robot_segmentation/curobo_robot_segmenter.py:RobotDepthCleaner.remove_robot`, producing `capture/planning/robot_mask.npy`.  It was previously consumed only by Route B planning depth/ESDF, not semantic final target selection.
+- First regression difference: `closed_loop/scripts/grounded_sam_backend.py` called `backend.choose_detection(boxes, scores)` before SAM and never evaluated robot overlap or SourceZone membership.  The historical implementation did not contain a separate semantic robot-exclusion gate; the missing behavior was a wiring gap, not a threshold regression.
+- Current screenshot replay: session `20260820_091607`, query `cup`, prior selected DINO idx 0 had SAM robot overlap `0.999581` and SourceZone overlap `0.0`; it is now `REJECT_ROBOT_OVERLAP`.  idx 1 (`0.781461` robot overlap) is also rejected; legal idx 2 is selected after gates.
+- Minimal repair: reuse the existing current-capture RobotSegmenter mask for semantic proposals; SAM evaluates every DINO box, hard-rejects dominant robot masks, removes non-dominant robot pixels, then requires valid residual geometry in the rigid SourceZone.  `STALE_ROBOT_MASK` fails if robot report capture_dir differs from RGB capture.
+- Validation: six pure regression cases PASS (`robot only`, `real target vs robot`, `partial occlusion`, `outside SourceZone`, `stale mask`, shape mismatch); offline DINO+SAM replay PASS; `py_compile` and `git diff --check` PASS.  No Isaac was started for replay.
+
+## 2026-08-20 — pre-experiment mainline cleanup
+
+- Purpose: remove superseded generated output and caches without changing frozen production behavior.
+- Commands: exact validated cleanup lists only (`xargs -r -d '\n' rm -rf < /tmp/cleanup_sessions_exact.txt`; `xargs -r -d '\n' rm -rf < /tmp/isaaclab_cache_inventory.txt`), followed by `py_compile`, semantic target safety unittest, HSV replay, scene migration read-only audit, Route B static tests, CLI dispatch smoke, and `git diff --check`.
+- Results: deleted exactly 42 superseded `closed_loop_sessions` directories and one superseded migration audit; retained `20260820_063033`, `20260820_073606`, `20260820_091607`, `20260820_091931`, both formal migration audits, and the latest preflight smoke.  Moved two unreferenced legacy files to `/home/lin/DexGraspNet2_Wuji2_cleanup_archive_20260820/`; production references: none.
+- Validation: `py_compile` PASS; semantic target safety 7/7 PASS; HSV replay PASS with zero robot pixels in final red/blue masks; migration audit PASS (`pairwise=0.011837 mm`, final drift `0.001711 mm`); Route B import/reach/config static tests PASS; four CLI task/route combinations PASS.  No Isaac, planner, or grasp execution was launched.
+
+## 2026-08-20 — scene_0020 pre-physics guard false positive
+
+- User formal experiment stopped before CAPTURE/perception at `SCENE_MIGRATION_GEOMETRY_FAIL`; artifact: `outputs/closed_loop_sessions/20260820_101901/cycle_001/capture/scene_migration_spawn_audit.json`.
+- Evidence: all scene_0020 manifest expected poses exactly matched the USD `actual_rigid_body_world_pose` (`0.000000 mm / 0.000000 deg`, including Pencil). The only failed value was the post-`SimulationContext.reset()` runtime cache for Pencil: `0.024183 mm / 0.103546 deg`.
+- Root cause: `_pre_physics_migration_audit()` incorrectly used `RigidObject.data.root_pose_w` as the zero-step migration truth. That runtime float representation is useful for physical-state diagnosis but is not the authored USD rigid-root frame being audited.
+- Minimal repair: the live guard and offline migration audit now use `actual_rigid_body_world_pose` for pose and pairwise geometry acceptance. Runtime pose deltas remain serialized as `runtime_pose_diagnostic_error_*`; settling drift remains referenced to the runtime initial state.
+- Validation: `py_compile` PASS and an offline assertion on the failed artifact confirms `PREPHYSICS_USD_GUARD_PASS` while preserving the runtime `0.103546 deg` diagnostic. No Route B, grasp, collision, scene mapping, or physics parameter changed.
+
+## 2026-08-20 — Route B candidate retry exception-boundary repair
+
+- User session `20260820_102515/cycle_002`: candidate `2898` correctly failed all 16 full-route chains at `LIFT_TO_TRANSFER` and was excluded. Candidate `1884` then had a structured front-half no-path (`NO_PREGRASP_GOAL_WITH_VALID_CUROBO_TRAJECTORY`, exit 3, report present), but the process stopped instead of trying the remaining goals.
+- Root cause: `routeB_front_half/runtime.py:run_routeB_dense_backend()` raised on every nonzero backend exit even when the backend had written an expected candidate-level `success=false` report. Additionally, orchestrator checked success-only trajectory artifacts before its existing failure/retry branch.
+- Repair: structured `success=false` front-half reports now return to orchestrator; orchestrator handles that report first, logs candidate/rank/reason/report, excludes the case, then retries. Missing trajectory artifacts remain fatal only for a claimed-success report.
+- Added `routeB_front_half/test_runtime_candidate_failure.py` regression. Validation: py_compile PASS; new retry regression PASS; existing reach-contract 2/2 PASS; `git diff --check` PASS. No Isaac, trajectory planning, or grasp run during this repair.
+
+## 2026-08-20 — color-query GroundingDINO mainline
+
+- User requirement: color-sort is a task parallel to semantic-grasp. The user enters `red`/`blue` (also `红`/`蓝` interactively); the system must visually find and move every current SourceZone object of that requested color, without choosing targets from the seeded runtime color assignment.
+- Command shape: `./run_closed_loop.sh --task color-sort --target-color red --motion-route curobo --color-seed 42 --sim-execute`. In interactive mode the color prompt appears after task/seed/route selection.
+- Selection contract: raw RGB -> RobotSegmenter `rgb_no_robot` -> GroundingDINO prompt `"red object"` or `"blue object"` -> existing SAM robot/SourceZone safety gates -> intersection with the best matching *current RGB* HSV instance. The final DGN2/ESDF target mask is this one-instance intersection, not the broad SAM mask and not a `sort_color` GT lookup.
+- Color HSV remains used only for current-image color instance validation, RobotSegmenter exclusion before morphology, and failure-instance bookkeeping. `color_assignment.json` remains runtime material/audit metadata only.
+- Continuity: candidate/endpoint/full Route B retries still explore alternate grasp/endpoint poses first. If that funnel is exhausted for a color instance, the robot has not moved (planning is frozen at HOME), the instance is recorded and skipped, then the next cycle takes a fresh capture and tries another same-color instance. If Route B execution returns `HOME` after a failure, that instance is likewise skipped and the session continues. Route-B executor recovery reverses only already executed cuRobo dense samples (no arm IK, quintic replacement, or replanning) and verifies HOME.
+- Validation commands: `isaaclab22_sim50 python -m py_compile` for orchestrator/color segmentation/Route-B executor; semantic safety unittest `7/7 PASS`; HSV preferred-color + robot-mask replay PASS; GroundingDINO/SAM offline `red object` replay on retained scene_0020 color capture PASS. The visual result had red overlap only (best `red_003`, 7784 pixels) and zero blue overlap. `git diff --check` PASS.
+
+## 2026-08-20 — repository cleanup and standardized color campaign
+
+- Read and classified tracked source/docs plus untracked root packages before
+  deletion. Protected `02_training_dataset/TRAIN_SCENE_INPUT_PATHS_AND_OBJECTS.txt`,
+  all dataset/model assets, official URDF/USD, production paths, tests, and audit tools.
+- Moved six unreferenced legacy/duplicate trees to
+  `/home/lin/DexGraspNet2_Wuji2_cleanup_archive_20260820/repository_cleanup/`.
+- Removed only explicit generated targets: root diagnostic logs, Trimesh/inference
+  output, sessions `20260820_101901` and `20260820_102515`, non-selected Route B
+  scratch, superseded color planning scratch, and Python/pytest caches.
+- Rewrote root/current-mainline READMEs and architecture documentation. No
+  planner, perception, physics, grasp, threshold, or official asset behavior changed.
+- Cleanup regression commands: `bash -n`; focused `py_compile`; semantic safety
+  unittest (7/7); core unittest (17/17); closed-loop unittest (9/9); Route B
+  unit/static tests (10 PASS); HSV replay with zero robot overlap; read-only scene
+  migration audit; four-way CLI dispatch smoke; `git diff --check`.
+- Added `closed_loop/tools/run_color_sort_campaign.py`. Dry-run PASS for a single
+  timestamp root containing `scene_0000:RED`, `scene_0020:BLUE`, and
+  `scene_0065:RED`. The tool invokes the unchanged production entry, streams and
+  records terminal output, stops on a real error, and resumes passed cases.
+
+## 2026-08-20 — supervised three-scene color campaign and error repairs
+
+- Campaign command: `/home/lin/miniconda3/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/run_color_sort_campaign.py`; canonical timestamp root:
+  `outputs/color_sort_campaigns/20260820_111709/`.
+- Cases: `scene_0000:RED`, `scene_0020:BLUE`, `scene_0065:RED`; seed 42,
+  headless Persistent Isaac, production color-sort + Route B sim-execute entry.
+- Error repair 1: a candidate-level `PREGRASP_TO_COVER` no-path formerly raised
+  before writing a current full-plan report, allowing a stale prior candidate
+  report to be read. The full backend now writes structured `success=false`, and
+  runtime unlinks the previous report before each candidate. Candidate failure
+  returns to the existing retry loop; worker/protocol failures remain fatal.
+- Error repair 2: target-local DGN2 `Official sampler produced no seed` formerly
+  ended the process. Color-sort now classifies only that exact exhausted-sampler
+  condition as recoverable, keeps/validates HOME, records the failed instance,
+  performs a fresh capture, and tries another instance. CUDA, checkpoint, input,
+  or protocol errors remain fatal.
+- Error repair 3: GroundedSAM already evaluated multiple legal DINO proposals,
+  but color-sort persisted and matched only the highest proposal. It now saves
+  all legal residual proposal masks in `legal_proposal_masks.npz` and matches
+  each current unfailed HSV instance against all legal proposals. Semantic-grasp
+  selection behavior is unchanged and runtime color assignment remains audit-only.
+- Error repair 4: the campaign resume path now always rewrites a complete
+  three-case summary, uses timestamped terminal logs, emits compact
+  `campaign_report.md`, and indexes failure stages without dumping long backend
+  JSON to the human report. `--rerun-case` permits one invalidated case to be
+  repeated under the same campaign root.
+- Final case status: all three processes exited normally with
+  `PARTIAL_COMPLETE`; no arm execution was started because no case produced all
+  seven Route B paths. `scene_0000` blockers were predominantly
+  `COVER_TO_LIFT`; `scene_0020` had `PLACE targets=385 raw IK=0` for the selected
+  blue instance plus one DINO/SAM-to-HSV no-match; `scene_0065` had
+  `CURRENT_TO_PREGRASP` no-path, `PLACE raw IK=0`, and two small-instance DGN2
+  no-seed results. These are preserved as truthful blockers; no placement zone,
+  IK tolerance, collision threshold, physics, grasp, or planner parameter was
+  changed to force PASS.
+- Removed four superseded campaign sessions and two obsolete un-timestamped
+  logs after repaired reruns; retained exactly one canonical latest session per
+  case. The removed generated data totalled about 312 MiB.
+- Final regression commands/results: Isaac-env focused `py_compile` PASS;
+  semantic safety 7/7 PASS; closed-loop 11/11 PASS; core 17/17 PASS; Route B
+  10/10 PASS in `curobo_v2`; GroundedSAM embedded subprocess compile PASS; HSV
+  replay stale-mask PASS with red/blue robot overlap both zero; scene migration
+  audit PASS; `git diff --check` PASS.

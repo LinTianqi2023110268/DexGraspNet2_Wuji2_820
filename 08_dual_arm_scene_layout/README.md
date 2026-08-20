@@ -1,10 +1,8 @@
 # 08 双臂与桌面手动布置
 
-> 最新进度：正式测试集 `scene_0000` 的现场重拍版本已完成顶部 RGB-D、
-> GroundingDINO+SAM 缓存、官方 DexGraspNet 2.0 缓存、LEAP→Wuji2 迁移、
-> 全位姿 IK、完整路径碰撞以及 24.85 s 完整抓放。正式业务结果见
-> `isaaclab_control/evidence/closed_loop_20260817_candidate5989/report.json`；
-> 17.78 s 结果只到 LIFT，保留为阶段性汇报，不是第二个完整案例。
+> 当前闭环入口、task/route 组合和最新合同见 `isaaclab_control/MAINLINE.md`。
+> 本文重点保留桌面、SourceZone、PlacementZone、相机和双臂安装的标定方法；
+> 旧的单次物理结果只作为历史证据，不代表当前正式实验已完成。
 
 本 README 的前半部分说明桌面、抓取区、放置区、相机和双臂机械臂的手工标定；
 机械臂控制、完整抓放和稳定回放以 `isaaclab_control/README.md` 为准。
@@ -36,8 +34,10 @@ Isaac Lab。正式机械臂控制则由 Isaac Lab AppLauncher 单独启动，不
 └── PhysicsScene
 ```
 
-桌面上表面默认位于世界`z=0`。蓝区和绿区只是半透明视觉标识，没有碰撞；
-真正承载物体的是灰色桌面。
+蓝区和绿区只是半透明视觉标识，没有碰撞；真正承载物体的是灰色桌面。当前标定
+JSON 中 Table 中心 `z=0.44 m`、厚度 `0.04 m`，因此物理桌面顶面为
+`z=0.46 m`。运行时必须从 live stage/config 读取，不能把 SourceZone 显示 cube 的
+顶面或 scale 当作物理支撑。
 
 ## 2. 模型位置与保护原则
 

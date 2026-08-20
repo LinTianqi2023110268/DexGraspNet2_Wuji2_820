@@ -123,7 +123,7 @@ Stage 03才按照`grasp_label_generation.training_selection_mask`物化训练子
 
 ## 环境分工
 
-- `generate_scenes_and_views.py`必须在`wuji2_factory`/Isaac Sim 5.0启动环境中运行；
+- `generate_scenes_and_views.py`必须在`isaaclab22_sim50`/Isaac Sim 5.0环境中运行；
 - 其他标签阶段使用`graspnet2.0`；
 - 两套100场景训练标签和25600个相机输入已经完成；不要再次运行完整相机生成脚本。
 

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import itertools
 import json
 import math
@@ -44,6 +45,16 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--scene-manifest", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--task", choices=["semantic-grasp", "color-sort"], default="semantic-grasp")
+    parser.add_argument("--color-seed", type=int, default=42)
+    parser.add_argument("--color-assignment", type=Path, default=None)
+    parser.add_argument("--scene-migration-audit", action="store_true")
+    parser.add_argument(
+        "--task-object-collision-policy",
+        choices=["persistent_filtered", "training_default"],
+        default="persistent_filtered",
+        help="Audit-only object/object policy; production default remains persistent_filtered.",
+    )
     parser.add_argument("--stdio", action="store_true")
     AppLauncher.add_app_launcher_args(parser)
     return parser.parse_args()
@@ -64,13 +75,21 @@ from isaaclab.sim import SimulationContext  # noqa: E402
 from isaacsim.core.utils.stage import add_reference_to_stage, get_current_stage  # noqa: E402
 from isaacsim.core.utils.viewports import set_camera_view  # noqa: E402
 from omni.physx.scripts import physicsUtils  # noqa: E402
-from pxr import Gf, PhysxSchema, Sdf, Usd, UsdGeom, UsdPhysics  # noqa: E402
+from pxr import Gf, PhysxSchema, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade  # noqa: E402
 
 
 PROJECT_ROOT = ARGS.project_root.expanduser().resolve()
 CONTROL_ROOT = PROJECT_ROOT / "08_dual_arm_scene_layout/isaaclab_control"
 sys.path.insert(0, str(CONTROL_ROOT))
+sys.path.insert(
+    0,
+    str(
+        CONTROL_ROOT
+        / "curobo_motion_planning_routeB/routeB_full_pipeline_v1"
+    ),
+)
 from core.config import DEFAULT_INITIAL_RIGHT_ARM_DEG  # noqa: E402
+from routeB_full_pipeline import execute_routeB_manifest  # noqa: E402
 
 
 ROBOT_PRIM = "/World/Layout/DualArmMount/DualArm"
@@ -105,6 +124,10 @@ TRACE_FIELDS = [
     "ring_target_force_n", "pinky_target_force_n", "palm_target_force_n",
 ]
 CONTACT_GROUPS = ("thumb", "index", "middle", "ring", "pinky", "palm")
+COLOR_SORT_PALETTE = {
+    "red": (0.90, 0.08, 0.08),
+    "blue": (0.08, 0.20, 0.95),
+}
 
 
 def contact_group_for_body(body_name: str) -> str | None:
@@ -169,6 +192,78 @@ def emit(payload: dict) -> None:
 
 def load_json(path: Path) -> dict:
     return json.loads(Path(path).resolve().read_text(encoding="utf-8"))
+
+
+def sha256_file(path: Path) -> str:
+    """Return a content hash without loading a mesh/USD through a renderer."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def resolve_manifest_simulation_usd(scene_manifest_path: Path, record: dict) -> tuple[Path, dict]:
+    """Resolve the exact editable USD for a manifest object, or fail closed.
+
+    A scene manifest stores a *centered source-mesh* pose.  It cannot safely be
+    replayed against an arbitrary cache with the same numerical pool index:
+    different dataset splits use different object orders.  Older Persistent
+    workers made precisely that mistake by always falling back to the test-set
+    cache.  Resolution is therefore by explicit manifest path, or by the
+    combination of source dataset / object code / pool index; it never falls
+    back to a different split merely because an index exists there.
+    """
+    scene_manifest_path = Path(scene_manifest_path).resolve()
+    explicit = record.get("simulation_usd")
+    if explicit:
+        candidate = Path(explicit).expanduser().resolve()
+        if not candidate.is_file():
+            raise FileNotFoundError(f"Manifest simulation_usd does not exist: {candidate}")
+        return candidate, {"mode": "manifest_explicit", "dataset_root": None}
+
+    code = str(record.get("object_code", record.get("code", "")))
+    pool_index = int(record["object_pool_index"])
+    if not code:
+        raise RuntimeError("Manifest object has neither simulation_usd nor object_code")
+
+    datasets_root = scene_manifest_path.parents[2]
+    source_dataset = scene_manifest_path.parents[2]
+    expected_urdf_name = f"{code}_centered_coacd.urdf"
+    # ``*_force_adjusted_legacy_v1`` stores altered accepted poses but reuses
+    # the production asset cache from its lineage dataset.  Resolve that
+    # lineage explicitly; never silently choose a test split with the same
+    # object code/index.
+    lineage_name = source_dataset.name.replace("_force_adjusted_legacy", "")
+    lineage_root = source_dataset.parent / lineage_name
+    preferred_roots = [source_dataset]
+    if lineage_root != source_dataset and lineage_root.is_dir():
+        preferred_roots.append(lineage_root)
+    candidates: list[tuple[Path, Path]] = []
+    for dataset_root in sorted(path for path in datasets_root.parent.iterdir() if path.is_dir()):
+        urdf = dataset_root / "prepared_assets" / f"object_{pool_index + 1:03d}" / expected_urdf_name
+        usd = dataset_root / "usd_cache" / f"object_{pool_index:03d}" / "flat" / f"object_{pool_index:03d}_editable.usd"
+        if urdf.is_file() and usd.is_file():
+            candidates.append((dataset_root.resolve(), usd.resolve()))
+    preferred = [item for item in candidates if item[0] in preferred_roots]
+    if len(preferred) == 1:
+        dataset_root, usd = preferred[0]
+    elif len(candidates) == 1:
+        dataset_root, usd = candidates[0]
+    else:
+        formatted = [f"{root} -> {usd}" for root, usd in candidates]
+        raise RuntimeError(
+            "Cannot prove the editable USD asset identity for "
+            f"object_code={code!r}, pool_index={pool_index}. candidates={formatted}. "
+            "Add simulation_usd to the scene manifest; do not substitute another dataset split."
+        )
+    return usd, {
+        "mode": "dataset_code_pool_index_match",
+        "scene_dataset_root": str(source_dataset),
+        "resolved_asset_dataset_root": str(dataset_root),
+        "object_code": code,
+        "object_pool_index": pool_index,
+    }
 
 
 def matrix_to_quaternion_wxyz(rotation: np.ndarray) -> np.ndarray:
@@ -245,12 +340,49 @@ def rigid_world_transform(stage: Usd.Stage, prim_path: str) -> np.ndarray:
     return result
 
 
+def rotation_error_deg(expected: np.ndarray, actual: np.ndarray) -> float:
+    relative = np.asarray(expected, dtype=np.float64).T @ np.asarray(actual, dtype=np.float64)
+    cosine = float(np.clip((np.trace(relative) - 1.0) * 0.5, -1.0, 1.0))
+    return float(np.rad2deg(np.arccos(cosine)))
+
+
+def pose_error(expected: np.ndarray, actual: np.ndarray) -> tuple[float, float]:
+    return (
+        1000.0 * float(np.linalg.norm(np.asarray(expected)[:3, 3] - np.asarray(actual)[:3, 3])),
+        rotation_error_deg(np.asarray(expected)[:3, :3], np.asarray(actual)[:3, :3]),
+    )
+
+
+def xform_audit(stage: Usd.Stage, prim_path: str) -> dict:
+    """Serialize authored transform operations and the evaluated world scale."""
+    prim = stage.GetPrimAtPath(prim_path)
+    if not prim.IsValid():
+        return {"valid": False, "prim_path": str(prim_path)}
+    xformable = UsdGeom.Xformable(prim)
+    operations = []
+    for operation in xformable.GetOrderedXformOps():
+        value = operation.Get()
+        operations.append({"name": str(operation.GetOpName()), "value": str(value)})
+    row = gf_matrix_to_numpy(xformable.ComputeLocalToWorldTransform(Usd.TimeCode.Default()))
+    return {
+        "valid": True,
+        "prim_path": str(prim_path),
+        "ordered_ops": operations,
+        "world_row_major": row.tolist(),
+        "world_scale_row_norm": np.linalg.norm(row[:3, :3], axis=1).tolist(),
+        "world_rigid_pose": rigid_world_transform(stage, prim_path).tolist(),
+    }
+
+
 def set_reference_transform(stage: Usd.Stage, root_path: str, pose: np.ndarray) -> None:
     prim = stage.GetPrimAtPath(root_path)
     quaternion = matrix_to_quaternion_wxyz(pose[:3, :3])
     transform = Gf.Matrix4d(1.0)
     transform.SetRotate(Gf.Quatd(float(quaternion[0]), Gf.Vec3d(*map(float, quaternion[1:]))))
-    transform.SetTranslate(Gf.Vec3d(*map(float, pose[:3, 3])))
+    # ``SetTranslate`` replaces the entire matrix in Gf and silently erases
+    # the rotation written above.  The manifest frame is a full centered-object
+    # SE(3) pose, so translation must be inserted without changing rotation.
+    transform.SetTranslateOnly(Gf.Vec3d(*map(float, pose[:3, 3])))
     xform = UsdGeom.Xformable(prim)
     xform.ClearXformOpOrder()
     xform.AddTransformOp().Set(transform)
@@ -284,6 +416,36 @@ def configure_demo_view(config: dict) -> None:
         distance * math.cos(yaw), distance * math.sin(yaw), float(view.get("height_above_target_m", 0.75))
     ])
     set_camera_view(eye=eye, target=target, camera_prim_path="/OmniverseKit_Persp")
+
+
+def safe_material_token(text: str) -> str:
+    return "".join(ch if ch.isalnum() else "_" for ch in text).strip("_")[:64] or "object"
+
+
+def define_preview_material(stage: Usd.Stage, path: str, color: tuple[float, float, float]) -> UsdShade.Material:
+    material = UsdShade.Material.Define(stage, path)
+    shader = UsdShade.Shader.Define(stage, f"{path}/PreviewSurface")
+    shader.CreateIdAttr("UsdPreviewSurface")
+    shader.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).Set(
+        Gf.Vec3f(*map(float, color))
+    )
+    shader.CreateInput("roughness", Sdf.ValueTypeNames.Float).Set(0.65)
+    shader.CreateInput("metallic", Sdf.ValueTypeNames.Float).Set(0.0)
+    material.CreateSurfaceOutput().ConnectToSource(shader.ConnectableAPI(), "surface")
+    return material
+
+
+def bind_visual_material(stage: Usd.Stage, root_path: str, material: UsdShade.Material) -> int:
+    """Bind material to renderable prims only; collision/mass/rigid APIs are untouched."""
+    root = stage.GetPrimAtPath(root_path)
+    if not root.IsValid():
+        return 0
+    count = 0
+    for prim in Usd.PrimRange(root):
+        if prim.IsA(UsdGeom.Gprim):
+            UsdShade.MaterialBindingAPI(prim).Bind(material)
+            count += 1
+    return count
 
 
 def camera_calibration(stage: Usd.Stage, width: int, height: int) -> tuple[np.ndarray, np.ndarray, dict]:
@@ -408,6 +570,12 @@ class PersistentScene:
         self.scene_manifest_path = Path(scene_manifest).resolve()
         self.scene_source = load_json(self.scene_manifest_path)
         self.config = config
+        self.task_type = str(getattr(ARGS, "task", "semantic-grasp"))
+        self.scene_migration_audit = bool(getattr(ARGS, "scene_migration_audit", False))
+        self.task_object_collision_policy = str(getattr(ARGS, "task_object_collision_policy", "persistent_filtered"))
+        if self.task_object_collision_policy != "persistent_filtered" and not self.scene_migration_audit:
+            raise RuntimeError("--task-object-collision-policy is allowed only with --scene-migration-audit")
+        self.color_assignment = self._build_color_assignment() if self.task_type == "color-sort" else None
         stage_path = PROJECT_ROOT / config["stage"] if not Path(config["stage"]).is_absolute() else Path(config["stage"])
         print("[Isaac] 初始化持续场景：只加载一次 USD / 机械臂 / 相机", flush=True)
         if not stage_utils.open_stage(str(stage_path.resolve())):
@@ -467,6 +635,19 @@ class PersistentScene:
         self.current_desired_arm = self.robot.data.joint_pos[:, self.arm_ids].clone()
         self.capture_count = 0
         self.execute_count = 0
+        # This is deliberately taken after SimulationContext.reset() but before
+        # any call to step()/hold().  It is the zero-physics-step proof of the
+        # scene-manifest -> SourceZone -> referenced USD bridge.
+        self.initial_spawn_audit = self._pre_physics_migration_audit()
+        print(
+            "[SCENE MIGRATION PRE-PHYSICS] "
+            f"{self.initial_spawn_audit['status']} | "
+            f"pairwise={self.initial_spawn_audit['max_pairwise_distance_error_mm']:.4f}mm | "
+            f"scale_used=NO",
+            flush=True,
+        )
+        for issue in self.initial_spawn_audit["errors"]:
+            print(f"[SCENE MIGRATION PRE-PHYSICS FAIL] {issue}", flush=True)
         # The CAPTURE command owns the single 1 s settle, including cycle 1.
         # Do not add a hidden second settle during worker construction.
         initial_hold = float(config.get("initial_hold_s", 0.0))
@@ -474,6 +655,49 @@ class PersistentScene:
             self.hold(initial_hold, render=False)
         self.pause()
         print("[Isaac] ✓ 持续场景已就绪（规划期间物理暂停）", flush=True)
+
+
+    def _build_color_assignment(self) -> dict:
+        objects = list(self.scene_source.get("objects", []))
+        seg_ids = [int(record["segmentation_id"]) for record in objects]
+        if not seg_ids:
+            raise RuntimeError("color-sort requires at least one task object")
+        rng = np.random.default_rng(int(getattr(ARGS, "color_seed", 42)))
+        shuffled = np.asarray(seg_ids, dtype=np.int64)
+        rng.shuffle(shuffled)
+        red_count = int(math.ceil(len(shuffled) / 2.0))
+        if len(shuffled) >= 2:
+            red_count = min(max(red_count, 1), len(shuffled) - 1)
+        color_by_seg: dict[int, str] = {}
+        for index, seg_id in enumerate(shuffled.tolist()):
+            color_by_seg[int(seg_id)] = "red" if index < red_count else "blue"
+        rows = []
+        for record in objects:
+            seg_id = int(record["segmentation_id"])
+            color = color_by_seg[seg_id]
+            rows.append({
+                "segmentation_id": seg_id,
+                "object_code": str(record.get("object_code", record.get("code", f"object_{seg_id}"))),
+                "sort_color": color,
+                "sort_rgb": list(COLOR_SORT_PALETTE[color]),
+            })
+        assignment = {
+            "schema_version": 1,
+            "seed": int(getattr(ARGS, "color_seed", 42)),
+            "policy": "balanced_seeded_random",
+            "palette": {key: list(value) for key, value in COLOR_SORT_PALETTE.items()},
+            "objects": rows,
+        }
+        target = getattr(ARGS, "color_assignment", None)
+        if target is not None:
+            path = Path(target).expanduser().resolve()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(assignment, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            print(f"[COLOR SORT] color_assignment={path}", flush=True)
+        red = sum(1 for row in rows if row["sort_color"] == "red")
+        blue = sum(1 for row in rows if row["sort_color"] == "blue")
+        print(f"[COLOR SORT] runtime dye assignment | seed={assignment['seed']} red={red} blue={blue}", flush=True)
+        return assignment
 
 
     def play(self) -> None:
@@ -496,26 +720,24 @@ class PersistentScene:
         material_path = "/World/PhysicsMaterials/TaskObjectsPersistent"
         sim_utils.spawn_rigid_body_material(
             material_path,
-            sim_utils.RigidBodyMaterialCfg(static_friction=1.0, dynamic_friction=1.0, restitution=0.0),
+            sim_utils.RigidBodyMaterialCfg(static_friction=0.3, dynamic_friction=0.3, restitution=0.0),
         )
         wrappers: list[RigidObject] = []
         records: list[dict] = []
         root_paths: list[str] = []
+        color_by_seg: dict[int, dict] = {}
+        if self.color_assignment is not None:
+            color_by_seg = {
+                int(row["segmentation_id"]): row
+                for row in self.color_assignment.get("objects", [])
+            }
         for record in self.scene_source["objects"]:
             seg_id = int(record["segmentation_id"])
             code = str(record.get("object_code", record.get("code", f"object_{seg_id}")))
             root_path = f"{TASK_ROOT}/Object_{seg_id:03d}"
-            simulation_usd = record.get("simulation_usd")
-            if simulation_usd is None:
-                pool_index = int(record["object_pool_index"])
-                simulation_usd = (
-                    PROJECT_ROOT
-                    / "02_training_dataset/data/scene_datasets/wuji2_test60_10upright_10view_v1"
-                    / f"usd_cache/object_{pool_index:03d}/flat/object_{pool_index:03d}_editable.usd"
-                )
-            simulation_usd = Path(simulation_usd).expanduser().resolve()
-            if not simulation_usd.is_file():
-                raise FileNotFoundError(simulation_usd)
+            simulation_usd, asset_resolution = resolve_manifest_simulation_usd(
+                self.scene_manifest_path, record
+            )
             add_reference_to_stage(str(simulation_usd), root_path)
             source_pose_value = record.get("T_world_centered_object", record.get("pose_world_object"))
             if source_pose_value is None:
@@ -525,33 +747,82 @@ class PersistentScene:
             prim = self.stage.GetPrimAtPath(root_path)
             prim.CreateAttribute("dgn2:segmentationId", Sdf.ValueTypeNames.Int).Set(seg_id)
             prim.CreateAttribute("dgn2:objectCode", Sdf.ValueTypeNames.String).Set(code)
+            color_record = color_by_seg.get(seg_id)
+            visual_bind_count = 0
+            if color_record is not None:
+                sort_color = str(color_record["sort_color"])
+                sort_rgb = tuple(float(x) for x in color_record["sort_rgb"])
+                prim.CreateAttribute("dgn2:sortColor", Sdf.ValueTypeNames.String).Set(sort_color)
+                material = define_preview_material(
+                    self.stage,
+                    f"/World/Looks/ColorSort_{safe_material_token(sort_color)}_{seg_id:03d}",
+                    sort_rgb,
+                )
+                visual_bind_count = bind_visual_material(self.stage, root_path, material)
             rigid = find_one_rigid_prim(self.stage, root_path)
             PhysxSchema.PhysxRigidBodyAPI.Apply(rigid).CreateDisableGravityAttr().Set(False)
             UsdPhysics.MassAPI.Apply(rigid).CreateMassAttr().Set(float(self.config.get("task_object_mass_kg", 0.1)))
             sim_utils.bind_physics_material(root_path, material_path)
             wrappers.append(RigidObject(RigidObjectCfg(prim_path=str(rigid.GetPath()), spawn=None)))
             root_paths.append(root_path)
+            source_mesh = record.get("asset", {}).get("source_obj")
+            source_mesh_path = None if source_mesh is None else (PROJECT_ROOT / source_mesh).resolve()
+            source_mesh_hash = (
+                None if source_mesh_path is None or not source_mesh_path.is_file()
+                else sha256_file(source_mesh_path)
+            )
+            expected_source_mesh_hash = record.get("asset", {}).get("source_obj_sha256")
+            if expected_source_mesh_hash is not None and source_mesh_hash != str(expected_source_mesh_hash):
+                raise RuntimeError(
+                    f"Source mesh hash mismatch for {code}: expected={expected_source_mesh_hash} "
+                    f"actual={source_mesh_hash} path={source_mesh_path}"
+                )
             records.append({
                 **record,
                 "segmentation_id": seg_id,
                 "object_code": code,
                 "simulation_usd": str(simulation_usd),
+                "simulation_usd_sha256": sha256_file(simulation_usd),
+                "asset_resolution": asset_resolution,
+                "source_mesh": None if source_mesh_path is None else str(source_mesh_path),
+                "source_mesh_sha256": source_mesh_hash,
+                "source_mesh_hash_verified": expected_source_mesh_hash is None or source_mesh_hash == str(expected_source_mesh_hash),
                 "root_path": root_path,
                 "rigid_path": str(rigid.GetPath()),
+                "sort_color": None if color_record is None else str(color_record["sort_color"]),
+                "sort_rgb": None if color_record is None else [float(x) for x in color_record["sort_rgb"]],
+                "sort_visual_bind_count": int(visual_bind_count),
             })
-        # Preserve the validated execution behavior: task objects do not collide
-        # with each other, while robot/table/object PhysX collisions stay active.
-        group_path = "/World/CollisionGroups/PersistentTaskObjects"
-        group = UsdPhysics.CollisionGroup.Define(self.stage, group_path)
-        group.CreateFilteredGroupsRel().AddTarget(group.GetPath())
-        for root_path in root_paths:
-            physicsUtils.add_collision_to_collision_group(self.stage, root_path, group_path)
-        print(f"[Isaac] ✓ 动态物体={len(wrappers)}，对象对过滤={len(list(itertools.combinations(root_paths, 2)))}", flush=True)
+        # Production keeps the historical filtered policy.  The alternate path
+        # exists solely for a training-vs-persistent migration A/B experiment.
+        if self.task_object_collision_policy == "persistent_filtered":
+            group_path = "/World/CollisionGroups/PersistentTaskObjects"
+            group = UsdPhysics.CollisionGroup.Define(self.stage, group_path)
+            group.CreateFilteredGroupsRel().AddTarget(group.GetPath())
+            for root_path in root_paths:
+                physicsUtils.add_collision_to_collision_group(self.stage, root_path, group_path)
+            filtered_pairs = len(list(itertools.combinations(root_paths, 2)))
+        else:
+            filtered_pairs = 0
+        print(
+            f"[Isaac] ✓ 动态物体={len(wrappers)}，对象对策略={self.task_object_collision_policy}，"
+            f"过滤对象对={filtered_pairs}",
+            flush=True,
+        )
         return wrappers, records
 
 
-    def _collision_aabb_world(self, root_path: str) -> tuple[np.ndarray | None, np.ndarray | None, int]:
-        # Union world AABB of prims carrying UsdPhysics.CollisionAPI.
+    def _geometry_aabb_world(
+        self, root_path: str, *, collision_only: bool
+    ) -> tuple[np.ndarray | None, np.ndarray | None, int]:
+        """Union valid world AABBs, with a mesh-point fallback for invalid USD bounds.
+
+        Some referenced flattened USDs expose an invalid BBoxCache sentinel for
+        a CollisionAPI Xform.  Treating that sentinel as an AABB hid exactly the
+        migration failures we need to diagnose.  We therefore traverse the
+        collision scope and compute a world AABB directly from mesh points when
+        necessary.
+        """
         root = self.stage.GetPrimAtPath(root_path)
         if not root.IsValid():
             return None, None, 0
@@ -563,19 +834,72 @@ class PersistentScene:
         mins: list[np.ndarray] = []
         maxs: list[np.ndarray] = []
         collision_count = 0
+        selected_gprims: dict[str, Usd.Prim] = {}
         for prim in Usd.PrimRange(root):
-            if not prim.HasAPI(UsdPhysics.CollisionAPI):
-                continue
-            collision_count += 1
+            selected = prim.HasAPI(UsdPhysics.CollisionAPI)
+            if selected:
+                collision_count += 1
+            if collision_only:
+                if not selected:
+                    continue
+                for nested in Usd.PrimRange(prim):
+                    if nested.IsA(UsdGeom.Gprim):
+                        selected_gprims[str(nested.GetPath())] = nested
+            elif prim.IsA(UsdGeom.Gprim):
+                selected_gprims[str(prim.GetPath())] = prim
+
+        if collision_only and not selected_gprims:
+            # A CollisionAPI may itself be a Mesh/Gprim.
+            selected_gprims = {
+                str(prim.GetPath()): prim
+                for prim in Usd.PrimRange(root)
+                if prim.IsA(UsdGeom.Gprim) and prim.HasAPI(UsdPhysics.CollisionAPI)
+            }
+
+        for prim in selected_gprims.values():
             aligned = cache.ComputeWorldBound(prim).ComputeAlignedBox()
             lower = np.asarray(aligned.GetMin(), dtype=np.float64)
             upper = np.asarray(aligned.GetMax(), dtype=np.float64)
-            if np.all(np.isfinite(lower)) and np.all(np.isfinite(upper)):
+            valid = (
+                np.all(np.isfinite(lower))
+                and np.all(np.isfinite(upper))
+                and np.all(upper >= lower)
+                and np.all(np.abs(lower) < 100.0)
+                and np.all(np.abs(upper) < 100.0)
+            )
+            if valid:
                 mins.append(lower)
                 maxs.append(upper)
+                continue
+            # Fallback: compute from points/extent using OpenUSD's row-vector
+            # local-to-world matrix.  This is intentionally read-only.
+            points_attr = prim.GetAttribute("points")
+            points = points_attr.Get() if points_attr.IsValid() else None
+            if points is None:
+                extent_attr = prim.GetAttribute("extent")
+                extent = extent_attr.Get() if extent_attr.IsValid() else None
+                if extent is not None and len(extent) == 2:
+                    lo = np.asarray(extent[0], dtype=np.float64)
+                    hi = np.asarray(extent[1], dtype=np.float64)
+                    points = [
+                        Gf.Vec3d(x, y, z)
+                        for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])
+                    ]
+            if points is None or len(points) == 0:
+                continue
+            row = gf_matrix_to_numpy(
+                UsdGeom.Xformable(prim).ComputeLocalToWorldTransform(Usd.TimeCode.Default())
+            )
+            local_h = np.c_[np.asarray(points, dtype=np.float64), np.ones(len(points), dtype=np.float64)]
+            world = local_h @ row
+            mins.append(np.min(world[:, :3], axis=0))
+            maxs.append(np.max(world[:, :3], axis=0))
         if not mins:
             return None, None, collision_count
         return np.min(np.stack(mins), axis=0), np.max(np.stack(maxs), axis=0), collision_count
+
+    def _collision_aabb_world(self, root_path: str) -> tuple[np.ndarray | None, np.ndarray | None, int]:
+        return self._geometry_aabb_world(root_path, collision_only=True)
 
     def _audit_task_objects(self, *, emit_terminal: bool) -> dict:
         table_min, table_max, table_collision_count = self._collision_aabb_world(TABLE_PRIM)
@@ -608,6 +932,8 @@ class PersistentScene:
                 warnings.append("kinematicEnabled=true")
             if collision_count <= 0:
                 warnings.append("no CollisionAPI prim")
+            if collision_count > 0 and (lower is None or upper is None):
+                warnings.append("no valid collision AABB from CollisionAPI prims")
             if penetration_mm is not None and penetration_mm > warn_penetration_mm:
                 warnings.append(
                     f"collision AABB penetrates table by {penetration_mm:.1f}mm "
@@ -710,34 +1036,162 @@ class PersistentScene:
                 imageable.MakeInvisible()
         return saved
 
-    def _current_scene_manifest(self) -> dict:
+    def _current_scene_manifest(self, *, snapshot_kind: str = "current") -> dict:
         rows = []
         for wrapper, record in zip(self.objects, self.object_records):
             pose = wrapper.data.root_pose_w[0].detach().cpu().numpy()
             world_from_object = pose_from_position_quaternion_wxyz(pose[:3], pose[3:7])
             source_from_object = self.source_from_world @ world_from_object
+            expected_source = np.asarray(
+                record.get("T_world_centered_object", record.get("pose_world_object")), dtype=np.float64
+            )
+            expected_world = self.world_from_source @ expected_source
+            reference_world = rigid_world_transform(self.stage, str(record["root_path"]))
+            rigid_world = rigid_world_transform(self.stage, str(record["rigid_path"]))
+            reference_from_rigid = np.linalg.inv(reference_world) @ rigid_world
+            expected_error_mm, expected_error_deg = pose_error(expected_world, world_from_object)
+            visual_lower, visual_upper, _ = self._geometry_aabb_world(
+                str(record["root_path"]), collision_only=False
+            )
+            collision_lower, collision_upper, collision_count = self._collision_aabb_world(
+                str(record["root_path"])
+            )
             row = dict(record)
             row["pose_world_object"] = source_from_object.tolist()
             row["T_world_centered_object"] = source_from_object.tolist()
+            row["snapshot_kind"] = snapshot_kind
+            row["manifest_local_pose"] = expected_source.tolist()
+            row["expected_world_pose"] = expected_world.tolist()
+            row["actual_reference_root_world_pose"] = reference_world.tolist()
+            row["actual_rigid_body_world_pose"] = rigid_world.tolist()
+            row["actual_rigid_body_runtime_pose"] = world_from_object.tolist()
+            row["T_reference_root_rigid_body"] = reference_from_rigid.tolist()
+            row["runtime_pose_error_from_expected_mm"] = expected_error_mm
+            row["runtime_pose_error_from_expected_deg"] = expected_error_deg
+            row["reference_xform"] = xform_audit(self.stage, str(record["root_path"]))
+            row["rigid_xform"] = xform_audit(self.stage, str(record["rigid_path"]))
+            row["visual_AABB_world"] = None if visual_lower is None else {
+                "min_m": visual_lower.tolist(), "max_m": visual_upper.tolist(),
+            }
+            row["collision_AABB_world"] = None if collision_lower is None else {
+                "min_m": collision_lower.tolist(), "max_m": collision_upper.tolist(),
+            }
+            row["collision_prim_count"] = collision_count
+            row["runtime_linear_velocity_world_m_s"] = wrapper.data.root_lin_vel_w[0].detach().cpu().tolist()
+            row["runtime_angular_velocity_world_rad_s"] = wrapper.data.root_ang_vel_w[0].detach().cpu().tolist()
+            # Keep the historical settled names for Route A/B consumers and
+            # older offline audits.  ``actual_rigid_body_runtime_pose`` is a
+            # SimulationContext runtime-state diagnostic; the zero-physics
+            # migration proof deliberately uses the authored USD rigid-root
+            # pose below, before any dynamic step is permitted.
             row["settled_pose_layout_world"] = world_from_object.tolist()
-            row["settled_linear_velocity_world_m_s"] = wrapper.data.root_lin_vel_w[0].detach().cpu().tolist()
-            row["settled_angular_velocity_world_rad_s"] = wrapper.data.root_ang_vel_w[0].detach().cpu().tolist()
+            row["settled_linear_velocity_world_m_s"] = row["runtime_linear_velocity_world_m_s"]
+            row["settled_angular_velocity_world_rad_s"] = row["runtime_angular_velocity_world_rad_s"]
             rows.append(row)
         return {
             "schema_version": 3,
-            "status": "persistent_isaac_current_scene",
+            "status": f"persistent_isaac_{snapshot_kind}_scene",
             "created_utc": datetime.now(timezone.utc).isoformat(),
             "source_scene_manifest": str(self.scene_manifest_path),
             "coordinate_contract": {
                 "object_pose": "pose_world_object means T_SourceZone_centeredObject",
                 "layout_bridge": "T_layoutWorld_object = T_layoutWorld_SourceZone @ pose_world_object",
+                "scale_used_for_scene_mapping": False,
             },
             "table": self.scene_source["table"],
             "world_from_source_zone": self.world_from_source.tolist(),
+            "task_object_collision_policy": self.task_object_collision_policy,
             "objects": rows,
             "persistent_session": True,
             "capture_count": self.capture_count,
             "execute_count": self.execute_count,
+        }
+
+    def _pre_physics_migration_audit(self) -> dict:
+        """Validate the scene bridge before the first dynamic physics step."""
+        snapshot = self._current_scene_manifest(snapshot_kind="initial_spawn_pre_physics")
+        source_row = gf_matrix_to_numpy(
+            UsdGeom.Xformable(self.stage.GetPrimAtPath(SOURCE_ZONE_PRIM)).ComputeLocalToWorldTransform(Usd.TimeCode.Default())
+        )
+        source_size_xy = np.linalg.norm(source_row[:2, :3], axis=1)
+        training_size_xy = np.asarray(self.scene_source["table"]["paper_size_m"], dtype=np.float64)
+        table_lower, table_upper, _ = self._collision_aabb_world(TABLE_PRIM)
+        table_top = None if table_upper is None else float(table_upper[2])
+        expected_positions = []
+        actual_positions = []
+        object_rows = []
+        errors = []
+        source_center = self.world_from_source[:3, 3]
+        for row in snapshot["objects"]:
+            expected = np.asarray(row["expected_world_pose"], dtype=np.float64)
+            # This audit proves the manifest -> SourceZone -> referenced-USD
+            # transform before the first physics step.  The USD rigid root is
+            # the corresponding authoritative frame.  ``wrapper.data`` is
+            # initialized by SimulationContext.reset() through a float runtime
+            # representation and can differ slightly even at zero user physics
+            # steps; retain it as a diagnostic, never as this frame-contract
+            # gate.
+            actual_usd = np.asarray(row["actual_rigid_body_world_pose"], dtype=np.float64)
+            actual_runtime = np.asarray(row["actual_rigid_body_runtime_pose"], dtype=np.float64)
+            expected_positions.append(expected[:3, 3])
+            actual_positions.append(actual_usd[:3, 3])
+            err_mm, err_deg = pose_error(expected, actual_usd)
+            runtime_err_mm, runtime_err_deg = pose_error(expected, actual_runtime)
+            collision_aabb = row["collision_AABB_world"]
+            bottom_minus_table_mm = None
+            if collision_aabb is not None and table_top is not None:
+                bottom_minus_table_mm = 1000.0 * (float(collision_aabb["min_m"][2]) - table_top)
+            inside_xy = bool(np.all(np.abs(actual_usd[:2, 3] - source_center[:2]) <= 0.5 * source_size_xy + 1.0e-9))
+            row_audit = {
+                "segmentation_id": int(row["segmentation_id"]),
+                "object_code": row["object_code"],
+                "pose_error_mm": err_mm,
+                "pose_error_deg": err_deg,
+                "runtime_pose_diagnostic_error_mm": runtime_err_mm,
+                "runtime_pose_diagnostic_error_deg": runtime_err_deg,
+                "inside_SourceZone_xy": inside_xy,
+                "collision_bottom_minus_table_top_mm": bottom_minus_table_mm,
+                "collision_geometry_valid": collision_aabb is not None,
+                "asset_identity_verified": bool(row.get("source_mesh_hash_verified", False)),
+            }
+            object_rows.append(row_audit)
+            if err_mm > 0.1 or err_deg > 0.05:
+                errors.append(f"pose seg={row_audit['segmentation_id']} {err_mm:.3f}mm/{err_deg:.4f}deg")
+            if collision_aabb is None:
+                errors.append(f"no valid collision geometry seg={row_audit['segmentation_id']}")
+
+        max_pairwise_error_mm = 0.0
+        if len(expected_positions) >= 2:
+            expected_xyz = np.stack(expected_positions)
+            actual_xyz = np.stack(actual_positions)
+            expected_pair = np.linalg.norm(expected_xyz[:, None, :] - expected_xyz[None, :, :], axis=-1)
+            actual_pair = np.linalg.norm(actual_xyz[:, None, :] - actual_xyz[None, :, :], axis=-1)
+            max_pairwise_error_mm = 1000.0 * float(np.max(np.abs(expected_pair - actual_pair)))
+            if max_pairwise_error_mm > 0.1:
+                errors.append(f"pairwise geometry {max_pairwise_error_mm:.3f}mm")
+        # SourceZone's authored float32 visual scale differs from the training
+        # manifest's decimal 0.3 by ~1e-8 m; this is serialization precision,
+        # not a geometric resize.  Keep the migration acceptance well below
+        # the required 0.1 mm geometric threshold.
+        if not np.allclose(training_size_xy, source_size_xy, atol=1.0e-7, rtol=0.0):
+            errors.append(f"table/source size mismatch train={training_size_xy.tolist()} source={source_size_xy.tolist()}")
+
+        return {
+            "schema_version": 1,
+            "status": "PASS" if not errors else "FAIL",
+            "errors": errors,
+            "scale_used_for_scene_mapping": False,
+            "training_scene_size_xy_m": training_size_xy.tolist(),
+            "source_zone_visual_size_xy_m": source_size_xy.tolist(),
+            "source_zone_center_world_m": source_center.tolist(),
+            "source_zone_physical_collision_support": False,
+            "table_physical_collision_support": True,
+            "task_object_collision_policy": self.task_object_collision_policy,
+            "training_table_top_z_m": float(self.scene_source["table"]["top_z_m"]),
+            "isaac_table_collision_top_world_z_m": table_top,
+            "max_pairwise_distance_error_mm": max_pairwise_error_mm,
+            "objects": object_rows,
+            "snapshot": snapshot,
         }
 
     def write_snapshot(self, output: Path) -> Path:
@@ -765,6 +1219,20 @@ class PersistentScene:
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return path
 
+    def _settle_state_sample(self, time_s: float) -> dict:
+        rows = []
+        for wrapper, record in zip(self.objects, self.object_records):
+            pose = wrapper.data.root_pose_w[0].detach().cpu().numpy().astype(np.float64)
+            rows.append({
+                "segmentation_id": int(record["segmentation_id"]),
+                "object_code": str(record["object_code"]),
+                "position_world_m": pose[:3].tolist(),
+                "quaternion_world_wxyz": pose[3:7].tolist(),
+                "linear_velocity_world_m_s": wrapper.data.root_lin_vel_w[0].detach().cpu().tolist(),
+                "angular_velocity_world_rad_s": wrapper.data.root_ang_vel_w[0].detach().cpu().tolist(),
+            })
+        return {"time_s": float(time_s), "objects": rows}
+
     def capture(self, output_dir: Path, hold_s: float | None = None) -> dict:
         """Hold the current HOME scene, capture RGB-D, then freeze physics.
 
@@ -774,9 +1242,24 @@ class PersistentScene:
         robot_state are written only after the final rendered physics step, so
         RGB-D, object poses and q_current refer to the same frozen instant.
         """
-        self.play()
         output = Path(output_dir).resolve()
         output.mkdir(parents=True, exist_ok=True)
+        initial_manifest_path = output / "initial_spawn_scene_manifest.json"
+        initial_manifest_path.write_text(
+            json.dumps(self.initial_spawn_audit["snapshot"], ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        migration_path = output / "scene_migration_spawn_audit.json"
+        migration_path.write_text(
+            json.dumps(self.initial_spawn_audit, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        if self.initial_spawn_audit["status"] != "PASS":
+            raise RuntimeError(
+                "SCENE_MIGRATION_GEOMETRY_FAIL: pre-physics scene is not an exact rigid "
+                f"migration; audit={migration_path}"
+            )
+        self.play()
         requested_hold = float(self.config.get("post_home_hold_s", 1.0) if hold_s is None else hold_s)
         if requested_hold < 0.0:
             raise ValueError("capture hold_s must be non-negative")
@@ -787,11 +1270,23 @@ class PersistentScene:
         # 12 steps.  No hidden +0.1 s settle is added.
         hold_steps = max(1, round(requested_hold / self.dt))
         render_start = max(0, hold_steps - camera_warmup_frames)
+        # The trace deliberately uses fixed physical times, not renderer frames.
+        # It reveals whether a failure occurs at contact creation (step 1), in a
+        # short depenetration impulse, or through gradual sliding.
+        trace_times = (0.0, self.dt, 0.05, 0.10, 0.25, 0.50, 1.00)
+        trace_indices = {
+            max(0, min(hold_steps, int(round(target / self.dt)))): float(target)
+            for target in trace_times if target <= requested_hold + 0.5 * self.dt
+        }
+        settle_trace = [self._settle_state_sample(0.0)]
         visibility_before_capture = self._set_capture_debug_visibility(visible=False)
         try:
             for step_index in range(hold_steps):
                 render = step_index >= render_start
                 self.step(render=render)
+                completed = step_index + 1
+                if completed in trace_indices:
+                    settle_trace.append(self._settle_state_sample(completed * self.dt))
                 if render:
                     self.camera.update(dt=self.dt, force_recompute=True)
 
@@ -800,6 +1295,16 @@ class PersistentScene:
             self.pause()
             self.capture_count += 1
             physics_audit_path = self._write_object_physics_audit(output)
+            settle_trace_path = output / "physics_settle_trace.json"
+            settle_trace_path.write_text(
+                json.dumps({
+                    "schema_version": 1,
+                    "dt_s": self.dt,
+                    "requested_hold_s": requested_hold,
+                    "samples": settle_trace,
+                }, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
 
             intrinsic, world_from_camera, camera_model = camera_calibration(
                 self.stage, self.camera_width, self.camera_height
@@ -839,6 +1344,9 @@ class PersistentScene:
             "extrinsics": {"file": "T_world_camera.npy", "matrix": world_from_camera.tolist()},
             "camera_model": camera_model,
             "settled_scene_manifest": str(settled_path),
+            "initial_spawn_scene_manifest": str(initial_manifest_path),
+            "scene_migration_spawn_audit": str(migration_path),
+            "physics_settle_trace": str(settle_trace_path),
             "robot_state": str(robot_state),
             "object_physics_audit": str(physics_audit_path),
             "post_home_hold_s": requested_hold,
@@ -854,6 +1362,9 @@ class PersistentScene:
             "intrinsics": str(output / "intrinsics.npy"),
             "T_world_camera": str(output / "T_world_camera.npy"),
             "settled_scene_manifest": str(settled_path),
+            "initial_spawn_scene_manifest": str(initial_manifest_path),
+            "scene_migration_spawn_audit": str(migration_path),
+            "physics_settle_trace": str(settle_trace_path),
             "robot_state": str(robot_state),
             "object_physics_audit": str(physics_audit_path),
             "hold_s": requested_hold,
@@ -1559,6 +2070,16 @@ def main() -> int:
                     target_segmentation_id=int(req["target_segmentation_id"]),
                 )
                 emit({"ok": True, "op": "execute", **result})
+            elif op == "execute_routeB":
+                result = execute_routeB_manifest(
+                    scene,
+                    project_root=PROJECT_ROOT,
+                    manifest_path=Path(req["manifest_path"]),
+                    output_dir=Path(req["output_dir"]),
+                    target_segmentation_id=int(req["target_segmentation_id"]),
+                    quintic=quintic,
+                )
+                emit({"ok": True, "op": "execute_routeB", **result})
             elif op == "snapshot":
                 path = scene.write_snapshot(Path(req["output"]))
                 emit({"ok": True, "op": "snapshot", "output": str(path)})

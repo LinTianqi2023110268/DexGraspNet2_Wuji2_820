@@ -25,6 +25,66 @@ def load_module(name: str, path: Path):
 
 
 class ClosedLoopLogicTests(unittest.TestCase):
+    def test_color_matching_uses_all_legal_grounded_sam_proposals(self):
+        orchestrator = load_module(
+            "closed_loop_orchestrator_color_proposals",
+            CLOSED_LOOP / "orchestrator.py",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            archive_path = root / "legal_proposal_masks.npz"
+            proposal_a = np.zeros((4, 5), dtype=bool)
+            proposal_a[0:2, 0:2] = True
+            proposal_b = np.zeros((4, 5), dtype=bool)
+            proposal_b[2:4, 3:5] = True
+            np.savez_compressed(
+                archive_path,
+                proposal_indices=np.asarray([3, 7], dtype=np.int64),
+                masks=np.stack([proposal_a, proposal_b]),
+            )
+            instance_a_path = root / "red_000.npy"
+            instance_b_path = root / "red_001.npy"
+            np.save(instance_a_path, proposal_a)
+            np.save(instance_b_path, proposal_b)
+            result = {
+                "legal_proposal_masks": str(archive_path),
+                "selected_detection": 3,
+                "detections": [
+                    {"index": 3, "score": 0.9},
+                    {"index": 7, "score": 0.7},
+                ],
+            }
+            rows = orchestrator.match_grounded_color_proposals(
+                grounded_sam_result=result,
+                selected_mask_path=instance_a_path,
+                hsv_instances=[
+                    {"instance_id": "red_001", "mask_path": str(instance_b_path)}
+                ],
+            )
+            self.assertEqual(rows[0]["proposal_index"], 7)
+            self.assertEqual(rows[0]["instance_id"], "red_001")
+            self.assertEqual(rows[0]["overlap_px"], 4)
+
+    def test_only_target_local_dgn2_empty_result_is_recoverable(self):
+        orchestrator = load_module(
+            "closed_loop_orchestrator_dgn2_recovery",
+            CLOSED_LOOP / "orchestrator.py",
+        )
+        self.assertTrue(
+            orchestrator.is_recoverable_color_target_generation_failure(
+                "RuntimeError: Official sampler produced no seed on the segmented target"
+            )
+        )
+        for fatal in (
+            "CUDA is not visible",
+            "checkpoint missing",
+            "seed/input mismatch",
+            "Official DGN2 LEAP inference failed without diagnostic",
+        ):
+            self.assertFalse(
+                orchestrator.is_recoverable_color_target_generation_failure(fatal)
+            )
+
     def test_scene_folder_parsing_requires_manifest(self):
         orchestrator = load_module("closed_loop_orchestrator", CLOSED_LOOP / "orchestrator.py")
         with tempfile.TemporaryDirectory() as tmp:

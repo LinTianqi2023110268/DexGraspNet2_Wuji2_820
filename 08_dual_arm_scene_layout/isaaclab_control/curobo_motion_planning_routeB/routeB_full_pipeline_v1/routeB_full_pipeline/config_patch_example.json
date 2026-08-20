@@ -1,0 +1,14 @@
+{
+  "routeB_full_pipeline": {
+    "enabled": true,
+    "conda_exe": "/home/lin/miniconda3/bin/conda",
+    "conda_env": "curobo_v2",
+    "script": "08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/full_motion_backend.py",
+    "backhalf_chain_limit": 32,
+    "attachment_padding_m": 0.005,
+    "attachment_min_dim_m": 0.02,
+    "attachment_sphere_slots": 48,
+    "attachment_sphere_count": 32,
+    "max_chain_trials": 16
+  }
+}

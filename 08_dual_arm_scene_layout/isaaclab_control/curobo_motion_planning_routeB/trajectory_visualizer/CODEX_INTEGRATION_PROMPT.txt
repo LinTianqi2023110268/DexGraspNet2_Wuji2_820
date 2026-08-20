@@ -1,0 +1,202 @@
+Task: wire the GPT-written generic visualizer to the current local Route B.
+Do not rewrite the viewer or planning algorithm.
+
+Goal:
+generate
+
+capture/curobo_test_result/visualization_right_arm_bundle.npz
+
+and then launch the viewer for the already-passing:
+
+capture/curobo_test_result/trajectory_right_arm.npz
+
+Do NOT modify Route A, MotionPlanner parameters, PREGRASP/COVER IK, ESDF values,
+VoxelGrid pose, collision thresholds, joint limits, or Isaac executor.
+
+==================================================
+1. Reuse the current passing Route B inputs
+==================================================
+
+Use the exact same capture and route plan that produced report_right_arm.json.
+
+Load:
+
+trajectory_right_arm.npz
+
+which is already validated as:
+- true 7DOF planner
+- 41 points
+- dt ~0.025 s
+- environment collision false
+- locked DOFs fixed
+
+Do not rerun trajectory optimization unless needed solely to obtain the locked
+planner kinematics object for FK/spheres.
+
+==================================================
+2. Export environment point cloud in arm_base_link
+==================================================
+
+Reuse the existing Route B scene/mapping code and current coordinate contract.
+
+Use the same RobotSegmenter-cleaned filtered depth that built the ESDF.
+
+Export a visualization point cloud in arm_base_link:
+
+scene_points_base [P,3]
+
+Prefer <= 30,000 uniformly sampled valid points for interactive speed.
+Do not crop or transform with a new convention.
+
+If RGB colors are readily available from the same capture, optionally export
+scene_colors_rgb. Otherwise omit colors.
+
+==================================================
+3. Export cuRobo collision sphere trace
+==================================================
+
+Rebuild/reuse the SAME true 7DOF locked-joint planner contract used by
+test_current_to_pregrasp_right_arm_only.py.
+
+For every one of the 41 trajectory q7 states:
+
+- evaluate the locked planner robot kinematics
+- obtain ALL robot collision spheres in arm_base_link
+- export their center xyz and radius
+
+Required:
+
+sphere_centers_base shape = [41,S,3]
+sphere_radii_m shape = [S]
+sphere_link_names shape = [S]
+
+The sphere order and radii must be constant across frames.
+
+Do NOT fabricate spheres from URDF meshes.
+Use the exact cuRobo collision spheres used by planner collision checking.
+
+==================================================
+4. Moving/static sphere mask
+==================================================
+
+Compute movement across the 41 frames:
+
+max_center_displacement per sphere
+
+sphere_active_mask = displacement > 1e-7 m
+
+This is only a visualization classification.
+
+Expected:
+- right-arm related spheres moving
+- 28 locked-DOF geometry static
+
+Do not alter planner geometry.
+
+==================================================
+5. EE/flange trace
+==================================================
+
+Using the same locked planner FK, export:
+
+ee_positions_base [41,3]
+
+Use the SAME right-arm flange/tool frame already used by the current Route B
+PREGRASP contract. Do not invent a new frame.
+
+Report the frame name used.
+
+==================================================
+6. Per-frame clearance
+==================================================
+
+Reuse the already-correct Route B ESDF collision query.
+
+For each dense frame, compute:
+
+frame_min_clearance_m [41]
+frame_worst_sphere_index [41]
+
+Use the exact sphere centers/radii for that frame.
+
+Do not modify ESDF or collision semantics.
+
+The global minimum should be consistent with report_right_arm.json
+(~0.075289 m, allowing normal float/interpolation-level differences).
+
+==================================================
+7. Save bundle using GPT module
+==================================================
+
+Import:
+
+trajectory_visualizer.bundle.VisualizationBundle
+trajectory_visualizer.bundle.save_bundle
+
+Save:
+
+capture/curobo_test_result/visualization_right_arm_bundle.npz
+
+The bundle must validate successfully.
+
+==================================================
+8. Launch viewer
+==================================================
+
+Run:
+
+python -m trajectory_visualizer.viewer \
+  <.../visualization_right_arm_bundle.npz>
+
+It must open an interactive matplotlib 3D window.
+
+Verify:
+- point cloud appears
+- robot collision spheres appear
+- right-arm spheres move across 41 frames
+- locked spheres remain fixed
+- EE path is visible
+- slider works
+- Play/Pause works
+- frame 0 and frame 40 match current/PREGRASP
+- no obvious coordinate-frame mismatch
+
+Do NOT start Isaac Sim.
+
+==================================================
+9. If local API mismatch occurs
+==================================================
+
+You may adapt ONLY:
+- imports
+- exact method/property names for FK
+- exact method/property names for collision spheres
+- existing Route B helper calls
+- paths
+
+Do not rewrite the generic viewer.
+Do not change planner or collision settings.
+
+Continue until the bundle is generated and the viewer actually opens.
+
+==================================================
+Final response
+==================================================
+
+Only finish after successful launch.
+
+Report:
+1. bundle path
+2. scene point count
+3. sphere count
+4. moving sphere count
+5. static sphere count
+6. EE frame name
+7. trajectory frames
+8. global min clearance and frame/sphere
+9. whether frame 0 visually matches current
+10. whether frame 40 visually matches PREGRASP
+11. slider PASS
+12. Play/Pause PASS
+13. coordinate-frame sanity PASS/FAIL
+14. Route A untouched

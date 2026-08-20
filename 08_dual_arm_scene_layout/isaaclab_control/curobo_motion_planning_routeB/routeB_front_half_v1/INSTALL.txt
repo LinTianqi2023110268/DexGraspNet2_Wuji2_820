@@ -1,0 +1,18 @@
+Extract this directory under:
+
+08_dual_arm_scene_layout/isaaclab_control/
+curobo_motion_planning_routeB/
+
+Expected result:
+
+08_dual_arm_scene_layout/isaaclab_control/
+curobo_motion_planning_routeB/
+routeB_front_half_v1/
+  routeB_front_half/
+    ...
+
+Then give:
+
+routeB_front_half_v1/routeB_front_half/CODEX_INTEGRATION_PROMPT.txt
+
+to Codex.

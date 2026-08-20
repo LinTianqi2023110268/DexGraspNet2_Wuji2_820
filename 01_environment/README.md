@@ -1,7 +1,7 @@
 # 01 环境
 
-本工程的训练和仿真仍故意使用两个主环境，不合并。姿态重定向另外使用一个项目内
-隔离环境，避免升级既有环境中的Pinocchio。
+本工程按职责隔离环境，不合并 CUDA、Isaac、cuRobo 和网络依赖。姿态重定向另用
+一个项目内环境，避免升级既有环境中的 Pinocchio。
 
 ## `graspnet2.0`
 
@@ -10,11 +10,22 @@
 - 负责标签处理、MinkowskiEngine、训练、预测和Trimesh；
 - RTX 4070已验证可运行CUDA 11.7版PyTorch。
 
-## `wuji2_factory`
+## `isaaclab22_sim50`
 
 - 负责Isaac Sim 5.0与Isaac Lab 2.2；
-- 只运行场景物理生成和抓取仿真；
+- 运行 Persistent Isaac、场景物理生成和抓取仿真；
 - 不承担网络训练。
+
+## `curobo_v2`
+
+- 负责 cuRobo V2 IK、RobotSegmenter 和 Route B 7DOF MotionPlanner；
+- 不启动 Isaac Kit，不与 Isaac 环境混装；
+- Route B 的独立 worker 必须显式在这个环境中运行。
+
+## `groundedsam`
+
+- 负责 GroundingDINO + SAM；
+- 正式闭环输入为当前 cycle 的 `rgb_no_robot.png`。
 
 ## 项目内`wuji_retargeting`
 
@@ -26,10 +37,10 @@
 - 只负责LEAP FK 21点→官方Wuji2 20关节姿态重定向和对应Trimesh；
 - 使用Pinocchio 3.8.0、NLopt 2.11.0和官方`wuji-retargeting`；
 - 不训练网络、不启动Isaac Sim；
-- 不改`graspnet2.0`和`wuji2_factory`。
+- 不改`graspnet2.0`、`curobo_v2`和`isaaclab22_sim50`。
 
 官方包要求Python 3.10以上，且当前代码使用Pinocchio 3的接口，所以不能直接放进
-Python 3.8的`graspnet2.0`，也不应升级已有`wuji2_factory`的Pinocchio。
+Python 3.8的`graspnet2.0`，也不应升级已有主环境中的Pinocchio。
 实际版本合同记录在`wuji_retargeting_environment.txt`；其中`cmeel-urdfdom`和
 `cmeel-tinyxml2`是经过导入测试的ABI配套版本，不能随意单独升级。
 
@@ -41,7 +52,8 @@ cd DexGraspNet2_Wuji2
 /home/lin/miniconda3/envs/graspnet2.0/bin/python tools_validate.py
 ```
 
-`verify.py`会分别调用两个环境的Python，打印Python、PyTorch、PyTorch编译CUDA和CUDA是否可用。它不会安装依赖、更新显卡驱动或启动Isaac Sim。
+`verify.py`打印已配置环境的Python、PyTorch、编译CUDA和CUDA可用性。它不会安装
+依赖、更新显卡驱动或启动Isaac Sim。
 
 Codex的隔离终端有时看不到主机的`/dev/nvidia*`，会显示
 `torch.cuda.is_available() == False`；这不能单独证明显卡驱动离线。应以你自己的
@@ -57,7 +69,7 @@ Codex的隔离终端有时看不到主机的`/dev/nvidia*`，会显示
 - 不自动更新NVIDIA驱动；
 - 不在后台数据生成时启动第二个Isaac Sim；
 - 不用`cuda`或`nvidia`作为检查命令，正确命令是`nvidia-smi`和PyTorch检查；
-- 不把`graspnet2.0`与`wuji2_factory`强行合并。
+- 不把`graspnet2.0`、`curobo_v2`与`isaaclab22_sim50`强行合并。
 
 ## Wuji2官方模型（唯一运行基准）
 
