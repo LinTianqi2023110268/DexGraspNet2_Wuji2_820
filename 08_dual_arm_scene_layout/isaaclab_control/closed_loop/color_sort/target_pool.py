@@ -8,6 +8,7 @@ import numpy as np
 
 try:
     from ..target_contract import PerceptionTarget, write_perception_target
+    from ..perception.target_removal_mask import write_target_removal_artifacts
 except (ImportError, ValueError):
     # Standalone/offline replay fallback.
     import sys
@@ -16,6 +17,7 @@ except (ImportError, ValueError):
     if str(CLOSED_LOOP) not in sys.path:
         sys.path.insert(0, str(CLOSED_LOOP))
     from target_contract import PerceptionTarget, write_perception_target
+    from perception.target_removal_mask import write_target_removal_artifacts
 
 
 def _load_legal_sam_masks(
@@ -95,7 +97,10 @@ def build_color_target_pool(
     IMPORTANT CONTRACT:
     - DINO/SAM only confirms that an HSV component is a semantically legal
       requested-color object.
-    - The FINAL target geometry is the complete matched HSV instance mask.
+    - The DGN2/grasp target geometry is the complete matched DINO/SAM mask.
+    - The ESDF target-removal geometry is a separate conservative mask built
+      from matched SAM, selected HSV instance neighbourhood, and depth
+      consistency.
     - No simulator object identity is read or stored.
     """
 
@@ -255,11 +260,30 @@ def build_color_target_pool(
         target_dir = targets_dir / target_id
         target_dir.mkdir(parents=True, exist_ok=True)
 
-        hsv_mask = np.load(Path(row["hsv_mask_path"])).astype(bool)
-        target_mask_path = target_dir / "target_mask.npy"
-        np.save(target_mask_path, hsv_mask)
-
         proposal = proposal_by_index[int(row["proposal_index"])]
+        hsv_mask_path = Path(row["hsv_mask_path"]).resolve()
+        hsv_mask = np.load(hsv_mask_path).astype(bool)
+
+        hsv_instance_mask_path = target_dir / "hsv_instance_mask.npy"
+        np.save(hsv_instance_mask_path, hsv_mask)
+
+        removal_audit = write_target_removal_artifacts(
+            output_dir=target_dir,
+            sam_mask=proposal,
+            hsv_mask=hsv_mask,
+            depth_m=depth,
+            sam_source=str(row["proposal_mask_source"]),
+            hsv_source=hsv_mask_path,
+            depth_source=filtered_depth_path,
+        )
+
+        target_mask_path = target_dir / "target_grasp_mask.npy"
+
+        # Backward-compatibility alias for older tools that still open
+        # target_mask.npy.  Its meaning is now the grasp/DGN2 mask, not the
+        # HSV color-selection mask.
+        np.save(target_dir / "target_mask.npy", proposal.astype(bool))
+
         intersection_path = target_dir / "sam_hsv_intersection.npy"
         np.save(intersection_path, proposal & hsv_mask)
 
@@ -269,6 +293,15 @@ def build_color_target_pool(
             if key != "hsv_mask_path"
         }
         metrics["sam_hsv_intersection_path"] = str(intersection_path)
+        metrics["hsv_instance_mask_path"] = str(hsv_instance_mask_path)
+        metrics["target_grasp_mask_path"] = str(Path(removal_audit["target_grasp_mask"]))
+        metrics["target_removal_mask_path"] = str(Path(removal_audit["target_removal_mask"]))
+        metrics["target_removal_audit_path"] = str(Path(removal_audit["target_removal_audit"]))
+        metrics["mask_contract"] = {
+            "target_grasp_mask": "matched DINO/SAM mask for DGN2 target points",
+            "target_removal_mask": "matched SAM AND selected HSV neighbourhood AND depth consistency for ESDF target removal",
+            "hsv_instance_mask": "color selection only; not used as ESDF removal mask",
+        }
 
         target = PerceptionTarget(
             capture_id=capture_root.parent.name,

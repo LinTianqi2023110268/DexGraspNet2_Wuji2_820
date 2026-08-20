@@ -1,5 +1,17 @@
 # Route-C V2 session summary
 
+## 2026-08-20 - PLACE V3 near-first endpoint preflight
+
+- Current phase: PLACE V3 endpoint-only integration and preflight; no full Isaac grasp, no dense Route B MotionPlanner execution.
+- Completed: read the V3 package docs and manifest; copied the supplied `ordered_place_policy.py`; wired color-sort PLACE generation through near-first ordered red/blue zone slots and ~8/10/12 cm release endpoints; Route A and Route B now share this color-zone endpoint semantics while retaining their separate path implementations.
+- Completed: PLACE endpoint IK config for `route_tuning.place` is now the V3 policy: position tolerance `0.03 m`, orientation tolerance `45 deg`, minimum inner joint margin `0.5 deg`, `require_raw_success=false`.
+- Completed: added endpoint-only preflight tool `closed_loop/tools/place_v3_endpoint_preflight.py`; added per-target IK residual audit fields in the cuRobo worker response for failure diagnosis.
+- Result: `20260820_142510/cycle_001` red-zone V3 preflight PASS. First passing candidate: `rank=0`, `cand=1536`, PLACE targets `108`, raw `25`, relaxed accepted `18`, back-half endpoint chains `32`; accepted slots are near column lanes `column_00_lane_00` and `column_00_lane_01`.
+- Result: `20260820_140119/cycle_001` blue-zone V3 preflight remains FAIL after scanning all 17 unique front-half cases. Representative residual: best position error `224.38 mm`, P50 `348.38 mm`; best orientation error `9.02 deg`; best inner joint margin `-8.66 deg`; all targets are multiple-fail. This is not the old precise PLACE 385-pose failure, and thresholds were not loosened further.
+- Current conclusion: PLACE V3 endpoint generation is integrated and can PASS; blue-zone reachability for the tested object/grasp set remains a separate endpoint reachability limitation that requires geometry/task decision rather than silent planner threshold relaxation.
+- Modified files: `closed_loop/planning/ordered_place_policy.py`, `closed_loop/planning/simplified_route_search.py`, `closed_loop/config/closed_loop.json`, `core/bridge/curobo_worker.py`, `routeB_full_pipeline/backhalf_pool.py`, `closed_loop/tools/place_v3_endpoint_preflight.py`, worklogs.
+- Test results: Python compile PASS; `git diff --check` PASS; red endpoint preflight PASS; blue endpoint preflight FAIL with residual evidence.
+
 ## Current phase
 
 Closed-loop one-command integration in progress; physical execution remains locked.
@@ -521,3 +533,30 @@ Run `./run_closed_loop.sh --planning-only` from a GPU-visible terminal using `sc
   logic 6/6, flexible planning 5/5, Route B front/full/right-arm unit tests,
   wiring audit, target-pool replay, and `git diff --check`.  No new full Isaac
   grasp was launched.
+
+## 2026-08-20 — color-sort target removal mask split
+
+- Root cause: color-sort's selected HSV instance mask was being used as the
+  single `target_mask_path` for both DGN2 target membership and Route B ESDF
+  target removal.  For `20260820_142510/cycle_001/red_target_000_red_003`, the
+  matched SAM mask had `17039` pixels but the HSV mask had only `10425`, leaving
+  `6779` SAM pixels (`39.785%`) undeleted from the intentional-contact ESDF.
+- Fix: added a formal split:
+  `target_grasp_mask.npy` is the matched DINO/SAM mask for DGN2 / grasp target
+  point support; `target_removal_mask.npy` is built from matched SAM AND the
+  selected HSV instance neighbourhood AND depth consistency for ESDF-only target
+  removal.
+- Route B interface is now explicit: `--target-mask-path` remains the
+  perception/grasp mask used for attachment proxy; new
+  `--target-removal-mask-path` is used only by
+  `remove_target_mask_from_filtered_depth()` when creating
+  `filtered_depth_no_target.npy`.
+- Offline replay on the real failed target wrote the selected artifacts under
+  `capture/planning/`: `target_grasp_mask.npy`, `target_removal_mask.npy`,
+  `target_removal_audit.json`, and `target_removal_replay_report.json`.
+  New removal covers `12835` valid-depth pixels and reduces SAM leftover to
+  `4804` pixels (`28.194%`).
+- Scope control: DGN2, cuRobo, Route A, Route B planning logic, PLACE V3, IK,
+  Isaac, dense MotionPlanner, and full grasp execution were not run or changed
+  beyond the explicit Route B mask-argument interface required to separate ESDF
+  removal from perception/grasp mask usage.

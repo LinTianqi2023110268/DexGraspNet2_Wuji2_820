@@ -37,6 +37,10 @@ def _helpers():
         sample_retreat,
         sample_transfer,
     )
+    from planning.ordered_place_policy import (
+        build_release_place_flange_poses,
+        ordered_near_to_far_slots,
+    )
     from planning.flexible_route_search import (
         BeamState,
         IKNode,
@@ -51,6 +55,79 @@ def _helpers():
         _solve_relaxed_pose_set,
     )
     return locals()
+
+
+def _load_perception_target_geometry(geometry: dict[str, Any]) -> dict[str, Any]:
+    case_root = Path(geometry["case_root"]).resolve()
+    case_meta = json.loads((case_root / "case.json").read_text(encoding="utf-8"))
+    path_value = case_meta.get("perception_target_geometry")
+    if not path_value:
+        raise RuntimeError(
+            "PLACE V3 requires perception_target_geometry in case.json; "
+            f"case={case_root}"
+        )
+    target_geometry_path = Path(str(path_value)).expanduser()
+    if not target_geometry_path.is_absolute():
+        target_geometry_path = (case_root / target_geometry_path).resolve()
+    else:
+        target_geometry_path = target_geometry_path.resolve()
+    target_geometry = json.loads(target_geometry_path.read_text(encoding="utf-8"))
+    if bool(target_geometry.get("simulator_identity_used", True)):
+        raise RuntimeError(
+            "PLACE V3 rejected target geometry that used simulator identity: "
+            f"{target_geometry_path}"
+        )
+    return target_geometry
+
+
+def _quantiles(values: list[float] | np.ndarray) -> dict[str, float | None]:
+    arr = np.asarray(values, dtype=np.float64)
+    arr = arr[np.isfinite(arr)]
+    if arr.size == 0:
+        return {"best": None, "p10": None, "p50": None, "p90": None}
+    return {
+        "best": float(np.min(arr)),
+        "p10": float(np.quantile(arr, 0.10)),
+        "p50": float(np.quantile(arr, 0.50)),
+        "p90": float(np.quantile(arr, 0.90)),
+    }
+
+
+def _place_v3_residual_audit(summary: dict[str, Any], metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarize available IK residuals for zero-PASS PLACE diagnosis.
+
+    The current worker exposes full residuals only for accepted records.  When
+    there are no accepted records, this report still preserves the V3 target
+    generation contract and the acceptance policy.  If all targets fail, the
+    next diagnostic step is to run a worker-level raw residual dump.
+    """
+    if "residual_audit" in summary:
+        return dict(summary["residual_audit"])
+    accepted = []
+    for row in summary.get("accepted_solutions", []) or []:
+        accepted.append(row)
+    pos = [float(row.get("position_error_m", float("nan"))) for row in accepted]
+    rot_deg = [
+        float(np.degrees(float(row.get("orientation_error_rad", float("nan")))))
+        for row in accepted
+    ]
+    margin_deg = [
+        float(np.degrees(float(row.get("inner_limit_margin_rad", float("nan")))))
+        for row in accepted
+    ]
+    return {
+        "accepted_record_count": int(len(accepted)),
+        "target_count": int(summary.get("target_count", len(metadata))),
+        "accepted_residuals_only": True,
+        "note": (
+            "Worker response currently exposes residuals for accepted seeds. "
+            "If PLACE accepted count is zero, run worker raw-residual audit "
+            "before loosening tolerances."
+        ),
+        "position_error_m": _quantiles(pos),
+        "orientation_error_deg": _quantiles(rot_deg),
+        "inner_joint_margin_deg": _quantiles(margin_deg),
+    }
 
 
 def _chain_by_stage(final_state) -> dict[str, Any]:
@@ -218,31 +295,87 @@ def build_backhalf_chain_pool(
 
     # PLACE endpoint IK.
     occupied = h["read_occupied_centres"](Path(placement_registry))
-    centres = h["free_placement_centres_xy"](
-        layout=layout,
-        nominal_object_size_xy_m=tuple(
-            place_cfg["nominal_object_size_xyz_m"][:2]
-        ),
-        edge_margin_m=float(place_cfg["edge_margin_m"]),
-        grid_step_xy_m=tuple(place_cfg["grid_step_xy_m"]),
-        occupied_centres_xy_m=occupied,
-        minimum_center_spacing_m=float(
-            place_cfg["minimum_center_spacing_m"]
-        ),
-        preferred_world_y_m=float(place_cfg["preferred_world_y_m"]),
-    )
-    place_flange = h["sample_place_from_centres"](
-        centres_xy_m=centres,
-        object_world_initial=geometry["object_world_initial"],
-        flange_from_object_grasp=geometry["flange_from_object_grasp"],
-        samples_per_xy=int(place_cfg["samples_per_xy"]),
-        table_top_world_z_m=table_top,
-        nominal_object_height_m=nominal_height,
-        z_extra_range_m=tuple(place_cfg["z_extra_range_m"]),
-        object_rotation_half_range_deg_xyz=tuple(
-            place_cfg["object_rotation_half_range_deg_xyz"]
-        ),
-    )
+    place_v3_slots = []
+    place_v3_metadata = []
+    if placement_zone_override is not None:
+        target_geometry = _load_perception_target_geometry(geometry)
+        target_anchor_world_initial = np.asarray(
+            target_geometry["T_world_target_anchor"], dtype=np.float64
+        )
+        robust_min = np.asarray(
+            target_geometry["robust_aabb_world_min_m"], dtype=np.float64
+        )
+        anchor_to_visible_bottom_m = float(
+            target_anchor_world_initial[2, 3] - robust_min[2]
+        )
+        source_center = np.asarray(
+            layout["transforms"]["source_zone"]["position_world_m"],
+            dtype=np.float64,
+        )
+        place_v3_slots = h["ordered_near_to_far_slots"](
+            zone_center_world_m=placement_zone_override["center_world_m"],
+            zone_size_m=placement_zone_override["size_m"],
+            source_center_world_m=source_center,
+            nominal_object_size_xy_m=tuple(
+                place_cfg["nominal_object_size_xyz_m"][:2]
+            ),
+            edge_margin_m=float(place_cfg["edge_margin_m"]),
+            longitudinal_spacing_m=float(
+                place_cfg.get(
+                    "longitudinal_spacing_m",
+                    place_cfg.get(
+                        "minimum_center_spacing_m",
+                        place_cfg["grid_step_xy_m"][0],
+                    ),
+                )
+            ),
+            minimum_center_spacing_m=float(
+                place_cfg["minimum_center_spacing_m"]
+            ),
+            transverse_slots=int(place_cfg.get("transverse_slots", 2)),
+            occupied_centres_xy_m=occupied,
+        )
+        poses, place_v3_metadata = h["build_release_place_flange_poses"](
+            slots=place_v3_slots,
+            target_anchor_world_initial=target_anchor_world_initial,
+            grasp_flange_world=geometry["object_world_initial"]
+            @ np.linalg.inv(geometry["flange_from_object_grasp"]),
+            table_top_world_z_m=table_top,
+            anchor_to_visible_bottom_m=anchor_to_visible_bottom_m,
+            release_clearance_values_m=tuple(
+                place_cfg.get(
+                    "release_clearance_values_m",
+                    (0.08, 0.10, 0.12),
+                )
+            ),
+        )
+        place_flange = PoseSampleSet(poses, place_v3_metadata)
+    else:
+        centres = h["free_placement_centres_xy"](
+            layout=layout,
+            nominal_object_size_xy_m=tuple(
+                place_cfg["nominal_object_size_xyz_m"][:2]
+            ),
+            edge_margin_m=float(place_cfg["edge_margin_m"]),
+            grid_step_xy_m=tuple(place_cfg["grid_step_xy_m"]),
+            occupied_centres_xy_m=occupied,
+            minimum_center_spacing_m=float(
+                place_cfg["minimum_center_spacing_m"]
+            ),
+            preferred_world_y_m=float(place_cfg["preferred_world_y_m"]),
+        )
+        place_flange = h["sample_place_from_centres"](
+            centres_xy_m=centres,
+            object_world_initial=geometry["object_world_initial"],
+            flange_from_object_grasp=geometry["flange_from_object_grasp"],
+            samples_per_xy=int(place_cfg["samples_per_xy"]),
+            table_top_world_z_m=table_top,
+            nominal_object_height_m=nominal_height,
+            z_extra_range_m=tuple(place_cfg["z_extra_range_m"]),
+            object_rotation_half_range_deg_xyz=tuple(
+                place_cfg["object_rotation_half_range_deg_xyz"]
+            ),
+        )
     place_nodes, summary = h["_solve_relaxed_pose_set"](
         client=client,
         stage="place",
@@ -252,9 +385,36 @@ def build_backhalf_chain_pool(
         T_base_from_world=T_base_from_world,
         solutions_per_pose=solutions_per_pose,
     )
-    summary["free_xy_count"] = int(len(centres))
+    if placement_zone_override is not None:
+        slot_counts: dict[str, int] = {}
+        for row in place_v3_metadata:
+            slot_counts[str(row["slot_id"])] = slot_counts.get(str(row["slot_id"]), 0) + 1
+        summary["place_v3"] = {
+            "enabled": True,
+            "semantics": "ordered slot -> PLACE_RELEASE about 8/10/12 cm above slot -> physics settle",
+            "simulator_target_identity_used": False,
+            "source_zone_center_world_m": [
+                float(v) for v in layout["transforms"]["source_zone"]["position_world_m"]
+            ],
+            "placement_zone_override": placement_zone_override,
+            "slot_count": int(len(place_v3_slots)),
+            "ordered_slots": [slot.to_jsonable() for slot in place_v3_slots],
+            "release_pose_count": int(len(place_v3_metadata)),
+            "release_pose_count_by_slot": slot_counts,
+            "release_clearance_values_m": list(
+                place_cfg.get("release_clearance_values_m", (0.08, 0.10, 0.12))
+            ),
+            "anchor_to_visible_bottom_m": float(anchor_to_visible_bottom_m),
+            "target_geometry": target_geometry,
+        }
+    else:
+        summary["free_xy_count"] = int(len(centres))
     if placement_zone_override is not None:
         summary["placement_zone_override"] = placement_zone_override
+    if not place_nodes:
+        summary["place_v3_residual_audit"] = _place_v3_residual_audit(
+            summary, place_v3_metadata
+        )
     summaries.append(summary)
     place_beam = h["_expand_beam"](
         transfer_beam,

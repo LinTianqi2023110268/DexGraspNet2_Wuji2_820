@@ -1,5 +1,58 @@
 # Route-C V2 command log
 
+## 2026-08-20 15:xx +08:00 — PLACE V3 near-first endpoint preflight integration
+
+- Purpose: apply `/home/lin/Projects/_wuji2_refactor_packages/wuji2_color_place_near_first_v3_20260820/` PLACE V3 semantics and run endpoint-only preflight without Isaac execution or dense MotionPlanner.
+- Conda environment: `curobo_v2` for endpoint IK preflight.
+- Working directory: `/home/lin/Projects/DexGraspNet2_Wuji2`
+- Commands:
+
+  ```bash
+  git status --short
+  git diff --check
+  sed -n '1,760p' /home/lin/Projects/_wuji2_refactor_packages/wuji2_color_place_near_first_v3_20260820/{README.md,PLACE_V3_ARCHITECTURE.md,SIMULATION_VERIFICATION_POLICY.md,CODEX_TASK.md}
+  python -m json.tool /home/lin/Projects/_wuji2_refactor_packages/wuji2_color_place_near_first_v3_20260820/MANIFEST.json
+  python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/closed_loop/planning/ordered_place_policy.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/planning/simplified_route_search.py 08_dual_arm_scene_layout/isaaclab_control/core/bridge/curobo_worker.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/backhalf_pool.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/place_v3_endpoint_preflight.py
+  /home/lin/miniconda3/bin/conda run --no-capture-output -n curobo_v2 python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/place_v3_endpoint_preflight.py --project-root /home/lin/Projects/DexGraspNet2_Wuji2 --cycle-root /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_142510/cycle_001 --goal-pool /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_142510/cycle_001/routeB_front_half/routeB_front_half_goal_pool.npz --placement-registry /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_142510/placement_registry.json --color-zones /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_142510/color_sort_zones.json --zone-id red_zone --scan-limit 8 --output /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_142510/cycle_001/routeB_full/place_v3_endpoint_preflight_red.json
+  /home/lin/miniconda3/bin/conda run --no-capture-output -n curobo_v2 python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/place_v3_endpoint_preflight.py --project-root /home/lin/Projects/DexGraspNet2_Wuji2 --cycle-root /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_140119/cycle_001 --goal-pool /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_140119/cycle_001/routeB_front_half/routeB_front_half_goal_pool.npz --placement-registry /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_140119/placement_registry.json --color-zones /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_140119/color_sort_zones.json --zone-id blue_zone --scan-limit 32 --output /home/lin/Projects/DexGraspNet2_Wuji2/08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_140119/cycle_001/routeB_full/place_v3_endpoint_preflight_blue_scan32.json
+  ```
+
+- Key output: red-zone V3 endpoint preflight PASS on `20260820_142510/cycle_001`, first pass `rank=0 cand=1536`, slot count `4`, release poses `108`, PLACE raw `25`, relaxed accepted targets `18`, chains `32`; accepted slots were the near column lanes `column_00_lane_00` and `column_00_lane_01`.
+
+## 2026-08-20 16:xx +08:00 — color-sort target removal mask split
+
+- Purpose: fix the color-sort perception→ESDF interface so the HSV selected
+  instance no longer serves as both color-selection mask and full target-removal
+  mask.
+- Read package:
+  `/tmp/wuji2_target_removal_mask_v1_20260820/TARGET_REMOVAL_POLICY.md`,
+  `CODEX_TASK.md`, and
+  `/tmp/wuji2_target_removal_mask_v1_20260820/closed_loop/perception/target_removal_mask.py`.
+- Focused inspection commands:
+
+  ```bash
+  grep -n "target_mask_path\\|build_perception_target_geometry\\|filtered_depth_no_target\\|selected_target_mask\\|target_removal\\|target_grasp_mask" 08_dual_arm_scene_layout/isaaclab_control/closed_loop/orchestrator.py
+  find 08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_142510/cycle_001 -maxdepth 6 -type f \\( -name '*mask*.npy' -o -name '*mask*.png' -o -name '*target*.json' -o -name '*result*.json' -o -name '*audit*.json' \\)
+  grep -RIn "target_mask_path\\|filtered_depth_no_target\\|target_removal\\|selected_target_mask\\|no_target" 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1 08_dual_arm_scene_layout/isaaclab_control/closed_loop/planning 08_dual_arm_scene_layout/isaaclab_control/core
+  ```
+
+- Validation commands:
+
+  ```bash
+  /home/lin/miniconda3/envs/curobo_v2/bin/python -m py_compile 08_dual_arm_scene_layout/isaaclab_control/closed_loop/perception/target_removal_mask.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/color_sort/target_pool.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/orchestrator.py 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/replay_target_removal_mask.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/runtime.py 08_dual_arm_scene_layout/isaaclab_control/curobo_motion_planning_routeB/routeB_full_pipeline_v1/routeB_full_pipeline/full_motion_backend.py
+  /home/lin/miniconda3/envs/curobo_v2/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/replay_target_removal_mask.py --cycle-root 08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_142510/cycle_001 --target-id red_target_000_red_003
+  git diff --check
+  ```
+
+- Replay result: SAM `17039` px, HSV `10425` px, old HSV-removal leftover
+  `6779` px (`39.785%`); new removal mask `12835` px, SAM leftover `4804` px
+  (`28.194%`).
+- ESDF audit wrote
+  `outputs/closed_loop_sessions/20260820_142510/cycle_001/capture/planning/target_removal_esdf_input_audit.json`.
+- Isaac, dense MotionPlanner, and full grasp execution were not started.
+- Key output: blue-zone V3 endpoint preflight still FAIL on `20260820_140119/cycle_001` after scanning all 17 unique front-half cases; each PLACE had raw `0`. Residual audit for representative `rank=16 cand=3525`: best position error `0.22438162565231323 m`, P50 `0.3483843207359314 m`; best orientation error `9.0158 deg`; best inner joint margin `-8.6631 deg`; failure type `multiple_fail=108/108`.
+- Conclusion: V3 wiring fixes old red PLACE endpoint generation and proves at least one PLACE V3 endpoint PASS. The old blue session is no longer failing because of precise near-table pose semantics alone; it is a reachability/joint-margin issue for that target/color-zone configuration and must not be masked by threshold loosening.
+
 ## 2026-08-16 15:15 +08:00 — Initial read-only Git baseline
 
 - Purpose: verify the required working directory and preserve the user's existing work.

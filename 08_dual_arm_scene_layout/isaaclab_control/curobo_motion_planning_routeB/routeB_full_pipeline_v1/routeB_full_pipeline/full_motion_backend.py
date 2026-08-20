@@ -228,6 +228,7 @@ def main() -> int:
     parser.add_argument("--backhalf-pool", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--target-mask-path", type=Path, default=None)
+    parser.add_argument("--target-removal-mask-path", type=Path, default=None)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--attachment-padding-m", type=float, default=0.005)
     parser.add_argument("--attachment-min-dim-m", type=float, default=0.02)
@@ -314,6 +315,11 @@ def main() -> int:
         if args.target_mask_path is not None
         else None
     )
+    explicit_target_removal_mask = (
+        args.target_removal_mask_path.expanduser().resolve()
+        if args.target_removal_mask_path is not None
+        else explicit_target_mask
+    )
     proxy = build_target_proxy_from_capture(
         project_root=root,
         capture_dir=capture,
@@ -325,6 +331,7 @@ def main() -> int:
 
     slug = safe_slug(args.query)
     mask_path = explicit_target_mask or (capture / "grounded_sam" / slug / "mask.npy")
+    removal_mask_path = explicit_target_removal_mask or mask_path
     filtered_depth = capture / "planning/filtered_depth.npy"
     intrinsics = capture / "intrinsics.npy"
     T_world_camera = capture / "T_world_camera.npy"
@@ -340,7 +347,7 @@ def main() -> int:
             raise FileNotFoundError(path)
     no_target_depth = remove_target_mask_from_filtered_depth(
         filtered_depth_path=filtered_depth,
-        target_mask_path=mask_path,
+        target_mask_path=removal_mask_path,
         output_path=capture / "planning/filtered_depth_no_target.npy",
     )
 

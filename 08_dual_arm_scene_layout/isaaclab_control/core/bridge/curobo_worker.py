@@ -154,6 +154,69 @@ def main() -> int:
             "inner_limit_margin_rad": float(result.inner_limit_margin_rad[i, k]),
         }
 
+    def residual_summary_per_target(result, payload: dict | None) -> list[dict]:
+        policy = (
+            StageAcceptancePolicy.from_payload(payload)
+            if payload is not None
+            else StageAcceptancePolicy(
+                name="solver_default_strict",
+                position_tolerance_m=float(ik.config.position_tolerance_m),
+                orientation_tolerance_rad=float(ik.config.orientation_tolerance_rad),
+                minimum_inner_limit_margin_rad=float(
+                    ik.config.minimum_inner_limit_margin_rad
+                ),
+                require_raw_success=True,
+            )
+        )
+        pos = np.asarray(result.position_error_m, dtype=np.float64)
+        rot = np.asarray(result.orientation_error_rad, dtype=np.float64)
+        margin = np.asarray(result.inner_limit_margin_rad, dtype=np.float64)
+        raw = np.asarray(result.raw_success, dtype=bool)
+        q = np.asarray(result.q_rad, dtype=np.float64)
+        finite = (
+            np.isfinite(q).all(axis=-1)
+            & np.isfinite(pos)
+            & np.isfinite(rot)
+            & np.isfinite(margin)
+        )
+        rows = []
+        for i in range(result.batch_size):
+            finite_i = finite[i]
+            if np.any(finite_i):
+                best_pos = float(np.min(pos[i][finite_i]))
+                best_rot = float(np.min(rot[i][finite_i]))
+                best_margin = float(np.max(margin[i][finite_i]))
+            else:
+                best_pos = float("nan")
+                best_rot = float("nan")
+                best_margin = float("nan")
+            pos_ok = bool(np.any(finite_i & (pos[i] <= policy.position_tolerance_m)))
+            rot_ok = bool(np.any(finite_i & (rot[i] <= policy.orientation_tolerance_rad)))
+            margin_ok = bool(
+                np.any(finite_i & (margin[i] >= policy.minimum_inner_limit_margin_rad))
+            )
+            raw_ok = bool(np.any(raw[i]))
+            rows.append(
+                {
+                    "target_index": int(i),
+                    "raw_success_count": int(np.count_nonzero(raw[i])),
+                    "finite_seed_count": int(np.count_nonzero(finite_i)),
+                    "best_position_error_m": best_pos,
+                    "best_orientation_error_rad": best_rot,
+                    "best_inner_limit_margin_rad": best_margin,
+                    "any_position_ok": pos_ok,
+                    "any_orientation_ok": rot_ok,
+                    "any_margin_ok": margin_ok,
+                    "any_raw_success": raw_ok,
+                    "require_raw_success": bool(policy.require_raw_success),
+                    "position_fail": not pos_ok,
+                    "orientation_fail": not rot_ok,
+                    "margin_fail": not margin_ok,
+                    "raw_success_fail": bool(policy.require_raw_success) and not raw_ok,
+                }
+            )
+        return rows
+
     def select_index_chain(result, target_indices: list[int], q_reference: np.ndarray):
         """Select a continuous branch through explicit target indices.
 
@@ -824,6 +887,9 @@ def main() -> int:
                     "accepted_per_target": result.accepted.sum(axis=1).tolist(),
                     "ik_accepted_per_target": ik_accepted_per_target,
                     "raw_success_per_target": result.raw_success.sum(axis=1).tolist(),
+                    "residual_summary_per_target": residual_summary_per_target(
+                        result, req.get("acceptance_policy")
+                    ),
                     "ik_accepted_solutions": ik_accepted_solutions,
                     "feasible_solutions": feasible_solutions,
                     "selected": None if selected is None else [None if x is None else x.to_jsonable() for x in selected],

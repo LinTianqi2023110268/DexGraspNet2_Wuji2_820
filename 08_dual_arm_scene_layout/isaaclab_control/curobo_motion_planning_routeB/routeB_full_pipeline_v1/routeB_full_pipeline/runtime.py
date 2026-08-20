@@ -84,6 +84,7 @@ def run_full_motion_backend(
     output_dir: Path,
     settings: dict[str, Any],
     target_mask_path: Path | None = None,
+    target_removal_mask_path: Path | None = None,
 ) -> dict[str, Any]:
     root = Path(project_root).resolve()
     output_dir = Path(output_dir).resolve()
@@ -132,6 +133,11 @@ def run_full_motion_backend(
     ]
     if target_mask_path is not None:
         cmd.extend(["--target-mask-path", str(Path(target_mask_path).resolve())])
+    if target_removal_mask_path is not None:
+        cmd.extend([
+            "--target-removal-mask-path",
+            str(Path(target_removal_mask_path).resolve()),
+        ])
     if not bool(settings.get("transfer_attachment", True)):
         cmd.append("--disable-transfer-attachment")
     report_path = output_dir / "routeB_full_plan_report.json"

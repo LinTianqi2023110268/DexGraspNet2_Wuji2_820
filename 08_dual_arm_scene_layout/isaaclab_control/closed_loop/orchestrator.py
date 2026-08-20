@@ -23,6 +23,7 @@ import math
 import os
 from pathlib import Path
 import re
+import shutil
 import shlex
 import struct
 import subprocess
@@ -1809,6 +1810,7 @@ def main() -> int:
                         f"| {time.perf_counter()-started:.1f}s"
                     )
                     target_mask_path = gs_root / "mask.npy"
+                    target_removal_mask_path = target_mask_path
                     target_source = "grounded_sam"
                     target_selection = {
                         "task_type": "semantic-grasp",
@@ -1949,12 +1951,28 @@ def main() -> int:
                         return 2
                     selected_target = PerceptionTarget(**target_rows[0]).validate()
                     target_mask_path = Path(selected_target.mask_path).resolve()
+                    target_removal_mask_path = Path(
+                        selected_target.metrics["target_removal_mask_path"]
+                    ).resolve()
                     target_source = selected_target.source
                     metrics = dict(selected_target.metrics)
+                    planning_target_grasp_mask = capture_root / "planning/target_grasp_mask.npy"
+                    planning_target_removal_mask = capture_root / "planning/target_removal_mask.npy"
+                    planning_target_removal_audit = capture_root / "planning/target_removal_audit.json"
+                    shutil.copy2(target_mask_path, planning_target_grasp_mask)
+                    shutil.copy2(target_removal_mask_path, planning_target_removal_mask)
+                    shutil.copy2(
+                        Path(metrics["target_removal_audit_path"]).resolve(),
+                        planning_target_removal_audit,
+                    )
+                    target_removal_mask_path = planning_target_removal_mask
                     target_selection = {
                         "task_type": "color-sort",
                         "target_source": target_source,
                         "target_mask_path": str(target_mask_path),
+                        "target_grasp_mask_path": str(planning_target_grasp_mask),
+                        "target_removal_mask_path": str(target_removal_mask_path),
+                        "target_removal_audit_path": str(planning_target_removal_audit),
                         "query_original": query_original,
                         "query_canonical": query,
                         "color": requested_color,
@@ -1968,7 +1986,7 @@ def main() -> int:
                             "hsv_instance_id": str(metrics.get("instance_id", "")),
                             "target_pool": str(color_root / "target_pool.json"),
                             "match_matrix": str(pool["match_matrix"]),
-                            "final_mask_contract": "complete_hsv_instance_mask",
+                            "final_mask_contract": "split_grasp_and_esdf_removal_masks",
                             "hsv_audit": str(color_root / "detection_report.json"),
                             "grounded_sam_result": str(gs_root / "result.json"),
                         },
@@ -2574,6 +2592,13 @@ def main() -> int:
                                     diagnostic_disable_home_pre_self_collision=bool(home_pre_self_bypassed),
                                     diagnostic_disable_pre_cover_esdf=bool(pre_cover_esdf_bypassed),
                                     diagnostic_disable_pre_cover_self_collision=bool(pre_cover_self_bypassed),
+                                    placement_zone_override=(
+                                        color_zone_specs.get(
+                                            str(target_selection.get("placement_zone_override", ""))
+                                        )
+                                        if args.task == "color-sort"
+                                        else None
+                                    ),
                                 )
                                 route["diagnostic_wall_s"] = float(time.perf_counter() - route_started)
                                 accumulate_home_pre_stats(funnel, route)
@@ -2916,6 +2941,7 @@ def main() -> int:
                                     output_dir=cycle_root / "routeB_full/planning",
                                     settings=cfg["routeB_full_pipeline"],
                                     target_mask_path=target_mask_path,
+                                    target_removal_mask_path=target_removal_mask_path,
                                 )
                             except RuntimeError as exc:
                                 message = str(exc)

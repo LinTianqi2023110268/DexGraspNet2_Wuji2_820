@@ -165,6 +165,13 @@
       ],
       "preferred_world_y_m": -0.05,
       "samples_per_xy": 5,
+      "transverse_slots": 2,
+      "longitudinal_spacing_m": 0.14,
+      "release_clearance_values_m": [
+        0.08,
+        0.1,
+        0.12
+      ],
       "z_extra_range_m": [
         0.0,
         0.04
@@ -258,9 +265,9 @@
         7.0,
         15.0
       ],
-      "ik_position_tolerance_m": 0.02,
-      "ik_orientation_tolerance_deg": 20.0,
-      "minimum_inner_limit_margin_deg": 3.0
+      "ik_position_tolerance_m": 0.03,
+      "ik_orientation_tolerance_deg": 45.0,
+      "minimum_inner_limit_margin_deg": 0.5
     },
     "transfer": {
       "samples": 384,
@@ -298,6 +305,13 @@
       ],
       "preferred_world_y_m": -0.05,
       "samples_per_xy": 5,
+      "transverse_slots": 2,
+      "longitudinal_spacing_m": 0.14,
+      "release_clearance_values_m": [
+        0.08,
+        0.1,
+        0.12
+      ],
       "z_extra_range_m": [
         0.0,
         0.04
@@ -308,9 +322,9 @@
         30.0
       ],
       "release_wrist_height_delta_m": 0.01,
-      "ik_position_tolerance_m": 0.02,
-      "ik_orientation_tolerance_deg": 20.0,
-      "minimum_inner_limit_margin_deg": 3.0
+      "ik_position_tolerance_m": 0.03,
+      "ik_orientation_tolerance_deg": 45.0,
+      "minimum_inner_limit_margin_deg": 0.5
     },
     "retreat": {
       "samples": 128,

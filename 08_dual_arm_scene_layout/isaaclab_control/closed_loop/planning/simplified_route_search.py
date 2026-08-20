@@ -28,6 +28,10 @@ from .flexible_pose_sampling import (
     sample_retreat,
     sample_transfer,
 )
+from .ordered_place_policy import (
+    build_release_place_flange_poses,
+    ordered_near_to_far_slots,
+)
 from .flexible_route_search import (
     BeamState,
     IKNode,
@@ -144,6 +148,65 @@ def _solution_pool(report: dict, target_index: int) -> list[dict]:
     return list(rows[target_index])
 
 
+def _residual_quantiles(values: list[float]) -> dict:
+    arr = np.asarray(values, dtype=np.float64)
+    arr = arr[np.isfinite(arr)]
+    if arr.size == 0:
+        return {"best": None, "p10": None, "p50": None, "p90": None}
+    return {
+        "best": float(np.min(arr)),
+        "p10": float(np.quantile(arr, 0.10)),
+        "p50": float(np.quantile(arr, 0.50)),
+        "p90": float(np.quantile(arr, 0.90)),
+    }
+
+
+def _residual_audit(report: dict) -> dict:
+    rows = list(report.get("residual_summary_per_target") or [])
+    pos = [float(row.get("best_position_error_m", float("nan"))) for row in rows]
+    rot = [
+        float(math.degrees(float(row.get("best_orientation_error_rad", float("nan")))))
+        for row in rows
+    ]
+    margin = [
+        float(math.degrees(float(row.get("best_inner_limit_margin_rad", float("nan")))))
+        for row in rows
+    ]
+    fail_counts = {
+        "position_only": 0,
+        "orientation_only": 0,
+        "margin_only": 0,
+        "multiple_fail": 0,
+        "no_finite_seed": 0,
+    }
+    for row in rows:
+        if int(row.get("finite_seed_count", 0)) <= 0:
+            fail_counts["no_finite_seed"] += 1
+            continue
+        failures = [
+            bool(row.get("position_fail", False)),
+            bool(row.get("orientation_fail", False)),
+            bool(row.get("margin_fail", False)),
+            bool(row.get("raw_success_fail", False)),
+        ]
+        count = int(sum(1 for item in failures if item))
+        if count > 1:
+            fail_counts["multiple_fail"] += 1
+        elif failures[0]:
+            fail_counts["position_only"] += 1
+        elif failures[1]:
+            fail_counts["orientation_only"] += 1
+        elif failures[2]:
+            fail_counts["margin_only"] += 1
+    return {
+        "target_count": int(len(rows)),
+        "position_error_m": _residual_quantiles(pos),
+        "orientation_error_deg": _residual_quantiles(rot),
+        "inner_joint_margin_deg": _residual_quantiles(margin),
+        "fail_counts": fail_counts,
+    }
+
+
 def _solve_relaxed_pose_set(
     *,
     client,
@@ -210,7 +273,25 @@ def _solve_relaxed_pose_set(
         "worker_solve_time_s": float(report.get("solve_time_s", 0.0)),
         "acceptance_policy": report.get("acceptance_policy", policy),
         "planner_esdf_collision_check": False,
+        "residual_audit": _residual_audit(report),
     }
+    accepted_solutions = []
+    for target_index, records in enumerate(
+        report.get("ik_accepted_solutions") or []
+    ):
+        for record in records:
+            accepted_solutions.append(
+                {
+                    **dict(pose_set.metadata[target_index]),
+                    "target_index": int(target_index),
+                    "solution_index": int(record.get("solution_index", -1)),
+                    "position_error_m": float(record.get("position_error_m", float("nan"))),
+                    "orientation_error_rad": float(record.get("orientation_error_rad", float("nan"))),
+                    "inner_limit_margin_rad": float(record.get("inner_limit_margin_rad", float("nan"))),
+                }
+            )
+    if accepted_solutions:
+        summary["accepted_solutions"] = accepted_solutions
     return nodes, summary
 
 
@@ -407,6 +488,29 @@ def _beam_diagnostics(
     }
 
 
+def _load_perception_target_geometry(case_root: Path) -> dict:
+    case_root = Path(case_root).resolve()
+    case_meta = load_json(case_root / "case.json")
+    path_value = case_meta.get("perception_target_geometry")
+    if not path_value:
+        raise RuntimeError(
+            "PLACE V3 requires perception_target_geometry in case.json; "
+            f"case={case_root}"
+        )
+    path = Path(str(path_value)).expanduser()
+    if not path.is_absolute():
+        path = (case_root / path).resolve()
+    else:
+        path = path.resolve()
+    target_geometry = load_json(path)
+    if bool(target_geometry.get("simulator_identity_used", True)):
+        raise RuntimeError(
+            "PLACE V3 rejected target geometry that used simulator identity: "
+            f"{path}"
+        )
+    return target_geometry
+
+
 def plan_flexible_route(
     *,
     client,
@@ -423,6 +527,7 @@ def plan_flexible_route(
     diagnostic_disable_home_pre_self_collision: bool = False,
     diagnostic_disable_pre_cover_esdf: bool = False,
     diagnostic_disable_pre_cover_self_collision: bool = False,
+    placement_zone_override: dict | None = None,
     output_npz: Path | None = None,
 ) -> dict:
     """Strict COVER + relaxed endpoints + simple joint-space pick path."""
@@ -442,6 +547,14 @@ def plan_flexible_route(
     layout = load_json(
         project_root / "08_dual_arm_scene_layout/config/manual_layout_calibrated.json"
     )
+    if placement_zone_override is not None:
+        layout = json.loads(json.dumps(layout))
+        layout["transforms"]["placement_zone"]["position_world_m"] = [
+            float(v) for v in placement_zone_override["center_world_m"]
+        ]
+        layout["geometry"]["placement_zone_size_m"] = [
+            float(v) for v in placement_zone_override["size_m"]
+        ]
     T_world_base = _world_from_base(project_root)
     T_base_from_world = np.linalg.inv(T_world_base)
     tuning = _route_tuning(config)
@@ -647,27 +760,73 @@ def plan_flexible_route(
 
     # PLACE
     occupied = read_occupied_centres(placement_registry)
-    centres = free_placement_centres_xy(
-        layout=layout,
-        nominal_object_size_xy_m=tuple(place_cfg["nominal_object_size_xyz_m"][:2]),
-        edge_margin_m=float(place_cfg["edge_margin_m"]),
-        grid_step_xy_m=tuple(place_cfg["grid_step_xy_m"]),
-        occupied_centres_xy_m=occupied,
-        minimum_center_spacing_m=float(place_cfg["minimum_center_spacing_m"]),
-        preferred_world_y_m=float(place_cfg["preferred_world_y_m"]),
-    )
-    place_flange = sample_place_from_centres(
-        centres_xy_m=centres,
-        object_world_initial=geometry["object_world_initial"],
-        flange_from_object_grasp=geometry["flange_from_object_grasp"],
-        samples_per_xy=int(place_cfg["samples_per_xy"]),
-        table_top_world_z_m=table_top,
-        nominal_object_height_m=nominal_height,
-        z_extra_range_m=tuple(place_cfg["z_extra_range_m"]),
-        object_rotation_half_range_deg_xyz=tuple(
-            place_cfg["object_rotation_half_range_deg_xyz"]
-        ),
-    )
+    place_v3_slots = []
+    place_v3_metadata = []
+    if placement_zone_override is not None:
+        target_geometry = _load_perception_target_geometry(case_root)
+        target_anchor_world_initial = np.asarray(
+            target_geometry["T_world_target_anchor"], dtype=np.float64
+        )
+        robust_min = np.asarray(
+            target_geometry["robust_aabb_world_min_m"], dtype=np.float64
+        )
+        anchor_to_visible_bottom_m = float(
+            target_anchor_world_initial[2, 3] - robust_min[2]
+        )
+        source_center = np.asarray(
+            layout["transforms"]["source_zone"]["position_world_m"],
+            dtype=np.float64,
+        )
+        place_v3_slots = ordered_near_to_far_slots(
+            zone_center_world_m=placement_zone_override["center_world_m"],
+            zone_size_m=placement_zone_override["size_m"],
+            source_center_world_m=source_center,
+            nominal_object_size_xy_m=tuple(place_cfg["nominal_object_size_xyz_m"][:2]),
+            edge_margin_m=float(place_cfg["edge_margin_m"]),
+            longitudinal_spacing_m=float(
+                place_cfg.get(
+                    "longitudinal_spacing_m",
+                    place_cfg.get("minimum_center_spacing_m", place_cfg["grid_step_xy_m"][0]),
+                )
+            ),
+            minimum_center_spacing_m=float(place_cfg["minimum_center_spacing_m"]),
+            transverse_slots=int(place_cfg.get("transverse_slots", 2)),
+            occupied_centres_xy_m=occupied,
+        )
+        poses, place_v3_metadata = build_release_place_flange_poses(
+            slots=place_v3_slots,
+            target_anchor_world_initial=target_anchor_world_initial,
+            grasp_flange_world=geometry["object_world_initial"]
+            @ np.linalg.inv(geometry["flange_from_object_grasp"]),
+            table_top_world_z_m=table_top,
+            anchor_to_visible_bottom_m=anchor_to_visible_bottom_m,
+            release_clearance_values_m=tuple(
+                place_cfg.get("release_clearance_values_m", (0.08, 0.10, 0.12))
+            ),
+        )
+        place_flange = PoseSampleSet(poses, place_v3_metadata)
+    else:
+        centres = free_placement_centres_xy(
+            layout=layout,
+            nominal_object_size_xy_m=tuple(place_cfg["nominal_object_size_xyz_m"][:2]),
+            edge_margin_m=float(place_cfg["edge_margin_m"]),
+            grid_step_xy_m=tuple(place_cfg["grid_step_xy_m"]),
+            occupied_centres_xy_m=occupied,
+            minimum_center_spacing_m=float(place_cfg["minimum_center_spacing_m"]),
+            preferred_world_y_m=float(place_cfg["preferred_world_y_m"]),
+        )
+        place_flange = sample_place_from_centres(
+            centres_xy_m=centres,
+            object_world_initial=geometry["object_world_initial"],
+            flange_from_object_grasp=geometry["flange_from_object_grasp"],
+            samples_per_xy=int(place_cfg["samples_per_xy"]),
+            table_top_world_z_m=table_top,
+            nominal_object_height_m=nominal_height,
+            z_extra_range_m=tuple(place_cfg["z_extra_range_m"]),
+            object_rotation_half_range_deg_xyz=tuple(
+                place_cfg["object_rotation_half_range_deg_xyz"]
+            ),
+        )
     place_nodes, summary = _solve_relaxed_pose_set(
         client=client,
         stage="place",
@@ -677,7 +836,26 @@ def plan_flexible_route(
         T_base_from_world=T_base_from_world,
         solutions_per_pose=solutions_per_pose,
     )
-    summary["free_xy_count"] = int(len(centres))
+    if placement_zone_override is not None:
+        slot_counts: dict[str, int] = {}
+        for row in place_v3_metadata:
+            slot_counts[str(row["slot_id"])] = slot_counts.get(str(row["slot_id"]), 0) + 1
+        summary["place_v3"] = {
+            "enabled": True,
+            "simulator_target_identity_used": False,
+            "placement_zone_override": placement_zone_override,
+            "slot_count": int(len(place_v3_slots)),
+            "ordered_slots": [slot.to_jsonable() for slot in place_v3_slots],
+            "release_pose_count": int(len(place_v3_metadata)),
+            "release_pose_count_by_slot": slot_counts,
+            "release_clearance_values_m": list(
+                place_cfg.get("release_clearance_values_m", (0.08, 0.10, 0.12))
+            ),
+            "anchor_to_visible_bottom_m": float(anchor_to_visible_bottom_m),
+            "target_geometry": target_geometry,
+        }
+    else:
+        summary["free_xy_count"] = int(len(centres))
     summaries.append(summary)
     place_beam = _expand_beam(
         transfer_beam, place_nodes, beam_width=beam_width, selection_cfg=selection_cfg
