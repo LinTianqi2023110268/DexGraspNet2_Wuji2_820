@@ -75,6 +75,35 @@
 - Future production/replay writes binary PNG previews for
   `target_grasp_mask.png` and `target_removal_mask.png`; current session
   overlays were regenerated for visual inspection.
+
+## 2026-08-21 01:xx +08:00 — target-removal supplement expansion v2
+
+- Read `/tmp/wuji2_target_removal_expand_v2_20260820/CODEX_TASK.md` and
+  `perception/target_removal_expand_v2.py`.
+- Scope: only `target_removal_mask`; no DGN2, Route A, Route B, cuRobo,
+  PLACE V3, IK, Isaac, or MotionPlanner execution.
+- Preserved the existing core formula:
+  `core = SAM ∩ HSV_neighbourhood ∩ adaptive_depth_gate`.
+- Added v2 supplement:
+  `supplement = SAM ∩ dilate(core, radius=8px)`, final
+  `target_removal_mask = core | supplement`.
+- Offline replay command:
+  `/home/lin/miniconda3/envs/curobo_v2/bin/python 08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/replay_target_removal_mask.py --cycle-root 08_dual_arm_scene_layout/isaaclab_control/outputs/closed_loop_sessions/20260820_195131/cycle_001 --target-id red_target_000_red_000`.
+- Result for `20260820_195131/cycle_001/red_target_000_red_000`: old core
+  removal `15369` px, old leftover `309` px (`1.971%`); supplement `305` px;
+  new removal `15674` px, new leftover `4` px (`0.026%`).
+- ESDF audit replay wrote
+  `capture/planning/filtered_depth_no_target_replay_target_removal_v2.npy`
+  with `target_pixels_removed=15674`.
+- Regenerated visual checks:
+  `target_removal_mask_overlay.png` and
+  `target_removal_leftover_overlay.png`.
+- Follow-up visual inspection found a few remaining SAM edge pixels.  Increased
+  supplement dilation from `8px` to `12px` while keeping
+  `supplement = SAM ∩ dilate(core)` bounded by the matched SAM mask.
+- Replay result after 12px expansion on
+  `20260820_195131/cycle_001/red_target_000_red_000`: old core removal
+  `15369` px, supplement `309` px, new removal `15678` px, new leftover `0` px.
 - Key output: blue-zone V3 endpoint preflight still FAIL on `20260820_140119/cycle_001` after scanning all 17 unique front-half cases; each PLACE had raw `0`. Residual audit for representative `rank=16 cand=3525`: best position error `0.22438162565231323 m`, P50 `0.3483843207359314 m`; best orientation error `9.0158 deg`; best inner joint margin `-8.6631 deg`; failure type `multiple_fail=108/108`.
 - Conclusion: V3 wiring fixes old red PLACE endpoint generation and proves at least one PLACE V3 endpoint PASS. The old blue session is no longer failing because of precise near-table pose semantics alone; it is a reachability/joint-margin issue for that target/color-zone configuration and must not be masked by threshold loosening.
 

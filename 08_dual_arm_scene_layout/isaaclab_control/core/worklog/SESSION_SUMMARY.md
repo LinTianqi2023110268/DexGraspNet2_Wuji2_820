@@ -578,3 +578,21 @@ Run `./run_closed_loop.sh --planning-only` from a GPU-visible terminal using `sc
   improved to `15369` removal pixels with `309` SAM leftover (`1.971%`);
   `20260820_142510/cycle_001/red_target_000_red_003` improved to `16543`
   removal pixels with `496` SAM leftover (`2.911%`).
+
+## 2026-08-21 — target-removal supplement expansion v2
+
+- Applied the minimal v2 package semantics for ESDF target removal only.
+  Existing core remains unchanged:
+  `SAM ∩ HSV_neighbourhood ∩ adaptive_depth_gate`.
+- Added `supplement = SAM ∩ dilate(core, radius=8px)` and final
+  `target_removal_mask = core | supplement`.  This recovers SAM pixels missed by
+  highlights/reflections/non-pure-color regions while still forbidding arbitrary
+  deletion outside the matched SAM object.
+- Offline replay on `20260820_195131/cycle_001/red_target_000_red_000`: core
+  removal `15369` px, core leftover `309` px; supplement `305` px; final removal
+  `15674` px, final leftover `4` px (`0.026%`).  No Isaac, MotionPlanner, DGN2,
+  Route, PLACE, or IK execution was run.
+- After visual confirmation of a few edge pixels, supplement dilation was raised
+  from `8px` to `12px` without changing the SAM-bound rule.  The same replay now
+  gives supplement `309` px, final removal `15678` px, and final leftover
+  `0` px.

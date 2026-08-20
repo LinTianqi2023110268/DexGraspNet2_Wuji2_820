@@ -47,6 +47,7 @@ def build_target_removal_mask(
     depth_percentile_low: float = 1.0,
     depth_percentile_high: float = 99.0,
     depth_percentile_padding_m: float = 0.01,
+    supplement_expand_radius_px: int = 12,
 ) -> np.ndarray:
     """Build ESDF-only target removal mask for color-sort.
 
@@ -55,6 +56,43 @@ def build_target_removal_mask(
     - selected HSV instance neighbourhood prevents deleting other same-color
       objects or unrelated SAM pixels;
     - depth consistency prevents deleting table/background pixels.
+    """
+    components = build_target_removal_components(
+        sam_mask,
+        hsv_mask,
+        depth_m,
+        sam_expand_radius=sam_expand_radius,
+        hsv_expand_radius=hsv_expand_radius,
+        depth_threshold_m=depth_threshold_m,
+        depth_percentile_low=depth_percentile_low,
+        depth_percentile_high=depth_percentile_high,
+        depth_percentile_padding_m=depth_percentile_padding_m,
+        supplement_expand_radius_px=supplement_expand_radius_px,
+    )
+    return components["removal"]
+
+
+def build_target_removal_components(
+    sam_mask: np.ndarray,
+    hsv_mask: np.ndarray,
+    depth_m: np.ndarray,
+    *,
+    sam_expand_radius: int = 0,
+    hsv_expand_radius: int = 12,
+    depth_threshold_m: float = 0.03,
+    depth_percentile_low: float = 1.0,
+    depth_percentile_high: float = 99.0,
+    depth_percentile_padding_m: float = 0.01,
+    supplement_expand_radius_px: int = 12,
+) -> dict[str, np.ndarray]:
+    """Return target-removal intermediate masks.
+
+    The frozen core is:
+        SAM ∩ HSV neighbourhood ∩ adaptive depth gate
+
+    V2 adds only:
+        supplement = SAM ∩ dilate(core, radius=12px)
+        final = core ∪ supplement
     """
     sam = np.asarray(sam_mask, dtype=bool)
     hsv = np.asarray(hsv_mask, dtype=bool)
@@ -68,7 +106,17 @@ def build_target_removal_mask(
     valid = np.isfinite(depth) & (depth > 0.0)
     hsv_valid = hsv & valid
     if not np.any(hsv_valid):
-        return np.zeros_like(sam, dtype=bool)
+        zero = np.zeros_like(sam, dtype=bool)
+        return {
+            "sam": sam,
+            "hsv": hsv,
+            "valid_depth": valid,
+            "hsv_neighbourhood": zero,
+            "depth_gate": zero,
+            "core": zero,
+            "supplement": zero,
+            "removal": zero,
+        }
 
     seed = sam & hsv & valid
     if np.count_nonzero(seed) >= 8:
@@ -77,7 +125,7 @@ def build_target_removal_mask(
         seed_depth = depth[hsv_valid]
 
     median_depth = float(np.median(seed_depth))
-    legacy_gate = valid & (np.abs(depth - median_depth) < float(depth_threshold_m))
+    _legacy_gate = valid & (np.abs(depth - median_depth) < float(depth_threshold_m))
 
     lo, hi = np.percentile(
         seed_depth,
@@ -94,11 +142,25 @@ def build_target_removal_mask(
     # table deletion rule.
     depth_consistent = adaptive_gate
 
-    return (
+    hsv_neighbourhood = _dilate(hsv, hsv_expand_radius)
+    core = (
         _dilate(sam, sam_expand_radius)
-        & _dilate(hsv, hsv_expand_radius)
+        & hsv_neighbourhood
         & depth_consistent
     )
+    supplement = sam & _dilate(core, supplement_expand_radius_px)
+    removal = core | supplement
+
+    return {
+        "sam": sam,
+        "hsv": hsv,
+        "valid_depth": valid,
+        "hsv_neighbourhood": hsv_neighbourhood,
+        "depth_gate": depth_consistent,
+        "core": core,
+        "supplement": supplement & ~core,
+        "removal": removal,
+    }
 
 
 def audit_target_removal(
@@ -110,11 +172,19 @@ def audit_target_removal(
     depth_m: np.ndarray | None = None,
     parameters: dict[str, Any] | None = None,
     sources: dict[str, str] | None = None,
+    core_mask: np.ndarray | None = None,
+    supplement_mask: np.ndarray | None = None,
 ) -> dict[str, Any]:
     sam = np.asarray(sam_mask, dtype=bool)
     hsv = np.asarray(hsv_mask, dtype=bool)
     grasp = np.asarray(target_grasp_mask, dtype=bool)
     removal = np.asarray(target_removal_mask, dtype=bool)
+    core = np.asarray(core_mask, dtype=bool) if core_mask is not None else removal
+    supplement = (
+        np.asarray(supplement_mask, dtype=bool)
+        if supplement_mask is not None
+        else np.zeros_like(removal, dtype=bool)
+    )
 
     payload: dict[str, Any] = {
         "schema_version": 1,
@@ -122,6 +192,12 @@ def audit_target_removal(
         "sam_pixels": int(np.count_nonzero(sam)),
         "hsv_pixels": int(np.count_nonzero(hsv)),
         "grasp_mask_pixels": int(np.count_nonzero(grasp)),
+        "core_removal_pixels": int(np.count_nonzero(core)),
+        "core_sam_leftover_pixels": int(np.count_nonzero(sam & ~core)),
+        "core_sam_leftover_fraction": float(
+            np.count_nonzero(sam & ~core) / max(1, np.count_nonzero(sam))
+        ),
+        "supplement_pixels": int(np.count_nonzero(supplement)),
         "removal_pixels": int(np.count_nonzero(removal)),
         "sam_leftover_pixels": int(np.count_nonzero(sam & ~removal)),
         "sam_leftover_fraction": float(
@@ -167,12 +243,13 @@ def write_target_removal_artifacts(
     depth_percentile_low: float = 1.0,
     depth_percentile_high: float = 99.0,
     depth_percentile_padding_m: float = 0.01,
+    supplement_expand_radius_px: int = 12,
 ) -> dict[str, Any]:
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     target_grasp_mask = np.asarray(sam_mask, dtype=bool)
-    target_removal_mask = build_target_removal_mask(
+    components = build_target_removal_components(
         target_grasp_mask,
         hsv_mask,
         depth_m,
@@ -182,7 +259,9 @@ def write_target_removal_artifacts(
         depth_percentile_low=depth_percentile_low,
         depth_percentile_high=depth_percentile_high,
         depth_percentile_padding_m=depth_percentile_padding_m,
+        supplement_expand_radius_px=supplement_expand_radius_px,
     )
+    target_removal_mask = components["removal"]
 
     grasp_path = output_dir / "target_grasp_mask.npy"
     removal_path = output_dir / "target_removal_mask.npy"
@@ -209,6 +288,8 @@ def write_target_removal_artifacts(
         "depth_percentile_low": float(depth_percentile_low),
         "depth_percentile_high": float(depth_percentile_high),
         "depth_percentile_padding_m": float(depth_percentile_padding_m),
+        "supplement": "SAM_intersect_dilate_core",
+        "supplement_expand_radius_px": int(supplement_expand_radius_px),
     }
     sources = {
         "sam_mask": "" if sam_source is None else str(Path(sam_source).resolve()),
@@ -223,6 +304,8 @@ def write_target_removal_artifacts(
         depth_m=depth_m,
         parameters=parameters,
         sources=sources,
+        core_mask=components["core"],
+        supplement_mask=components["supplement"],
     )
     audit["target_grasp_mask"] = str(grasp_path)
     audit["target_removal_mask"] = str(removal_path)

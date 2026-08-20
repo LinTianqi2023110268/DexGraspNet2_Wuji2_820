@@ -60,6 +60,7 @@ def main() -> int:
     parser.add_argument("--depth-percentile-low", type=float, default=1.0)
     parser.add_argument("--depth-percentile-high", type=float, default=99.0)
     parser.add_argument("--depth-percentile-padding-m", type=float, default=0.01)
+    parser.add_argument("--supplement-expand-radius-px", type=int, default=12)
     args = parser.parse_args()
 
     cycle_root = args.cycle_root.expanduser().resolve()
@@ -119,6 +120,7 @@ def main() -> int:
         depth_percentile_low=args.depth_percentile_low,
         depth_percentile_high=args.depth_percentile_high,
         depth_percentile_padding_m=args.depth_percentile_padding_m,
+        supplement_expand_radius_px=args.supplement_expand_radius_px,
     )
 
     planning_dir = capture_root / "planning"
@@ -136,26 +138,37 @@ def main() -> int:
         depth_percentile_low=args.depth_percentile_low,
         depth_percentile_high=args.depth_percentile_high,
         depth_percentile_padding_m=args.depth_percentile_padding_m,
+        supplement_expand_radius_px=args.supplement_expand_radius_px,
     )
 
-    old_hsv_removal = hsv_mask
-    old_leftover = int(np.count_nonzero(sam_mask & ~old_hsv_removal))
-    old_fraction = float(old_leftover / max(1, np.count_nonzero(sam_mask)))
+    legacy_hsv_removal = hsv_mask
+    legacy_leftover = int(np.count_nonzero(sam_mask & ~legacy_hsv_removal))
+    legacy_fraction = float(legacy_leftover / max(1, np.count_nonzero(sam_mask)))
+    old_core_pixels = int(planning_audit["core_removal_pixels"])
+    old_core_leftover = int(planning_audit["core_sam_leftover_pixels"])
+    old_core_fraction = float(planning_audit["core_sam_leftover_fraction"])
 
     report = {
         "schema_version": 1,
         "cycle_root": str(cycle_root),
         "target_id": target_id,
-        "old_behavior": {
+        "legacy_hsv_behavior": {
             "removal_mask": "HSV selected instance mask",
-            "removal_pixels": int(np.count_nonzero(old_hsv_removal)),
-            "sam_leftover_pixels": old_leftover,
-            "sam_leftover_fraction": old_fraction,
+            "removal_pixels": int(np.count_nonzero(legacy_hsv_removal)),
+            "sam_leftover_pixels": legacy_leftover,
+            "sam_leftover_fraction": legacy_fraction,
+        },
+        "old_behavior": {
+            "removal_mask": "core = SAM & HSV_neighbourhood & adaptive_depth_gate",
+            "removal_pixels": old_core_pixels,
+            "sam_leftover_pixels": old_core_leftover,
+            "sam_leftover_fraction": old_core_fraction,
         },
         "new_behavior": {
             "target_grasp_mask": planning_audit["target_grasp_mask"],
             "target_removal_mask": planning_audit["target_removal_mask"],
             "target_removal_audit": planning_audit["target_removal_audit"],
+            "supplement_pixels": int(planning_audit["supplement_pixels"]),
             "sam_leftover_pixels": int(planning_audit["sam_leftover_pixels"]),
             "sam_leftover_fraction": float(planning_audit["sam_leftover_fraction"]),
             "removal_pixels": int(planning_audit["removal_pixels"]),
@@ -175,13 +188,17 @@ def main() -> int:
     print(f"target            : {target_id}")
     print(f"SAM pixels        : {planning_audit['sam_pixels']}")
     print(f"HSV pixels        : {planning_audit['hsv_pixels']}")
-    print(f"old leftover      : {old_leftover} ({old_fraction:.3%})")
+    print(
+        f"old core removal  : {old_core_pixels} px | "
+        f"SAM leftover={old_core_leftover} ({old_core_fraction:.3%})"
+    )
     print(
         "new removal       : "
         f"{planning_audit['removal_pixels']} px | "
         f"SAM leftover={planning_audit['sam_leftover_pixels']} "
         f"({planning_audit['sam_leftover_fraction']:.3%})"
     )
+    print(f"supplement        : {planning_audit['supplement_pixels']} px")
     print(f"grasp mask        : {planning_audit['target_grasp_mask']}")
     print(f"removal mask      : {planning_audit['target_removal_mask']}")
     print(f"audit             : {planning_audit['target_removal_audit']}")
