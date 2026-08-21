@@ -596,3 +596,22 @@ Run `./run_closed_loop.sh --planning-only` from a GPU-visible terminal using `sc
   from `8px` to `12px` without changing the SAM-bound rule.  The same replay now
   gives supplement `309` px, final removal `15678` px, and final leftover
   `0` px.
+
+## 2026-08-21 — DGN2 target-cate dual-line integration
+
+- Integrated the ready-made dual-line DGN2 sampling patch without replacing the
+  legacy script.  `09_predict_official_leap_target.py` remains byte-for-byte
+  unchanged and continues to represent the `scene_postfilter` cate=False path.
+- Added the new `target_cate` path using
+  `09_predict_official_leap_target_cate.py`, selected by
+  `dgn2_sampling.mode_by_task.color-sort = target_cate`.  Semantic grasp stays
+  on `scene_postfilter` by default, with `WUJI2_DGN2_SAMPLING_MODE` available
+  for explicit A/B override.
+- Orchestrator now builds/writes a DGN2 sampling plan after the existing 40k
+  network input is built; no target pool, target masks, 40k builder,
+  official_core, Route A/B, cuRobo, PLACE, IK, or Isaac execution logic was
+  modified.
+- Offline failed-sample validation on
+  `20260821_114952/cycle_001/capture/dgn2/red_object/network_input.npz` passed:
+  target input points `2948`, proposals `8192`, target proposals `8192`,
+  non-target seeds `0`, selected score `-10.863729476928711`.

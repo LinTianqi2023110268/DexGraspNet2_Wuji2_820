@@ -57,6 +57,7 @@ from core.bridge import CuroboWorkerClient  # noqa: E402
 from core.config import WorkerConfig  # noqa: E402
 from persistent_isaac import PersistentIsaacClient  # noqa: E402
 from color_sort.target_pool import build_color_target_pool  # noqa: E402
+from dgn2_sampling_policy import build_sampling_plan, write_sampling_plan  # noqa: E402
 from planning.perception_target_geometry import build_perception_target_geometry  # noqa: E402
 from target_contract import PerceptionTarget, write_perception_target  # noqa: E402
 from verification_contract import make_verification_binding  # noqa: E402
@@ -2068,12 +2069,27 @@ def main() -> int:
                 print("[4] DGN2 生成抓取候选 ...")
                 started = time.perf_counter()
                 try:
-                    run("Official DGN2 LEAP inference", [
-                        network_py, root / "08_dual_arm_scene_layout/scripts/09_predict_official_leap_target.py",
-                        "--target", target_slug,
-                        "--rounds", str(int(cfg["dgn2_rounds"])),
-                        "--input-root", dgn_root,
-                    ], cwd=root)
+                    sampling_plan = build_sampling_plan(
+                        root=root,
+                        cfg=cfg,
+                        task_type=args.task,
+                        network_python=network_py,
+                        dgn_root=dgn_root,
+                        target_slug=target_slug,
+                    )
+                    write_sampling_plan(
+                        sampling_plan,
+                        dgn_root / "dgn2_sampling_plan.json",
+                    )
+                    print(
+                        f"    DGN2 sampling={sampling_plan.mode} | "
+                        f"target_points={sampling_plan.input_audit['target_point_count']}/40000"
+                    )
+                    run(
+                        f"Official DGN2 LEAP inference [{sampling_plan.mode}]",
+                        list(sampling_plan.command),
+                        cwd=root,
+                    )
                 except RuntimeError as exc:
                     if (
                         args.task != "color-sort"

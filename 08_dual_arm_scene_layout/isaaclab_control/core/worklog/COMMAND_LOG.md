@@ -104,6 +104,36 @@
 - Replay result after 12px expansion on
   `20260820_195131/cycle_001/red_target_000_red_000`: old core removal
   `15369` px, supplement `309` px, new removal `15678` px, new leftover `0` px.
+
+## 2026-08-21 — DGN2 target-cate dual-line wiring
+
+- Read `/tmp/wuji2_dgn2_target_cate_dual_v1_20260821/CODEX_TASK.md`,
+  `INTEGRATION_SPEC.md`, and `closed_loop_config_snippet.json`.
+- Copied overlay source files:
+  `08_dual_arm_scene_layout/scripts/09_predict_official_leap_target_cate.py`,
+  `08_dual_arm_scene_layout/isaaclab_control/closed_loop/dgn2_sampling_policy.py`,
+  and
+  `08_dual_arm_scene_layout/isaaclab_control/closed_loop/tools/audit_dgn2_target_membership.py`.
+- Preserved legacy script:
+  `git diff -- 08_dual_arm_scene_layout/scripts/09_predict_official_leap_target.py`
+  produced no output.
+- Changed only orchestrator DGN2 inference command to use
+  `build_sampling_plan(...)` / `write_sampling_plan(...)`.
+- Added top-level `dgn2_sampling` config:
+  `semantic-grasp=scene_postfilter`, `color-sort=target_cate`, with
+  `WUJI2_DGN2_SAMPLING_MODE` override enabled.
+- Offline validation:
+  copied
+  `outputs/closed_loop_sessions/20260821_114952/cycle_001/capture/dgn2/red_object`
+  to `/tmp/wuji2_dgn2_target_cate_replay_20260821_114952_red_object`.
+- Membership audit PASS: full scene `40000`, target points `2948`,
+  background `37052`, nonzero ids `[1]`.
+- New target-cate sampler command in `graspnet2.0`:
+  `/home/lin/miniconda3/envs/graspnet2.0/bin/python 08_dual_arm_scene_layout/scripts/09_predict_official_leap_target_cate.py --target red_object --rounds 8 --input-root /tmp/wuji2_dgn2_target_cate_replay_20260821_114952_red_object`.
+- Result: proposal_count `8192`, target_proposal_count `8192`,
+  non_target_seed_count `0`, selected_score `-10.863729476928711`.
+- Validation: py_compile PASS; `git diff --check` PASS.  Isaac, MotionPlanner,
+  route planning, and git push were not run.
 - Key output: blue-zone V3 endpoint preflight still FAIL on `20260820_140119/cycle_001` after scanning all 17 unique front-half cases; each PLACE had raw `0`. Residual audit for representative `rank=16 cand=3525`: best position error `0.22438162565231323 m`, P50 `0.3483843207359314 m`; best orientation error `9.0158 deg`; best inner joint margin `-8.6631 deg`; failure type `multiple_fail=108/108`.
 - Conclusion: V3 wiring fixes old red PLACE endpoint generation and proves at least one PLACE V3 endpoint PASS. The old blue session is no longer failing because of precise near-table pose semantics alone; it is a reachability/joint-margin issue for that target/color-zone configuration and must not be masked by threshold loosening.
 

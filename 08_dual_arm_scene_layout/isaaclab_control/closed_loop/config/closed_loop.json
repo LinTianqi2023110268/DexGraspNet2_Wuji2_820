@@ -22,6 +22,14 @@
   "planner_python": "/home/lin/miniconda3/envs/isaaclab22_sim50/bin/python",
   "dgn2_rounds": 8,
   "dgn2_target_membership_id": 1,
+  "dgn2_sampling": {
+    "default_mode": "scene_postfilter",
+    "mode_by_task": {
+      "semantic-grasp": "scene_postfilter",
+      "color-sort": "target_cate"
+    },
+    "allow_env_override": true
+  },
   "candidate_case_prefix": "closedloop",
   "retarget_chunk_size": 64,
   "max_candidates_to_test": 2048,
