@@ -23,7 +23,6 @@ import math
 import os
 from pathlib import Path
 import re
-import shutil
 import shlex
 import struct
 import subprocess
@@ -56,7 +55,10 @@ sys.path.insert(0, str(ROUTEB_FULL_ROOT))
 from core.bridge import CuroboWorkerClient  # noqa: E402
 from core.config import WorkerConfig  # noqa: E402
 from persistent_isaac import PersistentIsaacClient  # noqa: E402
-from color_sort.target_pool import build_color_target_pool  # noqa: E402
+from color_sort_dino_sam.candidate_binding import (  # noqa: E402
+    candidate_metadata_by_index,
+    enrich_candidate_rows,
+)
 from dgn2_sampling_policy import build_sampling_plan, write_sampling_plan  # noqa: E402
 from planning.perception_target_geometry import build_perception_target_geometry  # noqa: E402
 from target_contract import PerceptionTarget, write_perception_target  # noqa: E402
@@ -193,6 +195,47 @@ def write_npz_goal_pool_subset(
             filtered[key] = value
     np.savez_compressed(output, **filtered)
     return int(np.count_nonzero(keep))
+
+
+def concatenate_routeb_goal_pools(
+    sources: list[Path],
+    output: Path,
+) -> tuple[Path, Path]:
+    if not sources:
+        raise ValueError("no Route B goal pools to concatenate")
+    common_keys = {"arm_joint_names", "q_current_rad"}
+    payloads = []
+    for source in sources:
+        with np.load(Path(source).resolve(), allow_pickle=False) as z:
+            payloads.append({key: np.asarray(z[key]) for key in z.files})
+    keys = set(payloads[0])
+    if any(set(payload) != keys for payload in payloads[1:]):
+        raise RuntimeError("Route B goal pool schemas do not match")
+    merged = {}
+    for key in keys:
+        if key in common_keys:
+            reference = payloads[0][key]
+            if any(not np.array_equal(reference, payload[key]) for payload in payloads[1:]):
+                raise RuntimeError(f"Route B goal pool common field mismatch: {key}")
+            merged[key] = reference
+        else:
+            merged[key] = np.concatenate([payload[key] for payload in payloads], axis=0)
+    goal_count = int(len(merged["candidate_index"]))
+    merged["candidate_order"] = np.arange(goal_count, dtype=np.int64)
+    output = Path(output).resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(output, **merged)
+    report_path = output.with_suffix(".json")
+    report_path.write_text(json.dumps({
+        "schema_version": 1,
+        "status": "PASS",
+        "source_pool_count": len(sources),
+        "goal_count": goal_count,
+        "candidate_count": int(len(np.unique(merged["candidate_index"]))),
+        "sources": [str(Path(source).resolve()) for source in sources],
+        "output": str(output),
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return output, report_path
 
 
 def write_npz_goal_pool_indices(
@@ -1049,6 +1092,34 @@ def candidate_order(prediction: Path) -> tuple[list[dict], int]:
     return rows, total
 
 
+def bind_color_candidate(
+    row: dict,
+    target_selection: dict[str, object],
+) -> tuple[PerceptionTarget, Path, Path, dict[str, object]]:
+    perception_target = PerceptionTarget(
+        **load_json(Path(row["perception_target_json"]))
+    ).validate()
+    target_mask_path = Path(row["target_grasp_mask_path"]).resolve()
+    target_removal_mask_path = Path(row["target_removal_mask_path"]).resolve()
+    bound_selection = dict(target_selection)
+    bound_selection.update({
+        "instance_id": str(row["target_id"]),
+        "target_label": int(row["target_label"]),
+        "target_mask_path": str(target_mask_path),
+        "target_grasp_mask_path": str(target_mask_path),
+        "target_removal_mask_path": str(target_removal_mask_path),
+        "perception_target": str(Path(row["perception_target_json"]).resolve()),
+        "perception_target_geometry": str(Path(row["target_geometry_path"]).resolve()),
+        "placement_zone_override": perception_target.placement_zone_override,
+    })
+    return (
+        perception_target,
+        target_mask_path,
+        target_removal_mask_path,
+        bound_selection,
+    )
+
+
 def legacy_coarse_prefilter(
     *,
     client,
@@ -1165,7 +1236,7 @@ def choose_task_interactively(value: str | None) -> str:
         print(" [1] 指定物体名称抓取")
         print("     GroundingDINO + SAM\n")
         print(" [2] 红/蓝颜色分类抓取")
-        print("     HSV + 多轮自动抓放")
+        print("     SourceZone DINO+SAM 多目标抓放")
         print("==================================================")
         choice = input("请输入 1 或 2: ").strip()
         if choice == "1":
@@ -1257,94 +1328,12 @@ def write_color_attempt(
     return path
 
 
-def match_grounded_color_proposals(
-    *,
-    grounded_sam_result: dict,
-    selected_mask_path: Path,
-    hsv_instances: list[dict],
-) -> list[dict]:
-    """Match every legal SAM residual against current RGB HSV instances.
-
-    The backend still selects one highest-score proposal for semantic-grasp.
-    Color-sort consumes the complete already-computed legal proposal archive so
-    a failed color instance does not hide lower-score proposals for other
-    instances of the same requested color.
-    """
-    detections = {
-        int(row["index"]): row
-        for row in grounded_sam_result.get("detections", [])
-    }
-    proposal_masks: list[tuple[int, np.ndarray, str]] = []
-    archive_value = grounded_sam_result.get("legal_proposal_masks")
-    archive_path = Path(str(archive_value)).resolve() if archive_value else None
-    if archive_path is not None and archive_path.is_file():
-        with np.load(archive_path, allow_pickle=False) as archive:
-            indices = np.asarray(archive["proposal_indices"], dtype=np.int64)
-            masks = np.asarray(archive["masks"], dtype=bool)
-        if masks.ndim != 3 or len(indices) != len(masks):
-            raise RuntimeError(
-                f"invalid legal GroundedSAM proposal archive: {archive_path}"
-            )
-        proposal_masks.extend(
-            (int(index), mask, f"{archive_path}#{row}")
-            for row, (index, mask) in enumerate(zip(indices, masks))
-        )
-    else:
-        selected_index = grounded_sam_result.get("selected_detection")
-        proposal_masks.append(
-            (
-                -1 if selected_index is None else int(selected_index),
-                np.load(Path(selected_mask_path)).astype(bool),
-                str(Path(selected_mask_path).resolve()),
-            )
-        )
-
-    rows: list[dict] = []
-    for proposal_index, sam_mask, mask_source in proposal_masks:
-        detection = detections.get(proposal_index, {})
-        for instance in hsv_instances:
-            hsv_mask = np.load(Path(str(instance["mask_path"]))).astype(bool)
-            if hsv_mask.shape != sam_mask.shape:
-                raise RuntimeError(
-                    "GroundedSAM/HSV mask shape mismatch: "
-                    f"{sam_mask.shape} vs {hsv_mask.shape}"
-                )
-            overlap_px = int(np.count_nonzero(sam_mask & hsv_mask))
-            rows.append(
-                {
-                    "proposal_index": int(proposal_index),
-                    "proposal_mask_source": mask_source,
-                    "dino_score": float(detection.get("score", 0.0)),
-                    "instance_id": str(instance["instance_id"]),
-                    "overlap_px": overlap_px,
-                    "sam_overlap_fraction": float(
-                        overlap_px / max(1, int(sam_mask.sum()))
-                    ),
-                    "hsv_overlap_fraction": float(
-                        overlap_px / max(1, int(hsv_mask.sum()))
-                    ),
-                    "instance": instance,
-                    "proposal_mask": sam_mask,
-                }
-            )
-    rows.sort(
-        key=lambda row: (
-            -int(row["overlap_px"]),
-            -float(row["hsv_overlap_fraction"]),
-            -float(row["dino_score"]),
-            int(row["proposal_index"]),
-            str(row["instance_id"]),
-        )
-    )
-    return rows
-
-
 def is_recoverable_color_planning_failure(message: str) -> bool:
     """True only for an exhausted target/candidate planning funnel.
 
-    The robot is frozen at HOME while planning, so these failures are safe to
-    recover by taking a fresh capture and selecting another color instance.
-    Worker/protocol/asset failures remain fatal and visible.
+    The robot is frozen at HOME while planning. These failures stop the current
+    capture without requesting a new one; worker/protocol/asset failures remain
+    fatal and visible.
     """
     text = str(message)
     markers = (
@@ -1356,19 +1345,6 @@ def is_recoverable_color_planning_failure(message: str) -> bool:
         "no complete feasible route",
     )
     return any(marker in text for marker in markers)
-
-
-def is_recoverable_color_target_generation_failure(message: str) -> bool:
-    """Classify only a target-local DGN2 empty result as recoverable.
-
-    A missing checkpoint, CUDA failure, corrupt input, or subprocess protocol
-    error remains fatal.  The one accepted marker means the official sampler
-    completed all configured rounds but generated no seed on this segmented
-    instance, while the robot is still at HOME.
-    """
-    return "Official sampler produced no seed on the segmented target" in str(
-        message
-    )
 
 
 def canonical_query(text: str) -> str:
@@ -1486,13 +1462,13 @@ def main() -> int:
         print("\n==================================================")
         print(" COLOR SORT TASK — 红/蓝颜色分类抓取")
         print("==================================================")
-        print(f"HSV perception   : ON（使用RGB->HSV识别红/蓝实例）")
+        print("Color perception : SourceZone-only DINO+SAM multi-object")
         print(f"Color seed       : {int(args.color_seed)}")
         if args.target_color is None:
             print("Target color     : ASK AFTER FIRST RGB（先拍照显示，再询问）")
         else:
             print(f"Target color     : {str(args.target_color).upper()}（用户指定）")
-        print("GroundingDINO/SAM : ON（以颜色文本匹配物体，不使用颜色GT选择）")
+        print("GroundingDINO/SAM : ON（一次保留全部可信颜色物体）")
         print("==================================================")
     else:
         print("\n==================================================")
@@ -1720,7 +1696,6 @@ def main() -> int:
             print("✓ Isaac 持续场景已连接")
 
             cycle = 0
-            failed_targets_current_scene: set[str] = set()
             while True:
                 cycle += 1
                 cycle_started = time.perf_counter()
@@ -1756,6 +1731,10 @@ def main() -> int:
                 stop_words = {str(value).lower() for value in cfg.get("stop_words", [])}
                 target_source = ""
                 target_selection: dict[str, object] = {}
+                target_mask_path: Path | None = None
+                target_removal_mask_path: Path | None = None
+                perception_target: PerceptionTarget | None = None
+                color_catalog_path: Path | None = None
                 if args.task == "semantic-grasp":
                     if args.query:
                         query_original = str(args.query)
@@ -1826,51 +1805,30 @@ def main() -> int:
                 else:
                     requested_color = prompt_sort_color_after_capture(args.target_color)
                     args.target_color = requested_color
-                    color_root = cycle_root / "color_sort"
-                    print(f"[2] HSV 当前RGB颜色审计（目标={requested_color.upper()}；不使用颜色GT选择）...")
-                    color_cmd = [
-                        network_py,
-                        root / "08_dual_arm_scene_layout/isaaclab_control/closed_loop/color_sort/segmentation.py",
-                        "--capture-root", capture_root,
-                        "--output-root", color_root,
-                        "--config", root / "08_dual_arm_scene_layout/isaaclab_control/closed_loop/config/color_sort.json",
-                        "--layout", root / "08_dual_arm_scene_layout/config/manual_layout_calibrated.json",
-                        "--assignment", color_assignment_path,
-                        "--preferred-color", requested_color,
-                    ]
-                    run("HSV color audit", color_cmd, cwd=root, capture_json=False)
-                    detection_report = load_json(color_root / "detection_report.json")
-                    show_image_path(Path(detection_report["overlay"]), cfg)
-                    red_source = int(detection_report["red"]["inside_source_zone"])
-                    blue_source = int(detection_report["blue"]["inside_source_zone"])
-                    print("\n[COLOR SORT DETECTION]")
-                    print(f"    RED  source={red_source} visible={detection_report['red']['visible_components']}")
-                    print(f"    BLUE source={blue_source} visible={detection_report['blue']['visible_components']}")
-                    requested_source = int(detection_report[requested_color]["inside_source_zone"])
-                    if requested_source <= 0:
-                        final_snapshot = session_root / "final_scene_manifest.json"
-                        isaac.snapshot(final_snapshot)
-                        summary_path = session_root / "color_sort_summary.json"
-                        status = "COLOR_COMPLETE" if not failed_targets_current_scene else "PARTIAL_COMPLETE"
-                        summary_path.write_text(json.dumps({
-                            "schema_version": 1,
-                            "status": status,
-                            "target_color": requested_color,
-                            "cycle": cycle,
-                            "failed_instance_ids_current_scene": sorted(failed_targets_current_scene),
-                            "red_source_remaining": red_source,
-                            "blue_source_remaining": blue_source,
-                            "final_snapshot": str(final_snapshot),
-                        }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-                        print(f"✓ {requested_color.upper()} 颜色任务结束：{status} | summary={summary_path}")
-                        return 0
-
-                    # GroundingDINO/SAM confirms all current-capture HSV instances.
-                    # The final DGN2 target mask is the complete matched HSV
-                    # component, not the SAM/HVS intersection.
                     query_original = requested_color
                     query = f"{requested_color} object"
                     target_slug = safe_slug(f"{requested_color}_object")
+                    color_root = cycle_root / "color_sort_v2"
+                    spatial_root = color_root / "spatial"
+                    color_cfg = cfg["color_sort_v2"]
+                    spatial_result = run(
+                        "prepare SourceZone and GraspContextZone",
+                        [
+                            network_py, SCRIPTS / "prepare_color_source_context.py",
+                            "--capture-root", capture_root,
+                            "--filtered-depth", filtered_depth_path,
+                            "--rgb-no-robot", rgb_no_robot_path,
+                            "--layout", root / "08_dual_arm_scene_layout/config/manual_layout_calibrated.json",
+                            "--output-dir", spatial_root,
+                            "--context-margin-xy-m", str(color_cfg["context_margin_xy_m"]),
+                        ],
+                        cwd=root,
+                        capture_json=True,
+                    )
+                    source_rgb_path = Path(spatial_result["rgb_source_only"]).resolve()
+                    source_depth_mask_path = Path(
+                        spatial_result["source_zone_depth_mask"]
+                    ).resolve()
                     gs_root = capture_root / "grounded_sam" / target_slug
                     backend = cfg.get("grounded_sam_backend")
                     if not backend:
@@ -1878,7 +1836,7 @@ def main() -> int:
                     command = [
                         str(x).format(
                             project_root=root,
-                            rgb=rgb_no_robot_path,
+                            rgb=source_rgb_path,
                             text=query,
                             output=gs_root,
                         )
@@ -1891,133 +1849,79 @@ def main() -> int:
                     ])
                     started = time.perf_counter()
                     print(
-                        f"[2.5] GroundingDINO(rgb_no_robot, prompt={query!r}) + SAM + safety gate ..."
+                        f"[2] GroundingDINO(SourceZone-only RGB, prompt={query!r}) + SAM ..."
                     )
                     run("GroundingDINO color prompt -> SAM", command, cwd=root)
                     gs_result = load_json(gs_root / "result.json")
-                    if gs_result.get("status") == "NO_LEGAL_TARGET":
-                        summary_path = write_color_attempt(
+                    catalog_result = run(
+                        "build trusted DINO+SAM color catalog",
+                        [
+                            network_py, SCRIPTS / "build_dino_sam_color_catalog.py",
+                            "--capture-root", capture_root,
+                            "--color-root", color_root,
+                            "--grounded-sam-result", gs_root / "result.json",
+                            "--source-zone-depth-mask", source_depth_mask_path,
+                            "--requested-color", requested_color,
+                            "--duplicate-iou-threshold", str(color_cfg["duplicate_iou_threshold"]),
+                            "--minimum-source-valid-depth-pixels", str(color_cfg["minimum_source_valid_depth_pixels"]),
+                            "--minimum-source-fraction", str(color_cfg["minimum_source_fraction"]),
+                            "--removal-expand-px", str(color_cfg["removal_expand_px"]),
+                        ],
+                        cwd=root,
+                        capture_json=True,
+                    )
+                    color_catalog_path = Path(catalog_result["catalog"]).resolve()
+                    catalog = load_json(color_catalog_path)
+                    catalog_status = str(catalog["status"])
+                    if catalog_status == "COLOR_COMPLETE_DINO_EMPTY":
+                        final_snapshot = session_root / "final_scene_manifest.json"
+                        isaac.snapshot(final_snapshot)
+                        summary_path = session_root / "color_sort_summary.json"
+                        summary_path.write_text(json.dumps({
+                            "schema_version": 2,
+                            "status": catalog_status,
+                            "target_color": requested_color,
+                            "cycle": cycle,
+                            "catalog": str(color_catalog_path),
+                            "final_snapshot": str(final_snapshot),
+                        }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                        print(f"✓ {requested_color.upper()} 颜色任务结束 | summary={summary_path}")
+                        return 0
+                    if catalog_status != "PASS":
+                        attempt_path = write_color_attempt(
                             color_root=color_root,
-                            status="NO_LEGAL_COLOR_TARGET",
+                            status="NO_TRUSTED_COLOR_OBJECT",
                             requested_color=requested_color,
                             instance_id=None,
-                            detail=(
-                                f"GroundingDINO/SAM prompt={query!r} produced no legal target; "
-                                f"report={gs_root / 'result.json'}"
-                            ),
+                            detail=f"catalog={color_catalog_path}",
                         )
-                        print(
-                            f"⚠ GroundingDINO/SAM没有找到合法{requested_color.upper()}桌面物体；"
-                            "机械臂保持 HOME，停止本颜色任务。"
-                        )
-                        print(f"    attempt={summary_path}")
+                        print("⚠ DINO/SAM存在检测但没有可信SourceZone颜色物体；不声明任务完成。")
+                        print(f"    attempt={attempt_path}")
                         return 2
-                    gs_check = run("validate Grounded-SAM color output", [
-                        network_py, SCRIPTS / "validate_grounded_sam_output.py",
-                        "--rgb", rgb, "--output-root", gs_root, "--query", query,
-                    ], cwd=root, capture_json=True)
-                    overlay = Path(gs_check["overlay"])
-                    show_async(cfg.get("show_overlay_command"), overlay=str(overlay))
-                    grounded_sam_mask_path = gs_root / "mask.npy"
-                    pool = build_color_target_pool(
-                        capture_root=capture_root,
-                        color_root=color_root,
-                        detection_report=detection_report,
-                        grounded_sam_result=gs_result,
-                        selected_sam_mask_path=grounded_sam_mask_path,
-                        requested_color=requested_color,
-                        gate_cfg=load_json(
-                            root / "08_dual_arm_scene_layout/isaaclab_control/closed_loop/config/color_sort.json"
-                        )["matching"],
-                    )
-                    target_rows = [
-                        row for row in pool["targets"]
-                        if str(row["target_id"]) not in failed_targets_current_scene
-                    ]
-                    if not target_rows:
-                        write_color_attempt(
-                            color_root=color_root,
-                            status="NO_DINO_SAM_HSV_TARGET_POOL_MATCH",
-                            requested_color=requested_color,
-                            instance_id=None,
-                            detail=(
-                                f"No {requested_color} HSV component passed DINO/SAM matching gates; "
-                                f"matrix={pool['match_matrix']}"
-                            ),
-                        )
-                        print(
-                            f"⚠ 当前capture没有通过DINO/SAM确认的{requested_color.upper()} HSV实例；"
-                            "机械臂保持 HOME，停止本颜色任务。"
-                        )
-                        return 2
-                    selected_target = PerceptionTarget(**target_rows[0]).validate()
-                    target_mask_path = Path(selected_target.mask_path).resolve()
-                    target_removal_mask_path = Path(
-                        selected_target.metrics["target_removal_mask_path"]
-                    ).resolve()
-                    target_source = selected_target.source
-                    metrics = dict(selected_target.metrics)
-                    planning_target_grasp_mask = capture_root / "planning/target_grasp_mask.npy"
-                    planning_target_removal_mask = capture_root / "planning/target_removal_mask.npy"
-                    planning_target_removal_audit = capture_root / "planning/target_removal_audit.json"
-                    shutil.copy2(target_mask_path, planning_target_grasp_mask)
-                    shutil.copy2(target_removal_mask_path, planning_target_removal_mask)
-                    for source_png, dest_png in (
-                        (
-                            Path(metrics["target_grasp_mask_path"]).resolve().with_suffix(".png"),
-                            capture_root / "planning/target_grasp_mask.png",
-                        ),
-                        (
-                            Path(metrics["target_removal_mask_path"]).resolve().with_suffix(".png"),
-                            capture_root / "planning/target_removal_mask.png",
-                        ),
-                    ):
-                        if source_png.is_file():
-                            shutil.copy2(source_png, dest_png)
-                    shutil.copy2(
-                        Path(metrics["target_removal_audit_path"]).resolve(),
-                        planning_target_removal_audit,
-                    )
-                    target_removal_mask_path = planning_target_removal_mask
+                    target_source = "dino_sam_multi_sourcezone"
                     target_selection = {
                         "task_type": "color-sort",
                         "target_source": target_source,
-                        "target_mask_path": str(target_mask_path),
-                        "target_grasp_mask_path": str(planning_target_grasp_mask),
-                        "target_removal_mask_path": str(target_removal_mask_path),
-                        "target_removal_audit_path": str(planning_target_removal_audit),
                         "query_original": query_original,
                         "query_canonical": query,
                         "color": requested_color,
-                        "instance_id": selected_target.target_id,
-                        "bbox": None,
-                        "centroid_uv": None,
-                        "centroid_world": None,
-                        "placement_zone_override": selected_target.placement_zone_override,
+                        "instance_id": None,
+                        "placement_zone_override": f"{requested_color}_zone",
                         "metadata": {
-                            "perception_target": str(Path(target_mask_path).parent / "target.json"),
-                            "hsv_instance_id": str(metrics.get("instance_id", "")),
-                            "target_pool": str(color_root / "target_pool.json"),
-                            "match_matrix": str(pool["match_matrix"]),
-                            "final_mask_contract": "split_grasp_and_esdf_removal_masks",
-                            "hsv_audit": str(color_root / "detection_report.json"),
+                            "catalog": str(color_catalog_path),
                             "grounded_sam_result": str(gs_root / "result.json"),
+                            "spatial_context": str(spatial_root / "spatial_context.json"),
                         },
                     }
-                    (color_root / "selected_target.json").write_text(
-                        json.dumps(target_selection, ensure_ascii=False, indent=2) + "\n",
-                        encoding="utf-8",
-                    )
                     print(
-                        f"    selected={selected_target.target_id} | color={requested_color.upper()} | "
-                        f"DINO proposal={metrics.get('proposal_index')} "
-                        f"score={metrics.get('dino_score')} | "
-                        f"overlap={metrics.get('overlap_px')} px | "
+                        f"    trusted_objects={catalog['trusted_object_count']} | "
+                        f"labels={[row['target_label'] for row in catalog['objects']]} | "
                         f"{time.perf_counter()-started:.1f}s"
                     )
 
-                perception_target_root = Path(target_mask_path).resolve().parent
-                perception_target = PerceptionTarget(
+                if args.task == "semantic-grasp":
+                    perception_target_root = Path(target_mask_path).resolve().parent
+                    perception_target = PerceptionTarget(
                     capture_id=capture_root.parent.name,
                     target_id=target_slug,
                     task_type=str(args.task),
@@ -2030,45 +1934,45 @@ def main() -> int:
                         "query_original": query_original,
                         "target_selection": target_selection,
                     },
-                ).validate()
-                write_perception_target(
-                    perception_target_root / "perception_target.json",
-                    perception_target,
-                )
-                target_geometry_path = perception_target_root / "perception_target_geometry.json"
-                build_perception_target_geometry(
-                    capture_root=capture_root,
-                    target_mask_path=Path(target_mask_path),
-                    output_path=target_geometry_path,
-                    depth_path=filtered_depth_path,
-                    minimum_valid_pixels=50,
-                )
-                target_selection["perception_target"] = str(
-                    perception_target_root / "perception_target.json"
-                )
-                target_selection["perception_target_geometry"] = str(target_geometry_path)
+                    ).validate()
+                    write_perception_target(
+                        perception_target_root / "perception_target.json",
+                        perception_target,
+                    )
+                    target_geometry_path = perception_target_root / "perception_target_geometry.json"
+                    build_perception_target_geometry(
+                        capture_root=capture_root,
+                        target_mask_path=Path(target_mask_path),
+                        output_path=target_geometry_path,
+                        depth_path=filtered_depth_path,
+                        minimum_valid_pixels=50,
+                    )
+                    target_selection["perception_target"] = str(
+                        perception_target_root / "perception_target.json"
+                    )
+                    target_selection["perception_target_geometry"] = str(target_geometry_path)
 
-                # 3) RGB-D -> official 40k input
-                dgn_root = capture_root / "dgn2" / target_slug
-                dgn_depth_path = filtered_depth_path
-                print("[3] DGN2/ESDF 使用当前cycle同一份 RobotSegmenter filtered_depth ...")
-                print("[3] 构建 DGN2 40k 场景点云 ...")
-                dgn_command = [
-                    network_py, root / "08_dual_arm_scene_layout/scripts/08_build_target_network_input.py",
-                    "--target", target_slug,
-                    "--target-segmentation-id", str(int(cfg["dgn2_target_membership_id"])),
-                    "--capture-root", capture_root,
-                    "--mask", target_mask_path,
-                    "--depth-path", dgn_depth_path,
-                ]
-                run("RGB-D -> full-scene 40k + target membership", dgn_command, cwd=root)
-                net_meta = load_json(dgn_root / "network_input.json")
-                print(f"    ✓ 40k输入完成 | target_points={net_meta.get('sampled_target_point_count', 'NA')}")
+                if args.task == "semantic-grasp":
+                    # 3) RGB-D -> official 40k input
+                    dgn_root = capture_root / "dgn2" / target_slug
+                    dgn_depth_path = filtered_depth_path
+                    print("[3] DGN2/ESDF 使用当前cycle同一份 RobotSegmenter filtered_depth ...")
+                    print("[3] 构建 DGN2 40k 场景点云 ...")
+                    dgn_command = [
+                        network_py, root / "08_dual_arm_scene_layout/scripts/08_build_target_network_input.py",
+                        "--target", target_slug,
+                        "--target-segmentation-id", str(int(cfg["dgn2_target_membership_id"])),
+                        "--capture-root", capture_root,
+                        "--mask", target_mask_path,
+                        "--depth-path", dgn_depth_path,
+                    ]
+                    run("RGB-D -> full-scene 40k + target membership", dgn_command, cwd=root)
+                    net_meta = load_json(dgn_root / "network_input.json")
+                    print(f"    ✓ 40k输入完成 | target_points={net_meta.get('sampled_target_point_count', 'NA')}")
 
-                # 4) DGN2
-                print("[4] DGN2 生成抓取候选 ...")
-                started = time.perf_counter()
-                try:
+                    # 4) DGN2
+                    print("[4] DGN2 生成抓取候选 ...")
+                    started = time.perf_counter()
                     sampling_plan = build_sampling_plan(
                         root=root,
                         cfg=cfg,
@@ -2090,36 +1994,50 @@ def main() -> int:
                         list(sampling_plan.command),
                         cwd=root,
                     )
-                except RuntimeError as exc:
-                    if (
-                        args.task != "color-sort"
-                        or not is_recoverable_color_target_generation_failure(
-                            str(exc)
-                        )
-                    ):
-                        raise
-                    failed_instance_id = str(target_selection["instance_id"])
-                    failed_targets_current_scene.add(failed_instance_id)
-                    attempt_path = write_color_attempt(
-                        color_root=color_root,
-                        status="DGN2_NO_TARGET_SEED",
-                        requested_color=requested_color,
-                        instance_id=failed_instance_id,
-                        detail=(
-                            "Official DGN2 completed all sampler rounds but produced "
-                            "no seed on this segmented instance. Robot remained at HOME."
-                        ),
+                    prediction = dgn_root / "official_leap_1024_target_ranked.npz"
+                else:
+                    dgn_root = color_root / "dgn2"
+                    print("[3] 构建 GraspContextZone 40k 多目标 DGN2 输入 ...")
+                    run(
+                        "RGB-D -> GraspContextZone 40k multi-target input",
+                        [
+                            network_py, root / "08_dual_arm_scene_layout/scripts/08_build_color_multi_network_input.py",
+                            "--capture-root", capture_root,
+                            "--context-depth", spatial_root / "filtered_depth_grasp_context.npy",
+                            "--context-mask", spatial_root / "grasp_context_depth_mask.npy",
+                            "--target-label-image", color_root / "target_label_image.npy",
+                            "--catalog", color_catalog_path,
+                            "--output-root", dgn_root,
+                            "--minimum-sampled-points-per-target", str(color_cfg["minimum_sampled_points_per_target"]),
+                        ],
+                        cwd=root,
                     )
+                    net_meta = load_json(dgn_root / "network_input.json")
                     print(
-                        "[COLOR SORT] 当前颜色实例没有生成DGN2抓取候选。"
+                        f"    ✓ 40k输入完成 | target_counts={net_meta['sampled_target_counts']}"
                     )
-                    print(f"    skipped instance : {failed_instance_id}")
-                    print("    robot state      : HOME（尚未执行机械臂动作）")
-                    print("    next action      : fresh capture -> 尝试下一同色实例")
-                    print(f"    attempt          : {attempt_path}")
-                    continue
-                prediction = dgn_root / "official_leap_1024_target_ranked.npz"
+                    print("[4] official DGN2 cate=True 生成全部颜色物体候选 ...")
+                    started = time.perf_counter()
+                    run(
+                        "Official DGN2 LEAP color multi cate=True inference",
+                        [
+                            network_py, root / "08_dual_arm_scene_layout/scripts/09_predict_official_leap_color_multi_cate.py",
+                            "--input-root", dgn_root,
+                            "--catalog", color_catalog_path,
+                            "--rounds", str(color_cfg["dgn2_rounds"]),
+                        ],
+                        cwd=root,
+                    )
+                    prediction = dgn_root / "official_leap_color_multi_ranked.npz"
                 candidates_plain, total_proposals = candidate_order(prediction)
+                candidate_metadata = {}
+                if args.task == "color-sort":
+                    candidates_plain = enrich_candidate_rows(
+                        rows=candidates_plain,
+                        prediction_path=prediction,
+                        catalog_path=color_catalog_path,
+                    )
+                    candidate_metadata = candidate_metadata_by_index(candidates_plain)
                 print(
                     f"    ✓ proposals={total_proposals} | 目标候选={len(candidates_plain)} "
                     f"| {time.perf_counter()-started:.1f}s"
@@ -2153,15 +2071,29 @@ def main() -> int:
                         "failure_stage_counts": {},
                     },
                 }
-                leap_overlay = generate_leap_candidate_overlay(
-                    rgb_path=rgb,
-                    mask_path=target_mask_path,
-                    prediction=prediction,
-                    intrinsics_path=capture_root / "intrinsics.npy",
-                    T_world_camera_path=capture_root / "T_world_camera.npy",
-                    output_path=dgn_root / "leap_grasp_candidate_region_overlay.png",
-                    query=query,
-                )
+                if args.task == "color-sort":
+                    overlay_result = run(
+                        "draw color multi seed/root overlay",
+                        [
+                            network_py, SCRIPTS / "draw_color_multi_seed_root_overlay.py",
+                            "--capture-root", capture_root,
+                            "--prediction", prediction,
+                            "--output", dgn_root / "color_multi_seed_root_overlay.png",
+                        ],
+                        cwd=root,
+                        capture_json=True,
+                    )
+                    leap_overlay = Path(overlay_result["output"])
+                else:
+                    leap_overlay = generate_leap_candidate_overlay(
+                        rgb_path=rgb,
+                        mask_path=target_mask_path,
+                        prediction=prediction,
+                        intrinsics_path=capture_root / "intrinsics.npy",
+                        T_world_camera_path=capture_root / "T_world_camera.npy",
+                        output_path=dgn_root / "leap_grasp_candidate_region_overlay.png",
+                        query=query,
+                    )
                 if leap_overlay is not None:
                     funnel["dgn2"]["leap_grasp_candidate_region_overlay"] = str(leap_overlay)
                     print(f"    ✓ LEAP候选区域图：{leap_overlay}")
@@ -2314,13 +2246,31 @@ def main() -> int:
                         )
 
                     max_to_test = int(cfg.get("max_candidates_to_test", 0))
-                    if max_to_test > 0:
+                    if args.task != "color-sort" and max_to_test > 0:
                         survivor_indices = survivor_indices[:max_to_test]
                     retarget_chunk_size = int(cfg.get("retarget_chunk_size", 64))
-                    total_batches = math.ceil(len(survivor_indices) / retarget_chunk_size)
+                    if args.task == "color-sort" and not routeb_mode:
+                        candidate_batches: list[list[int]] = []
+                        for local_index in survivor_indices:
+                            label = int(candidates[local_index]["target_label"])
+                            if (
+                                not candidate_batches
+                                or len(candidate_batches[-1]) >= retarget_chunk_size
+                                or int(candidates[candidate_batches[-1][0]]["target_label"])
+                                != label
+                            ):
+                                candidate_batches.append([])
+                            candidate_batches[-1].append(int(local_index))
+                    else:
+                        candidate_batches = [
+                            survivor_indices[start:start + retarget_chunk_size]
+                            for start in range(0, len(survivor_indices), retarget_chunk_size)
+                        ]
+                    total_batches = len(candidate_batches)
                     selected = None
                     routeb_goal_pool_path = None
                     routeb_goal_pool_report = None
+                    routeb_goal_pool_paths: list[Path] = []
                     routeb_dense_report = None
                     tested_cover = 0
                     retargeted = 0
@@ -2333,8 +2283,7 @@ def main() -> int:
                         "[7] Wuji2 重定向 + 精确 COVER + "
                         + ("Route B PREGRASP goal pool" if args.motion_route == "curobo" else "Flexible IK 搜索")
                     )
-                    for chunk_index, start in enumerate(range(0, len(survivor_indices), retarget_chunk_size), start=1):
-                        local_indices = survivor_indices[start:start + retarget_chunk_size]
+                    for chunk_index, local_indices in enumerate(candidate_batches, start=1):
                         chunk_items = []
                         for local_index in local_indices:
                             item = candidates[local_index]
@@ -2342,14 +2291,26 @@ def main() -> int:
                             idx = int(item["candidate_index"])
                             case_id = f"{cfg.get('candidate_case_prefix','closedloop')}_r{rank:04d}_cand{idx:04d}"
                             case_root = scratch_root / f"rank_{rank:04d}" / case_id
-                            chunk_items.append({
+                            chunk_item = {
                                 "local_target_index": int(local_index),
                                 "target_rank": rank,
                                 "candidate_index": idx,
                                 "official_score": float(item.get("score", item.get("official_score", float('nan')))),
                                 "case_id": case_id,
                                 "case_root": str(case_root),
-                            })
+                            }
+                            if args.task == "color-sort":
+                                for key in (
+                                    "target_label",
+                                    "target_id",
+                                    "target_grasp_mask_path",
+                                    "target_seed_mask_path",
+                                    "target_removal_mask_path",
+                                    "target_geometry_path",
+                                    "perception_target_json",
+                                ):
+                                    chunk_item[key] = item[key]
+                            chunk_items.append(chunk_item)
                         if not chunk_items:
                             continue
                         chunk_dir = scratch_root / f"batch_{chunk_index:03d}"
@@ -2380,17 +2341,34 @@ def main() -> int:
                             f"ranks {batch_funnel['rank_range'][0]}..{batch_funnel['rank_range'][1]} | "
                             f"input={len(chunk_items)}"
                         )
-                        build_report = run("batch build candidate cases", [
-                            network_py, SCRIPTS / "batch_build_candidate_cases.py",
-                            "--project-root", root,
-                            "--prediction", prediction,
-                            "--network-input", dgn_root / "network_input.npz",
-                            "--capture-root", capture_root,
-                            "--settled-manifest", settled,
-                            "--target-geometry", target_geometry_path,
-                            "--items-json", items_json,
-                            "--output", chunk_dir / "batch_build_report.json",
-                        ], cwd=root, capture_json=True)
+                        if args.task == "color-sort":
+                            build_command = [
+                                network_py, SCRIPTS / "batch_build_candidate_cases_multi.py",
+                                "--prediction", prediction,
+                                "--network-input", dgn_root / "network_input.npz",
+                                "--capture-root", capture_root,
+                                "--settled-manifest", settled,
+                                "--items-json", items_json,
+                                "--output", chunk_dir / "batch_build_report.json",
+                            ]
+                        else:
+                            build_command = [
+                                network_py, SCRIPTS / "batch_build_candidate_cases.py",
+                                "--project-root", root,
+                                "--prediction", prediction,
+                                "--network-input", dgn_root / "network_input.npz",
+                                "--capture-root", capture_root,
+                                "--settled-manifest", settled,
+                                "--target-geometry", target_geometry_path,
+                                "--items-json", items_json,
+                                "--output", chunk_dir / "batch_build_report.json",
+                            ]
+                        build_report = run(
+                            "batch build candidate cases",
+                            build_command,
+                            cwd=root,
+                            capture_json=True,
+                        )
                         retarget_report = run("batch LEAP->Wuji2 retarget", [
                             retarget_py, SCRIPTS / "batch_retarget_cases.py",
                             "--items-json", items_json,
@@ -2466,12 +2444,17 @@ def main() -> int:
                             batch_size=int(cfg.get("gpu_ik_batch_size", 512)),
                         ) as curobo:
                             if need_observed_map:
+                                map_target_mask_path = (
+                                    Path(chunk_items[0]["target_grasp_mask_path"])
+                                    if args.task == "color-sort"
+                                    else target_mask_path
+                                )
                                 map_started = time.perf_counter()
                                 batch_map = curobo.build_map(
                                     roi_depth_path,
                                     capture_root / "intrinsics.npy",
                                     capture_root / "T_world_camera.npy",
-                                    target_mask_path,
+                                    map_target_mask_path,
                                 )
                                 batch_map.update({
                                     "batch_index": int(chunk_index),
@@ -2551,15 +2534,24 @@ def main() -> int:
                                     continue
 
                                 rb_cfg = cfg.get("routeB_front_half", {})
+                                goals_per_case = int(rb_cfg.get("goals_per_case", 8))
                                 pool = build_front_half_goal_pool(
                                     client=curobo,
                                     project_root=root,
                                     passed_cover_rows=passed_cover,
                                     q_current=q_current,
                                     config=cfg,
-                                    max_candidate_cases=int(rb_cfg.get("max_candidate_cases", 32)),
-                                    goals_per_case=int(rb_cfg.get("goals_per_case", 8)),
-                                    max_total_goals=int(rb_cfg.get("max_total_goals", 128)),
+                                    max_candidate_cases=(
+                                        len(passed_cover)
+                                        if args.task == "color-sort"
+                                        else int(rb_cfg.get("max_candidate_cases", 32))
+                                    ),
+                                    goals_per_case=goals_per_case,
+                                    max_total_goals=(
+                                        len(passed_cover) * goals_per_case
+                                        if args.task == "color-sort"
+                                        else int(rb_cfg.get("max_total_goals", 128))
+                                    ),
                                 )
                                 batch_funnel["routeB_goal_pool"] = {
                                     "goal_count": int(pool.goal_count),
@@ -2574,7 +2566,15 @@ def main() -> int:
                                     write_planning_funnel(cycle_root, funnel)
                                     print("    Route B: PREGRASP endpoint goal pool=0，进入下一批。")
                                     continue
-                                routeb_goal_pool_path = cycle_root / "routeB_front_half/routeB_front_half_goal_pool.npz"
+                                routeb_goal_pool_path = (
+                                    cycle_root
+                                    / "routeB_front_half"
+                                    / (
+                                        f"routeB_front_half_goal_pool_batch_{chunk_index:03d}.npz"
+                                        if args.task == "color-sort"
+                                        else "routeB_front_half_goal_pool.npz"
+                                    )
+                                )
                                 routeb_goal_pool_path, routeb_goal_pool_report = save_front_half_goal_pool(
                                     routeb_goal_pool_path,
                                     pool,
@@ -2596,6 +2596,9 @@ def main() -> int:
                                 funnel["routeB_front_half"]["goal_pool_npz"] = str(routeb_goal_pool_path)
                                 funnel["routeB_front_half"]["goal_pool_json"] = str(routeb_goal_pool_report)
                                 write_planning_funnel(cycle_root, funnel)
+                                if args.task == "color-sort":
+                                    routeb_goal_pool_paths.append(routeb_goal_pool_path)
+                                    continue
                                 # Leave the CuroboWorkerClient context before
                                 # RobotSegmenter and true 7DOF dense planning.
                                 break
@@ -2653,6 +2656,18 @@ def main() -> int:
                                         "case_root": str(Path(item["case_root"]).resolve()),
                                         "route": route,
                                     }
+                                    if args.task == "color-sort":
+                                        selected.update({
+                                            key: item[key]
+                                            for key in (
+                                                "target_label",
+                                                "target_id",
+                                                "target_grasp_mask_path",
+                                                "target_removal_mask_path",
+                                                "target_geometry_path",
+                                                "perception_target_json",
+                                            )
+                                        })
                                     print(
                                         f"    ✓ Flexible Route PASS | rank={selected['target_rank']} "
                                         f"candidate={selected['candidate_index']} | {time.perf_counter()-route_started:.2f}s"
@@ -2704,6 +2719,26 @@ def main() -> int:
                             break
                         if selected is not None:
                             break
+
+                    if args.task == "color-sort" and routeb_goal_pool_paths:
+                        (
+                            routeb_goal_pool_path,
+                            routeb_goal_pool_report,
+                        ) = concatenate_routeb_goal_pools(
+                            routeb_goal_pool_paths,
+                            cycle_root / "routeB_front_half/routeB_front_half_goal_pool.npz",
+                        )
+                        funnel["routeB_front_half"]["goal_pool_npz"] = str(
+                            routeb_goal_pool_path
+                        )
+                        funnel["routeB_front_half"]["goal_pool_json"] = str(
+                            routeb_goal_pool_report
+                        )
+                        write_planning_funnel(cycle_root, funnel)
+                        print(
+                            "[Route B] consolidated same-capture color candidate pools | "
+                            f"batches={len(routeb_goal_pool_paths)} | {routeb_goal_pool_path}"
+                        )
 
                     if args.motion_route == "curobo" and routeb_goal_pool_path is not None:
                         print("[Route B] cuRobo IK worker released before RobotSegmenter/dense backend.")
@@ -2931,6 +2966,24 @@ def main() -> int:
                             print(f"scene_collision  : {post_rb.get('scene_collision_max')}")
                             print(f"cspace           : {post_rb.get('cspace_max')}")
                             selected_case_root = Path(selected_rb["case_root"]).resolve()
+                            if args.task == "color-sort":
+                                routeb_candidate = candidate_metadata[
+                                    int(selected_rb["candidate_index"])
+                                ]
+                                (
+                                    routeb_perception_target,
+                                    routeb_target_mask_path,
+                                    routeb_target_removal_mask_path,
+                                    routeb_target_selection,
+                                ) = bind_color_candidate(
+                                    routeb_candidate,
+                                    target_selection,
+                                )
+                            else:
+                                routeb_perception_target = perception_target
+                                routeb_target_mask_path = target_mask_path
+                                routeb_target_removal_mask_path = target_removal_mask_path
+                                routeb_target_selection = target_selection
                             selected_rank_match = re.search(
                                 r"rank_(\d+)",
                                 str(selected_case_root),
@@ -2968,8 +3021,8 @@ def main() -> int:
                                     backhalf_pool=backhalf_pool_path,
                                     output_dir=cycle_root / "routeB_full/planning",
                                     settings=cfg["routeB_full_pipeline"],
-                                    target_mask_path=target_mask_path,
-                                    target_removal_mask_path=target_removal_mask_path,
+                                    target_mask_path=routeb_target_mask_path,
+                                    target_removal_mask_path=routeb_target_removal_mask_path,
                                 )
                             except RuntimeError as exc:
                                 message = str(exc)
@@ -3035,6 +3088,15 @@ def main() -> int:
                             ]
                             if missing_full:
                                 raise RuntimeError("Route B full plan missing outputs: " + ", ".join(missing_full))
+                            perception_target = routeb_perception_target
+                            target_mask_path = routeb_target_mask_path
+                            target_removal_mask_path = routeb_target_removal_mask_path
+                            target_selection = routeb_target_selection
+                            if args.task == "color-sort":
+                                (color_root / "selected_target.json").write_text(
+                                    json.dumps(target_selection, ensure_ascii=False, indent=2) + "\n",
+                                    encoding="utf-8",
+                                )
                             break
 
                         if routeb_full_report is None or pool is None or backhalf_pool_report is None:
@@ -3145,10 +3207,9 @@ def main() -> int:
                             if safe_home:
                                 if args.task == "color-sort" and target_selection.get("instance_id"):
                                     failed_instance_id = str(target_selection["instance_id"])
-                                    failed_targets_current_scene.add(failed_instance_id)
                                     write_color_attempt(
-                                        color_root=cycle_root / "color_sort",
-                                        status="EXECUTION_FAILED_INSTANCE_SKIPPED",
+                                        color_root=cycle_root / "color_sort_v2",
+                                        status="EXECUTION_FAILED_FRESH_CAPTURE_REQUIRED",
                                         requested_color=str(target_selection.get("color") or args.target_color),
                                         instance_id=failed_instance_id,
                                         detail=(
@@ -3158,11 +3219,9 @@ def main() -> int:
                                         ),
                                     )
                                     print(
-                                        f"    color-sort: HOME已确认，跳过实例 {failed_instance_id}；"
-                                        "fresh capture 后尝试另一个同色实例。"
+                                        f"    color-sort: HOME已确认；执行过实例 {failed_instance_id} 后"
+                                        "下一轮必须 fresh RGB-D。"
                                     )
-                                else:
-                                    failed_targets_current_scene.clear()
                                 print("    说明：本轮不提交placement；机械臂已回HOME，继续下一轮拍照。")
                                 continue
                             print("    说明：执行阶段异常，无法确认已安全回HOME；停止会话。")
@@ -3186,7 +3245,6 @@ def main() -> int:
                         )
                         print("✓ 机械臂已回 HOME；下一轮拍照前仅静置 1.0s，场景不会重新加载。")
                         print(f"✓ 本轮总耗时={time.perf_counter()-cycle_started:.1f}s")
-                        failed_targets_current_scene.clear()
                         continue
 
                     planning_result = {
@@ -3234,33 +3292,23 @@ def main() -> int:
                     print("✓ Isaac 会话继续保留，机械臂仍在 HOME")
                     continue
                 except RuntimeError as exc:
-                    # During planning the worker deliberately keeps physics frozen
-                    # and the arm at the captured HOME state.  For color-sort an
-                    # exhausted candidate funnel is therefore not a reason to end
-                    # the whole requested-color session: skip this visual instance,
-                    # take a fresh capture, and let DINO/SAM choose another one.
                     if (
                         args.task != "color-sort"
-                        or not target_selection.get("instance_id")
                         or not is_recoverable_color_planning_failure(str(exc))
                     ):
                         raise
-                    failed_instance_id = str(target_selection["instance_id"])
-                    failed_targets_current_scene.add(failed_instance_id)
-                    color_root = cycle_root / "color_sort"
                     attempt_path = write_color_attempt(
                         color_root=color_root,
-                        status="PLANNING_FAILED_INSTANCE_SKIPPED",
+                        status="NO_FEASIBLE_GRASP_CURRENT_CAPTURE",
                         requested_color=str(target_selection.get("color") or args.target_color),
-                        instance_id=failed_instance_id,
+                        instance_id=None,
                         detail=str(exc).splitlines()[0][:500],
                     )
-                    print("\n[COLOR SORT] 当前实例的所有候选/位姿均未生成完整路径。")
-                    print(f"    skipped instance : {failed_instance_id}")
+                    print("\n[COLOR SORT] 当前 capture 未找到完整可行抓取路线。")
                     print("    robot state      : HOME（规划期间未执行机械臂动作）")
-                    print("    next action      : fresh capture -> DINO/SAM -> 下一颜色实例")
+                    print("    next action      : stop (no physical execution; capture remains valid)")
                     print(f"    attempt          : {attempt_path}")
-                    continue
+                    return 2
 
                 if args.diagnostic_full_first_batch:
                     print("✓ diagnostic-full-first-batch 完成；未执行 Isaac 物理动作。")
@@ -3269,16 +3317,31 @@ def main() -> int:
                 if selected is None:
                     print(f"\n✗ 本轮未找到完整可行路线；场景保持原样，可重新描述目标或继续尝试。")
                     print(f"  详细日志：{DEBUG_LOG}")
-                    if args.task == "color-sort" and target_selection.get("instance_id"):
-                        failed_targets_current_scene.add(str(target_selection["instance_id"]))
-                        print(
-                            f"  color-sort: 本scene暂时跳过失败实例 "
-                            f"{target_selection['instance_id']}"
+                    if args.task == "color-sort":
+                        write_color_attempt(
+                            color_root=color_root,
+                            status="NO_FEASIBLE_GRASP_CURRENT_CAPTURE",
+                            requested_color=str(target_selection.get("color") or args.target_color),
+                            instance_id=None,
+                            detail="All globally ordered candidates were exhausted without physical execution.",
                         )
+                        return 2
                     # Persistent Isaac is still paused at the captured state.
                     # The next cycle will only perform the configured 1 s HOME
                     # hold + fresh RGB-D capture; it will NOT reload the scene.
                     continue
+
+                if args.task == "color-sort":
+                    (
+                        perception_target,
+                        target_mask_path,
+                        target_removal_mask_path,
+                        target_selection,
+                    ) = bind_color_candidate(selected, target_selection)
+                    (color_root / "selected_target.json").write_text(
+                        json.dumps(target_selection, ensure_ascii=False, indent=2) + "\n",
+                        encoding="utf-8",
+                    )
 
                 print("\n---------------- 规划结果 ----------------")
                 print(f"✓ target rank : {selected['target_rank']}")
@@ -3341,7 +3404,6 @@ def main() -> int:
                 )
                 print("✓ 机械臂已回 HOME；下一轮拍照前仅静置 1.0s，场景不会重新加载。")
                 print(f"✓ 本轮总耗时={time.perf_counter()-cycle_started:.1f}s")
-                failed_targets_current_scene.clear()
 
     except KeyboardInterrupt:
         print("\n[STOP] 用户中断")

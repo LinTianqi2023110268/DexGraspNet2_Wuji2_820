@@ -25,54 +25,78 @@ def load_module(name: str, path: Path):
 
 
 class ClosedLoopLogicTests(unittest.TestCase):
-    def test_color_matching_uses_all_legal_grounded_sam_proposals(self):
+    def test_routeb_goal_pool_merge_keeps_all_candidates(self):
         orchestrator = load_module(
-            "closed_loop_orchestrator_color_proposals",
+            "closed_loop_orchestrator_routeb_pool_merge",
             CLOSED_LOOP / "orchestrator.py",
         )
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            archive_path = root / "legal_proposal_masks.npz"
-            proposal_a = np.zeros((4, 5), dtype=bool)
-            proposal_a[0:2, 0:2] = True
-            proposal_b = np.zeros((4, 5), dtype=bool)
-            proposal_b[2:4, 3:5] = True
-            np.savez_compressed(
-                archive_path,
-                proposal_indices=np.asarray([3, 7], dtype=np.int64),
-                masks=np.stack([proposal_a, proposal_b]),
+            sources = []
+            for batch, candidates in enumerate(([8, 3], [11]), start=1):
+                source = root / f"pool_{batch}.npz"
+                count = len(candidates)
+                np.savez_compressed(
+                    source,
+                    arm_joint_names=np.asarray(["joint_1", "joint_2"]),
+                    q_current_rad=np.asarray([0.1, 0.2], dtype=np.float32),
+                    candidate_index=np.asarray(candidates, dtype=np.int64),
+                    candidate_order=np.arange(count, dtype=np.int64),
+                    case_root=np.asarray([f"case_{value}" for value in candidates]),
+                )
+                sources.append(source)
+            output, report = orchestrator.concatenate_routeb_goal_pools(
+                sources,
+                root / "merged.npz",
             )
-            instance_a_path = root / "red_000.npy"
-            instance_b_path = root / "red_001.npy"
-            np.save(instance_a_path, proposal_a)
-            np.save(instance_b_path, proposal_b)
-            result = {
-                "legal_proposal_masks": str(archive_path),
-                "selected_detection": 3,
-                "detections": [
-                    {"index": 3, "score": 0.9},
-                    {"index": 7, "score": 0.7},
-                ],
-            }
-            rows = orchestrator.match_grounded_color_proposals(
-                grounded_sam_result=result,
-                selected_mask_path=instance_a_path,
-                hsv_instances=[
-                    {"instance_id": "red_001", "mask_path": str(instance_b_path)}
-                ],
-            )
-            self.assertEqual(rows[0]["proposal_index"], 7)
-            self.assertEqual(rows[0]["instance_id"], "red_001")
-            self.assertEqual(rows[0]["overlap_px"], 4)
+            with np.load(output, allow_pickle=False) as merged:
+                self.assertEqual(merged["candidate_index"].tolist(), [8, 3, 11])
+                self.assertEqual(merged["candidate_order"].tolist(), [0, 1, 2])
+                np.testing.assert_allclose(merged["q_current_rad"], [0.1, 0.2])
+            self.assertEqual(json.loads(report.read_text())["candidate_count"], 3)
 
-    def test_only_target_local_dgn2_empty_result_is_recoverable(self):
+    def test_color_candidates_bind_seed_labels_to_object_metadata(self):
+        binding = load_module(
+            "color_sort_candidate_binding",
+            CLOSED_LOOP / "color_sort_dino_sam/candidate_binding.py",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            prediction = root / "prediction.npz"
+            np.savez_compressed(
+                prediction,
+                seed_target_label=np.asarray([2, 1], dtype=np.int64),
+            )
+            catalog = root / "catalog.json"
+            catalog.write_text(json.dumps({"objects": [
+                {
+                    "target_label": label,
+                    "target_id": f"red_sam_{label:03d}",
+                    "target_grasp_mask_path": f"grasp_{label}.npy",
+                    "target_seed_mask_path": f"seed_{label}.npy",
+                    "target_removal_mask_path": f"removal_{label}.npy",
+                    "target_geometry_path": f"geometry_{label}.json",
+                    "perception_target_json": f"target_{label}.json",
+                }
+                for label in (1, 2)
+            ]}), encoding="utf-8")
+            rows = binding.enrich_candidate_rows(
+                rows=[{"candidate_index": 0}, {"candidate_index": 1}],
+                prediction_path=prediction,
+                catalog_path=catalog,
+            )
+            self.assertEqual([row["target_label"] for row in rows], [2, 1])
+            self.assertEqual(rows[0]["target_id"], "red_sam_002")
+            self.assertEqual(rows[1]["target_geometry_path"], "geometry_1.json")
+
+    def test_only_exhausted_capture_planning_is_recoverable(self):
         orchestrator = load_module(
-            "closed_loop_orchestrator_dgn2_recovery",
+            "closed_loop_orchestrator_capture_recovery",
             CLOSED_LOOP / "orchestrator.py",
         )
         self.assertTrue(
-            orchestrator.is_recoverable_color_target_generation_failure(
-                "RuntimeError: Official sampler produced no seed on the segmented target"
+            orchestrator.is_recoverable_color_planning_failure(
+                "Route B exhausted all front-half goals before full plan PASS"
             )
         )
         for fatal in (
@@ -82,7 +106,7 @@ class ClosedLoopLogicTests(unittest.TestCase):
             "Official DGN2 LEAP inference failed without diagnostic",
         ):
             self.assertFalse(
-                orchestrator.is_recoverable_color_target_generation_failure(fatal)
+                orchestrator.is_recoverable_color_planning_failure(fatal)
             )
 
     def test_scene_folder_parsing_requires_manifest(self):

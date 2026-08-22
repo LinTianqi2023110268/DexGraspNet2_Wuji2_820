@@ -22,6 +22,17 @@
   "planner_python": "/home/lin/miniconda3/envs/isaaclab22_sim50/bin/python",
   "dgn2_rounds": 8,
   "dgn2_target_membership_id": 1,
+  "color_sort_v2": {
+    "perception_mode": "dino_sam_multi_no_hsv",
+    "context_margin_xy_m": 0.2,
+    "duplicate_iou_threshold": 0.85,
+    "minimum_source_valid_depth_pixels": 100,
+    "minimum_source_fraction": 0.8,
+    "removal_expand_px": 2,
+    "minimum_sampled_points_per_target": 128,
+    "dgn2_rounds": 8,
+    "proposals_per_round": 1024
+  },
   "dgn2_sampling": {
     "default_mode": "scene_postfilter",
     "mode_by_task": {

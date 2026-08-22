@@ -615,3 +615,26 @@ Run `./run_closed_loop.sh --planning-only` from a GPU-visible terminal using `sc
   `20260821_114952/cycle_001/capture/dgn2/red_object/network_input.npz` passed:
   target input points `2948`, proposals `8192`, target proposals `8192`,
   non-target seeds `0`, selected score `-10.863729476928711`.
+
+## 2026-08-22 - Color-Sort V2 SourceZone DINO+SAM multi-object integration
+
+- Copied the supplied Color-Sort V2 modules and minimally wired them into the
+  existing orchestrator. Legacy HSV files remain present but are no longer
+  imported or called by the production color-sort path.
+- Semantic-grasp keeps its existing GroundedSAM input, target selection,
+  40k builder, sampling-plan/cate=False compatibility path, candidate builder,
+  and downstream Route A/B flow.
+- Color-sort now builds SourceZone and GraspContextZone before recognition,
+  calls GroundedSAM once with the exact `<color> object` prompt on
+  `rgb_source_only.png`, catalogs every trusted legal SAM proposal, builds one
+  `(1,40000,3)` multi-label input, and runs 8 official `cate=True` rounds.
+- Candidate rows are enriched from `seed_target_label`; multi candidate cases
+  retain their object-specific masks, geometry, and perception target. Simulator
+  identity is still resolved only after a full route passes.
+- Planning-only color failures stop with
+  `NO_FEASIBLE_GRASP_CURRENT_CAPTURE`; after a physical execution call, the
+  existing outer loop takes a fresh RGB-D capture.
+- Offline `cycle_004` red and blue validations passed shape, label membership,
+  8192-proposal, zero-background-seed, loader/enrichment, and case-builder checks.
+  No Isaac, MotionPlanner, official_core, planner math, IK, PLACE, or execution
+  code was run or modified.

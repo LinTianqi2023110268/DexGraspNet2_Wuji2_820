@@ -1670,3 +1670,20 @@
   10/10 PASS in `curobo_v2`; GroundedSAM embedded subprocess compile PASS; HSV
   replay stale-mask PASS with red/blue robot overlap both zero; scene migration
   audit PASS; `git diff --check` PASS.
+
+## 2026-08-22 - Color-Sort V2 DINO+SAM multi-object integration
+
+- Read-only baseline: branch `route-c-v2-curobo-esdf`, clean worktree, HEAD
+  `10c4a0673`.
+- Integrated the supplied `repo_overlay` and replaced only the active color-sort
+  front-end with SourceZone context, SourceZone-only GroundedSAM, all-proposal
+  catalog, GraspContext 40k input, and official `cate=True` inference.
+- Offline capture: `20260821_140629/cycle_004`; no Isaac or MotionPlanner run.
+- Primary red validation: SourceZone/context pixels `135715/278195`, one trusted
+  object, 40k target count `{1: 827}`, 8192 proposal count `{1: 8192}`.
+- Multi-label blue diagnostic: five catalog labels; 40k counts
+  `{1: 831, 2: 14200, 3: 942, 4: 2549, 5: 848}`; 8192 proposal counts
+  `{1: 1641, 2: 1638, 3: 1635, 4: 1642, 5: 1636}`; background seeds `0`.
+- Validation commands: focused `py_compile`, closed-loop unit tests (11/11),
+  `check_v2_wiring.py`, loader/enrichment compatibility, one multi candidate
+  case build, and `git diff --check`.
